@@ -4,96 +4,9 @@
     <meta charset='utf-8' />
     <meta content='IE=edge,chrome=1' http-equiv='X-UA-Compatible' />
     <meta content='width=device-width, initial-scale=1, maximum-scale=1' name='viewport' />
-
-
-
-    <style>
-      body {
-        margin:   28px;
-        padding:  0px;
-      }
-      .kineticjs-content {
-        /*border-style: dotted;*/
-      }
-      #canvas_container {
-        width:  300px;
-        height: 360px;
-        margin-right: 5px;
-        border: 1px solid red;
-        float:  left;
-
-      }
-      #dashboard {
-        left:   300px;
-        width:  260px;
-        height: 360px;
-        border: 1px solid black;
-        float:  left;
-        font-size: 16px;
-      }
-      /* dashboard */
-      #dashboard div {
-        margin-top: 18px;
-        margin-bottom: 18px;
-        padding-left: 5px;
-      }
-
-      #dashboard input {
-        width:  110px;
-        height: 14px;
-      }
-
-      #dashboard label {
-        display: inline-block;
-      }
-
-      button {
-        width:  60px;
-        height: 28px;
-      }
-
-      #layer label{
-        margin-right:  22px;
-      }
-
-      #current {
-        background: grey;
-        padding: 5px;
-        margin-left:   2px;
-        margin-right:  2px;
-      }
-
-      #current input{
-        width: 110px;
-      }
-      #current label{
-        margin-right: 18px;
-      }
-
-      #current #position input {
-          width: 60px;
-          margin-right:  16px;
-      }
-      #current #position label {
-        margin-right: 10px;
-        width: 15px;
-      }
-
-      #current #position button {
-        width: 100px;
-      }
-
-      #current #delete button {
-        width: 100px;
-        margin-left: 8px;
-      }
-
-      #submit button {
-        width:  120px;
-      }
-
-    </style>
+    <link href='css/app.css' rel='stylesheet' />
   </head>
+
   <body>
     <div id="container">
       <div id="canvas_container"></div>
@@ -110,7 +23,7 @@
         <div id="current">
           <div id="name">            
             <label>Current Box</label>
-            <input type="text" name="current_box" value="curr box"> 
+            <input type="text" name="current_box" value="1"> 
           </div>
           <div id="position">
             <div class="group">
@@ -122,29 +35,38 @@
             <div class="group">
               <label>Rot</label>
               <input type="text" name="rotate_state" value="0">
-              <button name="rotate">R</button>                    
+              <button name="rotate">Rotate</button>                    
             </div>
           </div>
           <div id="delete">
             <button name="delete_current_box">-</button>
-            <button name="ensure_delete">ok</button>
+            <button name="ensure_delete">OK</button>
           </div>
         </div>
         <div id="submit">
           <button name="mirror">Mirror</button>
-          <button name="save">SALVA</button>
+          <button name="save">Save</button>
         </div>
       </div>
-
     </div>
 
-    <script src="javascripts/jquery-2.1.0.min.js"></script>
-    <script src='javascripts/underscore.js'></script>
-    <script src='javascripts/backbone.js'></script>
-    <script src="javascripts/rivets.min.js"></script>
-    <script src='javascripts/configure.js'></script>
-    <script src="javascripts/kinetic-v5.0.1.min.js"></script>
-    <script src='javascripts/app.js'></script>
-   
+    <!-- test -->
+    <div id="user-view">
+      <span>{ user:name }</span>
+      <input rv-value="user:name">
+    </div>
+
+    <div id="user-view">
+      <span>{ user:name }</span>
+      <input rv-value="user:name">
+    </div>
+
   </body>
+  <script src="javascripts/jquery-2.1.0.min.js"></script>
+  <script src='javascripts/underscore-min.js'></script>
+  <script src='javascripts/backbone.min.js'></script>
+  <script src="javascripts/rivets.min.js"></script>
+  <script src='javascripts/configure.js'></script>
+  <script src="javascripts/kinetic-v5.0.1.min.js"></script>
+  <script src='javascripts/app.js'></script>
 </html>

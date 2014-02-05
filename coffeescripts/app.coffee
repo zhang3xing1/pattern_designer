@@ -1,14 +1,31 @@
-# Dashboard
+class Box extends Backbone.Model
+  initialize: -> 
+    @on('change:price change:quantity', @setSubtotal)
+    @on('change:item', @setPrice)
+  defaults: {
+    x_position: 0,
+    y_position: 0,
+    rotate:     0
+  },
+  setXPosition: ->
+  setYPosition: ->
+  setRotate: ->
+  delete: ->
 
-# class Dashboard
-#   constructor: ->
+class @Boxes extends Backbone.Collection
+  model: Box,
+  size: 0,
+  initialize: ->
 
-#   move: (meters) ->
-#     alert @name + " moved #{meters}m."
+# test
+# BINDING BACKBONE.JS MODEL(S) TO A VIEW
+user = new Backbone.Model(name: "Joe")
+el = document.getElementById("user-view")
+rivets.bind el,
+  user: user
 
 
-
-# Canvas
+# Canvas test
 
 stage = new Kinetic.Stage(
   container: "canvas_container"
@@ -24,7 +41,6 @@ rect = new Kinetic.Rect(
   fill: "green"
   strokeWidth: 4
 )
-console.log(rect.x(50))
 
 # add the shape to the layer
 layer.add rect
@@ -32,13 +48,5 @@ layer.add rect
 # add the layer to the stage
 stage.add layer
 
-class Rabbit
-  constructor: (@adjective) ->
-  speak: (line) ->
-    console.log "The #{@adjective} rabbit says '#{line}'"
- 
-whiteRabbit = new Rabbit "white"
-fatRabbit = new Rabbit "fat"
- 
-whiteRabbit.speak "Hurry!"
-fatRabbit.speak "Tasty"
+
+

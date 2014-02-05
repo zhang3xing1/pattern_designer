@@ -1,0 +1,84 @@
+body {
+        margin:   28px;
+        padding:  0px;
+      }
+      .kineticjs-content {
+        /*border-style: dotted;*/
+      }
+      #canvas_container {
+        width:  300px;
+        height: 360px;
+        margin-right: 5px;
+        border: 1px solid red;
+        float:  left;
+
+      }
+      #dashboard {
+        left:   300px;
+        width:  260px;
+        height: 360px;
+        border: 1px solid black;
+        float:  left;
+        font-size: 16px;
+      }
+      /* dashboard */
+      #dashboard div {
+        margin-top: 18px;
+        margin-bottom: 18px;
+        padding-left: 5px;
+      }
+
+      #dashboard input {
+        width:  110px;
+        height: 14px;
+      }
+
+      #dashboard label {
+        display: inline-block;
+      }
+
+      button {
+        width:  60px;
+        height: 28px;
+        font-size: 16px;
+      }
+
+      #layer label{
+        margin-right:  22px;
+      }
+
+      #current {
+        background: grey;
+        padding: 5px;
+        margin-left:   2px;
+        margin-right:  2px;
+      }
+
+      #current input{
+        width: 110px;
+      }
+      #current label{
+        margin-right: 18px;
+      }
+
+      #current #position input {
+          width: 60px;
+          margin-right:  16px;
+      }
+      #current #position label {
+        margin-right: 10px;
+        width: 15px;
+      }
+
+      #current #position button {
+        width: 100px;
+      }
+
+      #current #delete button {
+        width: 100px;
+        margin-left: 8px;
+      }
+
+      #submit button {
+        width:  120px;
+      }
