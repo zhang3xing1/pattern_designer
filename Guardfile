@@ -4,6 +4,7 @@
 guard 'livereload' do
   watch(%r{javascripts/.+\.js$})
   watch(%r{index\.html$})
+  watch(%r{css/.+\.css$})
 end
 
 guard 'livereload' do

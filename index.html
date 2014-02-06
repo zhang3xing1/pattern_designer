@@ -15,12 +15,12 @@
           <label>Name</label>
           <input type="text" name="layer" value="layer_1">
         </div>
-        <div id="new">
+        <div id="new_box" class="boxes">
           <label>New Box</label>
-          <input type="text" name="new_box" value="7">
-          <button name="add_new_box">+</button>
+          <input type="text" name="new_box" rv-value="boxes.newBoxId">
+          <button name="add_new_box" rv-on-click="boxes.addNewBox">+</button>
         </div>
-        <div id="current">
+        <div id="current_box" class="boxes">
           <div id="name">            
             <label>Current Box</label>
             <input type="text" name="current_box" value="1"> 
@@ -48,18 +48,25 @@
           <button name="save">Save</button>
         </div>
       </div>
+
+    <!-- flash infomation  -->
+    <div class="boxes" id="flash">
+      <span>{ boxes.newBoxId }</span>
     </div>
+
+
 
     <!-- test -->
-    <div id="user-view">
+    <!--     <div id="user-view">
       <span>{ user:name }</span>
       <input rv-value="user:name">
+      <button name="add_new_box" rv-on-click="user.add_u">+</button>
     </div>
 
-    <div id="user-view">
-      <span>{ user:name }</span>
-      <input rv-value="user:name">
-    </div>
+    <div id="new-box-test">
+      <button name="add_new_box" rv-on-click="boxes.addNewBox">addbox</button>
+    </div> -->
+
 
   </body>
   <script src="javascripts/jquery-2.1.0.min.js"></script>

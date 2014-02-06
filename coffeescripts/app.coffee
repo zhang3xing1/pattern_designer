@@ -12,17 +12,33 @@ class Box extends Backbone.Model
   setRotate: ->
   delete: ->
 
-class @Boxes extends Backbone.Collection
+class Boxes extends Backbone.Collection
   model: Box,
-  size: 0,
   initialize: ->
+    @newBoxId = 10
+  addNewBox: ->
+    console.log('add new')
+
+@boxes=new Boxes
+rivets.bind $('.boxes'),{boxes: @boxes}
+
+
 
 # test
 # BINDING BACKBONE.JS MODEL(S) TO A VIEW
-user = new Backbone.Model(name: "Joe")
+# user = new Backbone.Model(
+#   name: "Joe"
+# )
+class User extends Backbone.Model
+  defaults: {
+    name: "Joe"
+  }
+  add_u: ->
+    console.log('d')
+
 el = document.getElementById("user-view")
 rivets.bind el,
-  user: user
+  user: user=new User
 
 
 # Canvas test
