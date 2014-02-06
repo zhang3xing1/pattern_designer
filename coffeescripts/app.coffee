@@ -14,13 +14,43 @@ class Box extends Backbone.Model
 
 class Boxes extends Backbone.Collection
   model: Box,
+  
   initialize: ->
-    @newBoxId = 10
-  addNewBox: ->
-    console.log('add new')
+    #
+    #Canvas
+    #
+    @stage = new Kinetic.Stage(
+      container: "canvas_container"
+      width: 300  
+      height: 360
+    )
+    @layer = new Kinetic.Layer()
+    @rect = new Kinetic.Rect(
+      x: 10
+      y: 10
+      width: 20
+      height: 20
+      fill: "green"
+      strokeWidth: 4
+    )
+    # add the shape to the layer
+    @layer.add @rect
 
-@boxes=new Boxes
-rivets.bind $('.boxes'),{boxes: @boxes}
+    # add the layer to the stage
+    @stage.add @layer
+
+    #
+    # Box
+    #
+    @newBoxId = 1
+    @message = "The new box id will be 1"
+  addNewBox: =>
+    console.log(@newBoxId)
+  flash: =>
+    @message
+
+
+rivets.bind $('.boxes'),{boxes: boxes=new Boxes}
 
 
 
@@ -29,40 +59,41 @@ rivets.bind $('.boxes'),{boxes: @boxes}
 # user = new Backbone.Model(
 #   name: "Joe"
 # )
-class User extends Backbone.Model
-  defaults: {
-    name: "Joe"
-  }
-  add_u: ->
-    console.log('d')
+# class User extends Backbone.Model
+#   defaults: {
+#     name: "Joe"
+#   }
+#   add_u: ->
+#     console.log('d')
 
-el = document.getElementById("user-view")
-rivets.bind el,
-  user: user=new User
+# el = document.getElementById("user-view")
+# rivets.bind el,
+#   user: user=new User
 
 
 # Canvas test
 
-stage = new Kinetic.Stage(
-  container: "canvas_container"
-  width: 300  
-  height: 360
-)
-layer = new Kinetic.Layer()
-rect = new Kinetic.Rect(
-  x: 10
-  y: 10
-  width: 20
-  height: 20
-  fill: "green"
-  strokeWidth: 4
-)
+# stage = new Kinetic.Stage(
+#   container: "canvas_container"
+#   width: 300  
+#   height: 360
+# )
+# layer = new Kinetic.Layer()
+# rect = new Kinetic.Rect(
+#   x: 10
+#   y: 10
+#   width: 20
+#   height: 20
+#   fill: "green"
+#   strokeWidth: 4
+# )
 
-# add the shape to the layer
-layer.add rect
+# # add the shape to the layer
+# layer.add rect
 
-# add the layer to the stage
-stage.add layer
+# # add the layer to the stage
+# stage.add layer
+
 
 
 
