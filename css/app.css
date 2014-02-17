@@ -3,87 +3,91 @@ body {
         padding:  0px;
       }
 
-      #canvas_container {
-        width:  300px;
-        height: 360px;
-        margin-right: 5px;
-        border: 1px solid red;
-        float:  left;
+#canvas_container {
+  width:  300px;
+  height: 360px;
+  margin-right: 5px;
+  border: 1px solid red;
+  float:  left;
 
-      }
-      #dashboard {
-        left:   300px;
-        width:  260px;
-        height: 360px;
-        border: 1px solid black;
-        float:  left;
-        font-size: 16px;
-      }
-      /* dashboard */
-      #dashboard div {
-        margin-top: 18px;
-        margin-bottom: 18px;
-        padding-left: 5px;
-      }
+}
+#dashboard {
+  left:   300px;
+  width:  260px;
+  height: 360px;
+  border: 1px solid black;
+  float:  left;
+  font-size: 16px;
+}
+/* dashboard */
+#dashboard div {
+  margin-top: 18px;
+  margin-bottom: 18px;
+  padding-left: 5px;
+}
 
-      #dashboard input {
-        width:  110px;
-        height: 14px;
-      }
+#dashboard input {
+  width:  110px;
+  height: 14px;
+}
 
-      #dashboard label {
-        display: inline-block;
-      }
+#dashboard label {
+  display: inline-block;
+}
 
-      button {
-        width:  60px;
-        height: 28px;
-        font-size: 16px;
-      }
+button {
+  width:  60px;
+  height: 28px;
+  font-size: 16px;
+}
 
-      #layer label{
-        margin-right:  22px;
-      }
+#layer label{
+  margin-right:  22px;
+}
 
-      #current_box {
-        background: grey;
-        padding: 5px;
-        margin-left:   2px;
-        margin-right:  2px;
-      }
+#current_box {
+  background: grey;
+  padding: 5px;
+  margin-left:   2px;
+  margin-right:  2px;
+}
 
-      #current_box input{
-        width: 110px;
-      }
-      #current_box label{
-        margin-right: 18px;
-      }
+#current_box input{
+  width: 110px;
+}
+#current_box label{
+  margin-right: 18px;
+}
 
-      #current_box #position input {
-          width: 60px;
-          margin-right:  16px;
-      }
-      #current_box #position label {
-        margin-right: 10px;
-        width: 15px;
-      }
+#current_box #position input {
+    width: 60px;
+    margin-right:  16px;
+}
+#current_box #position label {
+  margin-right: 10px;
+  width: 15px;
+}
 
-      #current_box #position button {
-        width: 100px;
-      }
+#current_box #position button {
+  width: 100px;
+}
 
-      #current_box #delete button {
-        width: 100px;
-        margin-left: 8px;
-      }
+#current_box #delete button {
+  width: 100px;
+  margin-left: 8px;
+}
 
-      #submit button {
-        width:  120px;
-      }
+#submit button {
+  width:  120px;
+}
 
-      #flash {
-        margin-left: 600px;
-        color: yellow;
-        background: green;
-        font: 20px bold;
-      }
+#flash {
+  margin-left: 600px;
+  color: yellow;
+  background: green;
+  font: 20px bold;
+}
+
+.box {
+  display:none;
+}

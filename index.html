@@ -5,6 +5,7 @@
     <meta content='IE=edge,chrome=1' http-equiv='X-UA-Compatible' />
     <meta content='width=device-width, initial-scale=1, maximum-scale=1' name='viewport' />
     <link href='css/app.css' rel='stylesheet' />
+    <link href="css/bootstrap.min.css" rel="stylesheet">
   </head>
 
   <body>
@@ -17,20 +18,20 @@
         </div>
         <div id="new_box" class="boxes">
           <label>New Box</label>
-          <input type="text" name="new_box" rv-value="boxes.newBoxId">
+          <input type="text" name="new_box" >
           <button name="add_new_box" rv-on-click="boxes.addNewBox">+</button>
         </div>
-        <div id="current_box" class="boxes">
+        <div id="current_box" class="box">
           <div id="name">            
             <label>Current Box</label>
-            <input type="text" name="current_box" value="1"> 
+            <input type="text" name="current_box_id" rv-value="box.getTitleName" > 
           </div>
           <div id="position">
             <div class="group">
               <label>X</label>
-              <input type="text" name="x_position" value="100">
+              <input type="text" id="current_box_x_position", rv-value="box.getXPosition">
               <label>Y</label>
-              <input type="text" name="y_position" value="200">
+              <input type="text" name="y_position", rv-value="box.getYPosition">
             </div>
             <div class="group">
               <label>Rot</label>
@@ -54,6 +55,12 @@
       <span>{ boxes.flash }</span>
     </div>
 
+    <div class="boxes">
+<!--       <button rv-on-click="boxes.up">UP</button>
+      <button rv-on-click="boxes.down">UP</button> -->
+    </div>
+
+
 
 
     <!-- test -->
@@ -68,6 +75,7 @@
     </div> -->
 
 
+
   </body>
   <script src="javascripts/jquery-2.1.0.min.js"></script>
   <script src='javascripts/underscore-min.js'></script>
@@ -76,4 +84,5 @@
   <script src='javascripts/configure.js'></script>
   <script src="javascripts/kinetic-v5.0.1.min.js"></script>
   <script src='javascripts/app.js'></script>
+  <script src="javascripts/bootstrap.min.js"></script>
 </html>

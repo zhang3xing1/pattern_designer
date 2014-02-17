@@ -7,11 +7,11 @@ guard 'livereload' do
   watch(%r{css/.+\.css$})
 end
 
-guard 'livereload' do
-  watch(%r{app/views/.+\.(erb|haml|slim)$})
-  watch(%r{app/helpers/.+\.rb})
-  watch(%r{public/.+\.(css|js|html)})
-  watch(%r{config/locales/.+\.yml})
-  # Rails Assets Pipeline
-  watch(%r{(app|vendor)(/assets/\w+/(.+\.(css|js|html|png|jpg))).*}) { |m| "/assets/#{m[3]}" }
+guard 'coffeescript', :output => 'javascripts' do
+  watch(/^coffeescripts\/(.*)\.coffee/)
 end
+ 
+guard 'coffeescript', :output => 'spec/javascripts' do
+  watch(/^spec\/coffeescripts\/(.*)\.coffee/)
+end
+ 
