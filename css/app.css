@@ -1,4 +1,4 @@
-body {
+/*body {
         margin:   28px;
         padding:  0px;
       }
@@ -19,7 +19,7 @@ body {
   float:  left;
   font-size: 16px;
 }
-/* dashboard */
+
 #dashboard div {
   margin-top: 18px;
   margin-bottom: 18px;
@@ -93,4 +93,4 @@ button {
 }
 .direction{
   display:none;
-}
+}*/

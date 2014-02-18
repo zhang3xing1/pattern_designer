@@ -9,56 +9,116 @@
   </head>
 
   <body>
-    <div id="container">
-      <div id="canvas_container"></div>
-      <div id="dashboard">
-        <div id="layer">
-          <label>Name</label>
-          <input type="text" name="layer" value="layer_1">
-        </div>
-        <div id="new_box" class="boxes">
-          <label>New Box</label>
-          <input type="text" name="new_box" rv-value="boxes.availableNewBoxId">
-          <button name="add_new_box" rv-on-click="boxes.addNewBox">+</button>
-        </div>
-        <div id="current_box" class="box">
-          <div id="name">            
-            <label>Current Box</label>
-            <input type="text" name="current_box_id" rv-value="box.getTitleName" > 
+    <div id="container" class="container">
+      <div class='row'>
+        <div id="canvas_container" class='col-md-6'></div>
+        <div id="dashboard" class='col-md-4'>
+          <div class="alert alert-success boxes">
+              <span>{ boxes.flash }</span>
           </div>
-          <div id="position">
-            <div class="group">
-              <label>X</label>
-              <input type="text" id="current_box_x_position", rv-value="box.getXPosition">
-              <label>Y</label>
-              <input type="text" name="y_position", rv-value="box.getYPosition">
-            </div>
-            <div class="group">
-              <label>Rot</label>
-              <input type="text" name="rotate_state" value="0">
-              <button name="rotate">Rotate</button>                    
-            </div>
+          <div class="input-group">
+              <span class="input-group-addon">Layer</span>
+              <input type="text" class="form-control" placeholder="layer name">
           </div>
-        </div>
-        <div id="submit">
-          <button name="mirror">Mirror</button>
-          <button name="save">Save</button>
+          <div id="new_box" class="boxes input-group">
+              <span class="input-group-addon">New Box</span>
+              <input type="text" name="new_box" class="form-control" placeholder="name" rv-value="boxes.availableNewBoxId">
+              <span class="input-group-btn">
+                <button class="btn btn-default" type="button" rv-on-click="boxes.addNewBox">+</button>
+              </span>
+          </div>
+          <div class="panel panel-default box">
+                <div class="panel-heading">Current Box</div>
+                <div class="panel-body">
+                    <div class="row">
+                        <div class="col-md-6" >
+                            <div class="input-group">
+                                <span class="input-group-addon">X</span>
+                                <input type="text" class="form-control" rv-value="box.getXPosition">
+                            </div>
+                        </div>
+                        <div class="col-md-6" >
+                            <div class="input-group">
+                                <span class="input-group-addon">Y</span>
+                                <input type="text" class="form-control" rv-value="box.getYPosition">
+                            </div>
+                        </div>
+                        <div class="col-md-6" >
+                            <div class="input-group">
+                                <span class="input-group-addon">Width</span>
+                                <input type="text" class="form-control" rv-value="box.getWidth">
+                            </div>
+                        </div>
+                        <div class="col-md-6" >
+                            <div class="input-group">
+                                <span class="input-group-addon">Height</span>
+                                <input type="text" class="form-control" rv-value="box.getHeight">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-3" >
+                            <h4><span class="label label-primary">Rotation</span></h4>
+                        </div>
+                        <div class="col-md-4" >
+                            <div class="btn-group">
+                                <button type="button" class="btn btn-default">R+</button>
+                                <button type="button" class="btn btn-default">R-</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-2" >
+                            <h4><span class="label label-primary">Move</span></h4>
+                        </div>
+                        <div class="col-md-10 boxes" >
+                            <div class="btn-group" style="float: right">
+                                <button type="button" class="btn btn-default" rv-on-click="boxes.up">UP</button>
+                                <button type="button" class="btn btn-default" rv-on-click="boxes.down">DOWN</button>
+                                <button type="button" class="btn btn-default" rv-on-click="boxes.left">LEFT</button>
+                                <button type="button" class="btn btn-default" rv-on-click="boxes.right">RIGHT</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6" >
+                            <div class="input-group box">
+                                <span class="input-group-addon">Title</span>
+                                <input type="text" class="form-control" rv-value="box.getTitleName">
+                            </div>
+                        </div>
+                        <div class="col-md-4" style="float: right"  >
+                            <button type="button" class="btn btn-danger boxes"  rv-on-click="boxes.removeCurrentBox">DELETE</button>
+                        </div>
+                    </div>
+                </div>
+          </div>
         </div>
       </div>
 
-    <!-- flash infomation  -->
-    <div class="boxes" id="flash">
-      <span>{ boxes.flash }</span>
+        <!-- test -->
+<div id="asdasd">
+    <input rv-value="showbutton" type="checkbox">
+    <label>Hide button</label>
+    <div rv-hide="showbutton">
+        <button rv-on-click="scope.change">Change Model Data</button>
+        <button rv-on-click="scope.show">Show Model Data</button>
     </div>
-    <div class="boxes">
-      <button class='direction' rv-on-click="boxes.up">UP</button>
-      <button class='direction' rv-on-click="boxes.down">Down</button>
-      <button class='direction' rv-on-click="boxes.left">LEFT</button>
-      <button class='direction' rv-on-click="boxes.right">RIGHT</button>
-      <button class='direction' rv-on-click="boxes.removeCurrentBox">Remove</button>
-    </div>
- 
+      <h3>
+    <span>Name : { scope.name } & Task: { scope.job.task}</span>
+  </h3>
 
+    <input rv-input="scope.name">
+    <input rv-input="scope.job.task">
+    <p><b>Computed Properties !</b>
+    </p>
+    <label>Price</label>
+    <input rv-input="scope.price ">
+    <label>Quantity</label>
+    <input rv-input="scope.quantity">
+    <label>Total =</label>  <span rv-text="scope.total < quantity price | rupee"></span>
+
+</div>
 
 
 
@@ -75,7 +135,10 @@
 
 
 
-  </body>
+
+   </div>
+</body>
+
   <script src="javascripts/jquery-2.1.0.min.js"></script>
   <script src='javascripts/underscore-min.js'></script>
   <script src='javascripts/backbone.min.js'></script>

@@ -1,3 +1,4 @@
+"use strict"
 class @Logger
   instance = null
   class Horn
@@ -43,8 +44,9 @@ class @Box extends Backbone.Model
     @get('group').add(@get('title'))
     Logger.debug('Box: Generate a new box.')
 
-    # @get('group').on "click", =>
-    #   Logger.debug @get('boxId')
+    @box().on "dblclick", =>
+      @box().rotation(45)
+      Logger.debug "@box().rotation(45)"
 
   setTitleName: (newTitle) ->
     @get('title').setText(newTitle) 
@@ -60,7 +62,7 @@ class @Box extends Backbone.Model
     @get('group').y()
   setHeight: (height) ->
     @get('rect').setHeight(height)
-  getHeight:  ->
+  getHeight:() ->
     @get('rect').height()
   setWidth: (width) ->
     @get('rect').setWidth(width)
@@ -96,7 +98,7 @@ class @Box extends Backbone.Model
 class @Boxes extends Backbone.Collection
   model: Box
   initialize: (@layer,@zone)->
-    @on('add', @showCurrentBox)
+    @on('add', @showCurrentBoxPanel)
     @currentBox = new Box
     @availableNewBoxId  = 1
     @flash = "Initialized completed!"
@@ -109,7 +111,7 @@ class @Boxes extends Backbone.Collection
     newBox.box().on "click", =>
       Logger.debug "box#{newBox.getTitleName()} clicked!"
       @updateCurrentBox(newBox)
-    
+
     @add(newBox)
     @draw()
     
@@ -127,7 +129,7 @@ class @Boxes extends Backbone.Collection
     @draw()
     if @length == 0
       @flash = 'There is no box.'
-    @showCurrentBox()
+    @showCurrentBoxPanel()
     Logger.debug("remove button clicked!")
   testCollision:()->
     result =_.reduce(@models,
@@ -158,14 +160,12 @@ class @Boxes extends Backbone.Collection
   updateCurrentBox: (newBox) ->
     @currentBox = newBox
     rivets.bind $('.box'),{box: newBox}
-  showCurrentBox: () ->
+  showCurrentBoxPanel: () ->
     # rivets.bind $('.box'),{box: @currentBox}
-    Logger.debug("showCurrentBox: #{@length}")
+    Logger.debug("showCurrentBoxPanel: #{@length}")
     if(@length == 0)
-      $('.box').css('display','none')
       $('.direction').css('display','none')
     else
-      $('.box').css('display','block')
       $('.direction').css('display','inline')
   up: () =>
     Logger.debug("@currentBox:\t" + @currentBox.getTitleName())
@@ -238,6 +238,118 @@ class @StackBoard
     rivets.bind $('.boxes'),{boxes: @boxes}
 
 board=new StackBoard
+
+
+
+#/====== Skip This Part, this is configuration =============
+rivets.config.handler = (context, ev, binding) ->
+  if binding.model instanceof binding.model.____
+    @call binding.model, ev, context # Event Target !!
+  else
+    @call context, ev, binding.view.models
+
+rivets.binders.input =
+  publishes: true
+  routine: rivets.binders.value.routine
+  bind: (el) ->
+    el.addEventListener "input", @publish
+    return
+
+  unbind: (el) ->
+    el.removeEventListener "input", @publish
+    return
+
+
+#================ Acutal Code Start from Here =============
+rivets.formatters.rupee = (val) ->
+  "$ " + val
+
+Person = ->
+  @name = "Narendra"
+  @job = {}
+
+  @job.task = "Engineer"
+  @____ = Person
+  return
+
+Person:: =
+  show: ->
+    @display()
+    return
+
+  change: ->
+    @name = "Deepak"
+    @job.task = "Playing"
+    return
+
+  display: ->
+    alert JSON.stringify(this)
+    return
+
+  total: ->
+    window.parseInt(@price) * window.parseInt(@quantity)
+
+person = new Person()
+rivets.bind document.querySelector("#asdasd"),
+  scope: person
+
+##### Example two way binding with rivets #####
+# ///====== Skip This Part, this is configuration =============
+# rivets.config.handler = function (context, ev, binding) {
+#     if (binding.model instanceof binding.model.____) {
+#         return this.call(binding.model, ev, context); // Event Target !!d
+#     } else {
+#         return this.call(context, ev, binding.view.models);
+#     }
+# };
+
+# rivets.binders.input = {
+#     publishes: true,d
+#     routine: rivets.binders.value.routine,
+#     bind: function (el) {
+#         el.addEventListener('input', this.publish);
+#     },
+#     unbind: function (el) {
+#         el.removeEventListener('input', this.publish);
+#     }
+# };
+
+# //================ Acutal Code Start from Here =============
+# rivets.formatters.rupee = function (val) {
+#     return "$ " + val;
+# };
+
+# var Person = function () {
+#     this.name = "Narendra",
+#     this.job = {};
+#     this.job.task = "Engineer";
+#     this.____ = Person;
+# };
+
+# Person.prototype = {
+#     show: function () {
+#         this.display();
+#     },
+#     change: function () {
+#         this.name = "Deepak";
+#         this.job.task = "Playing";
+#     },
+#     display: function () {
+#         alert(JSON.stringify(this));
+#     },
+#     total: function () {
+#         return window.parseInt(this.price) * window.parseInt(this.quantity);
+#     }
+# };
+################################################
+
+
+
+# var person = new Person();
+# rivets.bind(document.querySelector("#asdasd"), {
+#     scope: person
+# });
+
 # rivets.binders.color = (el, value) ->
 #   el.style.color = value
 

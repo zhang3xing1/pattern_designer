@@ -1,5 +1,6 @@
 (function() {
-  var board,
+  "use strict";
+  var Person, board, person,
     __hasProp = {}.hasOwnProperty,
     __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
     __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
@@ -85,7 +86,13 @@
       });
       this.get('group').add(this.get('rect'));
       this.get('group').add(this.get('title'));
-      return Logger.debug('Box: Generate a new box.');
+      Logger.debug('Box: Generate a new box.');
+      return this.box().on("dblclick", (function(_this) {
+        return function() {
+          _this.box().rotation(45);
+          return Logger.debug("@box().rotation(45)");
+        };
+      })(this));
     };
 
     Box.prototype.setTitleName = function(newTitle) {
@@ -194,7 +201,7 @@
     Boxes.prototype.initialize = function(layer, zone) {
       this.layer = layer;
       this.zone = zone;
-      this.on('add', this.showCurrentBox);
+      this.on('add', this.showCurrentBoxPanel);
       this.currentBox = new Box;
       this.availableNewBoxId = 1;
       return this.flash = "Initialized completed!";
@@ -232,7 +239,7 @@
       if (this.length === 0) {
         this.flash = 'There is no box.';
       }
-      this.showCurrentBox();
+      this.showCurrentBoxPanel();
       return Logger.debug("remove button clicked!");
     };
 
@@ -283,13 +290,11 @@
       });
     };
 
-    Boxes.prototype.showCurrentBox = function() {
-      Logger.debug("showCurrentBox: " + this.length);
+    Boxes.prototype.showCurrentBoxPanel = function() {
+      Logger.debug("showCurrentBoxPanel: " + this.length);
       if (this.length === 0) {
-        $('.box').css('display', 'none');
         return $('.direction').css('display', 'none');
       } else {
-        $('.box').css('display', 'block');
         return $('.direction').css('display', 'inline');
       }
     };
@@ -398,5 +403,57 @@
   })();
 
   board = new StackBoard;
+
+  rivets.config.handler = function(context, ev, binding) {
+    if (binding.model instanceof binding.model.____) {
+      return this.call(binding.model, ev, context);
+    } else {
+      return this.call(context, ev, binding.view.models);
+    }
+  };
+
+  rivets.binders.input = {
+    publishes: true,
+    routine: rivets.binders.value.routine,
+    bind: function(el) {
+      el.addEventListener("input", this.publish);
+    },
+    unbind: function(el) {
+      el.removeEventListener("input", this.publish);
+    }
+  };
+
+  rivets.formatters.rupee = function(val) {
+    return "$ " + val;
+  };
+
+  Person = function() {
+    this.name = "Narendra";
+    this.job = {};
+    this.job.task = "Engineer";
+    this.____ = Person;
+  };
+
+  Person.prototype = {
+    show: function() {
+      this.display();
+    },
+    change: function() {
+      this.name = "Deepak";
+      this.job.task = "Playing";
+    },
+    display: function() {
+      alert(JSON.stringify(this));
+    },
+    total: function() {
+      return window.parseInt(this.price) * window.parseInt(this.quantity);
+    }
+  };
+
+  person = new Person();
+
+  rivets.bind(document.querySelector("#asdasd"), {
+    scope: person
+  });
 
 }).call(this);
