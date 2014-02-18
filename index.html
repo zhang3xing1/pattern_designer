@@ -18,7 +18,7 @@
         </div>
         <div id="new_box" class="boxes">
           <label>New Box</label>
-          <input type="text" name="new_box" >
+          <input type="text" name="new_box" rv-value="boxes.availableNewBoxId">
           <button name="add_new_box" rv-on-click="boxes.addNewBox">+</button>
         </div>
         <div id="current_box" class="box">
@@ -39,10 +39,6 @@
               <button name="rotate">Rotate</button>                    
             </div>
           </div>
-          <div id="delete">
-            <button name="delete_current_box">-</button>
-            <button name="ensure_delete">OK</button>
-          </div>
         </div>
         <div id="submit">
           <button name="mirror">Mirror</button>
@@ -54,11 +50,14 @@
     <div class="boxes" id="flash">
       <span>{ boxes.flash }</span>
     </div>
-
     <div class="boxes">
-<!--       <button rv-on-click="boxes.up">UP</button>
-      <button rv-on-click="boxes.down">UP</button> -->
+      <button class='direction' rv-on-click="boxes.up">UP</button>
+      <button class='direction' rv-on-click="boxes.down">Down</button>
+      <button class='direction' rv-on-click="boxes.left">LEFT</button>
+      <button class='direction' rv-on-click="boxes.right">RIGHT</button>
+      <button class='direction' rv-on-click="boxes.removeCurrentBox">Remove</button>
     </div>
+ 
 
 
 

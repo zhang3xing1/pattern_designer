@@ -59,8 +59,8 @@
       this.on('change:rect', this.rectChanged);
       this.set({
         rect: new Kinetic.Rect({
-          x: 10,
-          y: 20,
+          x: 0,
+          y: 0,
           width: 100,
           height: 50,
           fill: "green"
@@ -78,17 +78,14 @@
       });
       this.set({
         group: new Kinetic.Group({
-          x: 10,
-          y: 20,
+          x: 4,
+          y: 8,
           rotation: 0
         })
       });
       this.get('group').add(this.get('rect'));
       this.get('group').add(this.get('title'));
-      Logger.debug('Box: Generate a new box.');
-      return this.get('group').on("click", function() {
-        return Logger.debug(this.getX());
-      });
+      return Logger.debug('Box: Generate a new box.');
     };
 
     Box.prototype.setTitleName = function(newTitle) {
@@ -131,12 +128,48 @@
       return this.get('rect').width();
     };
 
+    Box.prototype.getPointA = function() {
+      var pointX;
+      return pointX = {
+        x: this.getXPosition(),
+        y: this.getYPosition()
+      };
+    };
+
+    Box.prototype.getPointB = function() {
+      var pointB;
+      return pointB = {
+        x: this.getXPosition() + this.get('rect').getWidth(),
+        y: this.getYPosition()
+      };
+    };
+
+    Box.prototype.getPointC = function() {
+      var pointC;
+      return pointC = {
+        x: this.getXPosition(),
+        y: this.getYPosition() + this.get('rect').getHeight()
+      };
+    };
+
+    Box.prototype.getPointD = function() {
+      var pointC;
+      return pointC = {
+        x: this.getXPosition() + this.get('rect').getWidth(),
+        y: this.getYPosition() + this.get('rect').getHeight()
+      };
+    };
+
     Box.prototype.rectChanged = function() {
       return Logger.debug('box model changed by rect.');
     };
 
     Box.prototype.box = function() {
       return this.get('group');
+    };
+
+    Box.prototype.printPoints = function() {
+      return Logger.info(("PointA(x:" + (this.getPointA().x) + ",y:" + (this.getPointA().y) + ") ") + ("PointB(x:" + (this.getPointB().x) + ",y:" + (this.getPointB().y) + ") ") + ("PointC(x:" + (this.getPointC().x) + ",y:" + (this.getPointC().y) + ") ") + ("PointD(x:" + (this.getPointD().x) + ",y:" + (this.getPointD().y) + ") "));
     };
 
     return Box;
@@ -147,38 +180,74 @@
     __extends(Boxes, _super);
 
     function Boxes() {
-      this.showCurrentBox = __bind(this.showCurrentBox, this);
+      this.right = __bind(this.right, this);
+      this.left = __bind(this.left, this);
+      this.down = __bind(this.down, this);
+      this.up = __bind(this.up, this);
+      this.removeCurrentBox = __bind(this.removeCurrentBox, this);
       this.addNewBox = __bind(this.addNewBox, this);
       return Boxes.__super__.constructor.apply(this, arguments);
     }
 
     Boxes.prototype.model = Box;
 
-    Boxes.prototype.initialize = function(layer) {
+    Boxes.prototype.initialize = function(layer, zone) {
       this.layer = layer;
+      this.zone = zone;
       this.on('add', this.showCurrentBox);
       this.currentBox = new Box;
-      this.currentNewBoxId = 1;
-      this.flash = "Initialized completed!";
-      return this.flash = 'test:\t' + this.currentBox.get('boxId');
+      this.availableNewBoxId = 1;
+      return this.flash = "Initialized completed!";
     };
 
     Boxes.prototype.addNewBox = function() {
       var newBox;
-      Logger.debug('show currentbox x:\t' + this.currentBox.getXPosition());
       newBox = new Box;
-      newBox.setXPosition(newBox.getXPosition() + this.currentNewBoxId * 10);
-      newBox.setYPosition(newBox.getYPosition() + this.currentNewBoxId * 10);
-      newBox.setTitleName(this.currentNewBoxId);
-      newBox.set('boxId', this.currentNewBoxId);
-      this.currentBox = newBox;
+      newBox.setXPosition(newBox.getXPosition() + this.availableNewBoxId * 4);
+      newBox.setYPosition(newBox.getYPosition() + this.availableNewBoxId * 4);
+      newBox.setTitleName(this.availableNewBoxId);
+      newBox.set('boxId', this.availableNewBoxId);
+      newBox.box().on("click", (function(_this) {
+        return function() {
+          Logger.debug("box" + (newBox.getTitleName()) + " clicked!");
+          return _this.updateCurrentBox(newBox);
+        };
+      })(this));
       this.add(newBox);
       this.draw();
-      this.currentBox = new Box;
-      return this.currentNewBoxId += 1;
+      this.updateCurrentBox(newBox);
+      this.availableNewBoxId += 1;
+      return Logger.debug("@availableNewBoxId:\t" + this.availableNewBoxId);
     };
 
-    Boxes.prototype.testCollision = function() {};
+    Boxes.prototype.removeCurrentBox = function() {
+      if (this.length === 0) {
+        this.flash = 'There is no box.';
+      } else {
+        this.currentBox.get('group').destroy();
+        this.remove(this.currentBox);
+        this.currentBox = this.last();
+      }
+      this.draw();
+      if (this.length === 0) {
+        this.flash = 'There is no box.';
+      }
+      this.showCurrentBox();
+      return Logger.debug("remove button clicked!");
+    };
+
+    Boxes.prototype.testCollision = function() {
+      var result;
+      result = _.reduce(this.models, (function(status, box) {
+        if (this.currentBox.getTitleName() !== box.getTitleName()) {
+          Logger.debug("testCollision " + (this.currentBox.getTitleName()) + " " + (box.getTitleName()));
+          return status || this.testBoxCollision(box, this.currentBox);
+        } else {
+          return status;
+        }
+      }), false, this);
+      return Logger.debug("testCollision: " + result);
+    };
 
     Boxes.prototype.draw = function() {
       var box, _i, _len, _ref;
@@ -207,16 +276,95 @@
       return status;
     };
 
-    Boxes.prototype.showCurrentBox = function() {
-      rivets.bind($('.box'), {
-        box: this.currentBox
+    Boxes.prototype.updateCurrentBox = function(newBox) {
+      this.currentBox = newBox;
+      return rivets.bind($('.box'), {
+        box: newBox
       });
-      Logger.debug('show currentbox x:\t' + this.currentBox.getXPosition());
-      if (_.isEmpty(this.models)) {
-        return $('.box').css('display', 'none');
+    };
+
+    Boxes.prototype.showCurrentBox = function() {
+      Logger.debug("showCurrentBox: " + this.length);
+      if (this.length === 0) {
+        $('.box').css('display', 'none');
+        return $('.direction').css('display', 'none');
       } else {
-        return $('.box').css('display', 'block');
+        $('.box').css('display', 'block');
+        return $('.direction').css('display', 'inline');
       }
+    };
+
+    Boxes.prototype.up = function() {
+      Logger.debug("@currentBox:\t" + this.currentBox.getTitleName());
+      this.currentBox.setYPosition(this.currentBox.getYPosition() - 4);
+      if (this.validateZone(this.currentBox)) {
+        this.draw();
+      } else {
+        this.currentBox.setYPosition(this.currentBox.getYPosition() + 4);
+        this.flash = "Box" + (this.currentBox.getTitleName()) + " Y " + (this.currentBox.getYPosition()) + " cannot be moved UP!";
+      }
+      this.currentBox.printPoints();
+      return this.testCollision();
+    };
+
+    Boxes.prototype.down = function() {
+      Logger.debug("@currentBox:\t" + this.currentBox.getTitleName());
+      this.currentBox.setYPosition(this.currentBox.getYPosition() + 4);
+      if (this.validateZone(this.currentBox)) {
+        this.draw();
+      } else {
+        this.currentBox.setYPosition(this.currentBox.getYPosition() - 4);
+        this.flash = "Box" + (this.currentBox.getTitleName()) + " cannot be moved DOWN!";
+      }
+      this.currentBox.printPoints();
+      return this.testCollision();
+    };
+
+    Boxes.prototype.left = function() {
+      Logger.debug("@currentBox:\t" + this.currentBox.getTitleName());
+      this.currentBox.setXPosition(this.currentBox.getXPosition() - 4);
+      if (this.validateZone(this.currentBox)) {
+        this.draw();
+      } else {
+        this.currentBox.setXPosition(this.currentBox.getXPosition() + 4);
+        this.flash = "Box" + (this.currentBox.getTitleName()) + " cannot be moved LEFT!";
+      }
+      this.currentBox.printPoints();
+      return this.testCollision();
+    };
+
+    Boxes.prototype.right = function() {
+      Logger.debug("@currentBox:\t" + this.currentBox.getTitleName());
+      this.currentBox.setXPosition(this.currentBox.getXPosition() + 4);
+      if (this.validateZone(this.currentBox)) {
+        this.draw();
+      } else {
+        this.currentBox.setXPosition(this.currentBox.getXPosition() - 4);
+        this.flash = "Box" + (this.currentBox.getTitleName()) + " cannot be moved RIGHT!";
+      }
+      this.currentBox.printPoints();
+      return this.testCollision();
+    };
+
+    Boxes.prototype.validateZone = function(box) {
+      var result;
+      result = _.reduce([box.getPointA(), box.getPointB(), box.getPointC(), box.getPointD()], (function(status, point) {
+        return status && this.validateZoneX(point) && this.validateZoneY(point);
+      }), true, this);
+      Logger.debug("validresult:\t " + result);
+      return result;
+    };
+
+    Boxes.prototype.validateZoneX = function(point) {
+      var _ref;
+      Logger.debug("validateZoneX: point.x " + point.x + ", @zone.x " + this.zone.x);
+      return (0 <= (_ref = point.x) && _ref <= this.zone.x);
+    };
+
+    Boxes.prototype.validateZoneY = function(point) {
+      var _ref;
+      Logger.debug("validateZoneY: point.y " + point.y + ", @zone.x " + this.zone.y);
+      return (0 <= (_ref = point.y) && _ref <= this.zone.y);
     };
 
     return Boxes;
@@ -227,14 +375,18 @@
     function StackBoard() {
       this.stage = new Kinetic.Stage({
         container: "canvas_container",
-        width: 300,
-        height: 360
+        width: 400,
+        height: 720
       });
+      this.zone = {
+        x: 298,
+        y: 360
+      };
       this.layer = new Kinetic.Layer();
       this.stage.add(this.layer);
       Logger.debug("StackBoard: Stage Initialized!");
       Logger.info("StackBoard: Initialized!");
-      this.boxes = new Boxes(this.layer);
+      this.boxes = new Boxes(this.layer, this.zone);
       this.boxes.shift();
       rivets.bind($('.boxes'), {
         boxes: this.boxes

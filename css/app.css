@@ -88,6 +88,9 @@ button {
   font: 20px bold;
 }
 
-.box {
+.box{
+  display:none;
+}
+.direction{
   display:none;
 }
