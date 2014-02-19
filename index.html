@@ -1,102 +1,127 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<!DOCTYPE html>
 <html>
   <head>
     <meta charset='utf-8' />
     <meta content='IE=edge,chrome=1' http-equiv='X-UA-Compatible' />
     <meta content='width=device-width, initial-scale=1, maximum-scale=1' name='viewport' />
-    <link href='css/app.css' rel='stylesheet' />
     <link href="css/bootstrap.min.css" rel="stylesheet">
+    <link href='css/app.css' rel='stylesheet'>
   </head>
 
   <body>
     <div id="container" class="container">
       <div class='row'>
-        <div id="canvas_container" class='col-md-6'></div>
+        <div id="canvas_container" class='col-md-4'></div>
         <div id="dashboard" class='col-md-4'>
-          <div class="alert alert-success boxes">
-              <span>{ boxes.flash }</span>
+          <div class="input-group row column">
+              <span class="input-group-addon label-info colomn-label-info">Layer :</span>
+              <input type="text" class="form-control" placeholder="layer name" readonly="readonly">
           </div>
-          <div class="input-group">
-              <span class="input-group-addon">Layer</span>
-              <input type="text" class="form-control" placeholder="layer name">
-          </div>
-          <div id="new_box" class="boxes input-group">
-              <span class="input-group-addon">New Box</span>
+          <div id="new_box" class="boxes input-group row column">
+              <span class="input-group-addon label-info">New Box :</span>
               <input type="text" name="new_box" class="form-control" placeholder="name" rv-value="boxes.availableNewBoxId">
               <span class="input-group-btn">
-                <button class="btn btn-default" type="button" rv-on-click="boxes.addNewBox">+</button>
+                <button class="btn btn-primary" rv-on-click="boxes.addNewBox">+</button>
               </span>
           </div>
-          <div class="panel panel-default box">
-                <div class="panel-heading">Current Box</div>
+          <div class="panel panel-default row box" style="display: none">
+                <div class="panel-heading panel-heading-info ">
+                    <span>Current Box</span>
+                    <span class="flash-info boxes">{ boxes.flash }</span>
+                </div>
                 <div class="panel-body">
-                    <div class="row">
-                        <div class="col-md-6" >
-                            <div class="input-group">
-                                <span class="input-group-addon">X</span>
-                                <input type="text" class="form-control" rv-value="box.getXPosition">
+                        <div class="row column">
+                            <div class="col-md-6" >
+                                <div class="input-group" >
+                                    <span class="input-group-addon label-info">X :</span>
+                                    <input type="text" class="form-control" rv-value="box.getXPosition">
+                                </div>
+                            </div>
+                            <div class="col-md-6" >
+                                <div class="input-group ">
+                                    <span class="input-group-addon label-info">Y :</span>
+                                    <input type="text" class="form-control" rv-value="box.getYPosition">
+                                </div>
                             </div>
                         </div>
+                    <div class="row column">
                         <div class="col-md-6" >
-                            <div class="input-group">
-                                <span class="input-group-addon">Y</span>
-                                <input type="text" class="form-control" rv-value="box.getYPosition">
-                            </div>
-                        </div>
-                        <div class="col-md-6" >
-                            <div class="input-group">
-                                <span class="input-group-addon">Width</span>
+                            <div class="input-group ">
+                                <span class="input-group-addon label-info">Width :</span>
                                 <input type="text" class="form-control" rv-value="box.getWidth">
                             </div>
                         </div>
                         <div class="col-md-6" >
                             <div class="input-group">
-                                <span class="input-group-addon">Height</span>
+                                <span class="input-group-addon label-info">Height :</span>
                                 <input type="text" class="form-control" rv-value="box.getHeight">
                             </div>
                         </div>
                     </div>
-                    <div class="row">
+                    <div class="row column">
                         <div class="col-md-3" >
-                            <h4><span class="label label-primary">Rotation</span></h4>
+                            <button type="button" class="btn btn-info boxes">Move :</button>
                         </div>
-                        <div class="col-md-4" >
-                            <div class="btn-group">
-                                <button type="button" class="btn btn-default">R+</button>
-                                <button type="button" class="btn btn-default">R-</button>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-md-2" >
-                            <h4><span class="label label-primary">Move</span></h4>
-                        </div>
-                        <div class="col-md-10 boxes" >
+                        <div class="col-md-9 boxes" >
                             <div class="btn-group" style="float: right">
-                                <button type="button" class="btn btn-default" rv-on-click="boxes.up">UP</button>
-                                <button type="button" class="btn btn-default" rv-on-click="boxes.down">DOWN</button>
-                                <button type="button" class="btn btn-default" rv-on-click="boxes.left">LEFT</button>
-                                <button type="button" class="btn btn-default" rv-on-click="boxes.right">RIGHT</button>
+                                <button type="button" class="btn btn-primary" rv-on-click="boxes.left">LEFT</button>
+                                <button type="button" class="btn btn-primary" rv-on-click="boxes.right">RIGHT</button>
+                                <button type="button" class="btn btn-primary" rv-on-click="boxes.up">UP</button>
+                                <button type="button" class="btn btn-primary" rv-on-click="boxes.down">DOWN</button>
                             </div>
                         </div>
                     </div>
                     <div class="row">
-                        <div class="col-md-6" >
+                        <div class="col-md-4" >
                             <div class="input-group box">
-                                <span class="input-group-addon">Title</span>
+                                <span class="input-group-addon label-info">Title :</span>
                                 <input type="text" class="form-control" rv-value="box.getTitleName">
                             </div>
                         </div>
-                        <div class="col-md-4" style="float: right"  >
-                            <button type="button" class="btn btn-danger boxes"  rv-on-click="boxes.removeCurrentBox">DELETE</button>
+                        <div class="col-md-4">
+                            <button type="button" class="btn btn-primary boxes">Rotate Box</button>
+                        </div>
+                        <div class="col-md-3" >
+                            <button type="button" class="btn btn-danger boxes" rv-on-click="boxes.removeCurrentBox">Delete Box</button>
                         </div>
                     </div>
                 </div>
           </div>
+          <div class="row">
+              <div class="col-md-5" style="margin-left: -3%" >
+                  <div class="btn-group dropup">
+                      <button type="button" class="btn btn-warning">Manul Stack</button>
+                      <button type="button" class="btn btn-warning dropdown-toggle" data-toggle="dropdown">
+                          <span class="caret"></span>
+                          <span class="sr-only">Toggle Dropdown</span>
+                      </button>
+                      <ul class="dropdown-menu" role="menu">
+                          <li><a href="#">4 Packages Example</a></li>
+                          <li><a href="#">5 Packages Example</a></li>
+                          <li><a href="#">6 Packages Example</a></li>
+                          <li class="divider"></li>
+                          <li><a href="#">Manul Stack Model</a></li>
+                      </ul>
+                  </div>
+              </div>
+              <div>
+                  <div class="col-md-2" style="float: right; margin-right: 2%" >
+                      <button type="button" class="btn btn-primary boxes" rv-on-click="boxes.removeCurrentBox">Save</button>
+                  </div>
+                  <div class="col-md-2" style="float: right; margin-right: 6%" >
+                      <button type="button" class="btn btn-primary boxes" rv-on-click="boxes.removeCurrentBox">Mirror</button>
+                  </div>
+              </div>
+
+          </div>
         </div>
       </div>
 
+
         <!-- test -->
+        <div class="alert alert-success boxes row">
+            <span>{ boxes.flash }</span>
+        </div>
 <div id="asdasd">
     <input rv-value="showbutton" type="checkbox">
     <label>Hide button</label>
@@ -132,9 +157,6 @@
     <div id="new-box-test">
       <button name="add_new_box" rv-on-click="boxes.addNewBox">addbox</button>
     </div> -->
-
-
-
 
    </div>
 </body>

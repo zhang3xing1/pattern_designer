@@ -64,7 +64,9 @@
           y: 0,
           width: 100,
           height: 50,
-          fill: "green"
+          fillRed: 60,
+          fillGreen: 118,
+          fillBlue: 61
         })
       });
       this.set({
@@ -284,6 +286,9 @@
     };
 
     Boxes.prototype.updateCurrentBox = function(newBox) {
+      if (newBox == null) {
+        newBox = this.currentBox;
+      }
       this.currentBox = newBox;
       return rivets.bind($('.box'), {
         box: newBox
@@ -291,11 +296,14 @@
     };
 
     Boxes.prototype.showCurrentBoxPanel = function() {
+      rivets.bind($('.box'), {
+        box: this.currentBox
+      });
       Logger.debug("showCurrentBoxPanel: " + this.length);
       if (this.length === 0) {
-        return $('.direction').css('display', 'none');
+        return $('.panel').css('display', 'none');
       } else {
-        return $('.direction').css('display', 'inline');
+        return $('.panel').css('display', 'block');
       }
     };
 
@@ -306,10 +314,11 @@
         this.draw();
       } else {
         this.currentBox.setYPosition(this.currentBox.getYPosition() + 4);
-        this.flash = "Box" + (this.currentBox.getTitleName()) + " Y " + (this.currentBox.getYPosition()) + " cannot be moved UP!";
+        this.flash = "Box" + (this.currentBox.getTitleName()) + " cannot be moved UP!";
       }
       this.currentBox.printPoints();
-      return this.testCollision();
+      this.testCollision();
+      return this.updateCurrentBox();
     };
 
     Boxes.prototype.down = function() {
@@ -322,7 +331,8 @@
         this.flash = "Box" + (this.currentBox.getTitleName()) + " cannot be moved DOWN!";
       }
       this.currentBox.printPoints();
-      return this.testCollision();
+      this.testCollision();
+      return this.updateCurrentBox();
     };
 
     Boxes.prototype.left = function() {
@@ -335,7 +345,8 @@
         this.flash = "Box" + (this.currentBox.getTitleName()) + " cannot be moved LEFT!";
       }
       this.currentBox.printPoints();
-      return this.testCollision();
+      this.testCollision();
+      return this.updateCurrentBox();
     };
 
     Boxes.prototype.right = function() {
@@ -348,7 +359,8 @@
         this.flash = "Box" + (this.currentBox.getTitleName()) + " cannot be moved RIGHT!";
       }
       this.currentBox.printPoints();
-      return this.testCollision();
+      this.testCollision();
+      return this.updateCurrentBox();
     };
 
     Boxes.prototype.validateZone = function(box) {
@@ -357,6 +369,9 @@
         return status && this.validateZoneX(point) && this.validateZoneY(point);
       }), true, this);
       Logger.debug("validresult:\t " + result);
+      if (result) {
+        this.flash = "";
+      }
       return result;
     };
 
@@ -378,16 +393,27 @@
 
   this.StackBoard = (function() {
     function StackBoard() {
+      var stage_bg;
       this.stage = new Kinetic.Stage({
         container: "canvas_container",
-        width: 400,
-        height: 720
+        width: 360,
+        height: 480
       });
       this.zone = {
-        x: 298,
-        y: 360
+        x: 300,
+        y: 380
       };
       this.layer = new Kinetic.Layer();
+      stage_bg = new Kinetic.Rect({
+        x: 0,
+        y: 0,
+        width: 300,
+        height: 380,
+        fillRed: 255,
+        fillGreen: 228,
+        fillBlue: 196
+      });
+      this.layer.add(stage_bg);
       this.stage.add(this.layer);
       Logger.debug("StackBoard: Stage Initialized!");
       Logger.info("StackBoard: Initialized!");

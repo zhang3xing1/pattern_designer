@@ -19,12 +19,15 @@ class @Box extends Backbone.Model
   }
   initialize: ->
     @on('change:rect', @rectChanged)
+    #rgb(60, 118, 61);
     @set rect: new Kinetic.Rect(
                                   x:            0
                                   y:            0
                                   width:        100
                                   height:       50
-                                  fill:         "green"
+                                  fillRed:      60
+                                  fillGreen:    118
+                                  fillBlue:     61
                                   # stroke:       'blue'
                                 )
     @set title: new Kinetic.Text(
@@ -157,16 +160,16 @@ class @Boxes extends Backbone.Collection
     boxBRight  =  boxB.getXPosition() + boxB.getWidth()
     status = true  unless boxABottom < boxBTop or boxATop > boxBBottom or boxALeft > boxBRight or boxARight < boxBLeft
     status
-  updateCurrentBox: (newBox) ->
+  updateCurrentBox: (newBox = @currentBox) ->
     @currentBox = newBox
     rivets.bind $('.box'),{box: newBox}
   showCurrentBoxPanel: () ->
-    # rivets.bind $('.box'),{box: @currentBox}
+    rivets.bind $('.box'),{box: @currentBox}
     Logger.debug("showCurrentBoxPanel: #{@length}")
     if(@length == 0)
-      $('.direction').css('display','none')
+      $('.panel').css('display','none')
     else
-      $('.direction').css('display','inline')
+      $('.panel').css('display','block')
   up: () =>
     Logger.debug("@currentBox:\t" + @currentBox.getTitleName())
     @currentBox.setYPosition(@currentBox.getYPosition() - 4)
@@ -174,9 +177,10 @@ class @Boxes extends Backbone.Collection
       @draw()
     else
       @currentBox.setYPosition(@currentBox.getYPosition() + 4)
-      @flash = "Box#{@currentBox.getTitleName()} Y #{@currentBox.getYPosition()} cannot be moved UP!"
+      @flash = "Box#{@currentBox.getTitleName()} cannot be moved UP!"
     @currentBox.printPoints()
     @testCollision()
+    @updateCurrentBox()
   down: () =>
     Logger.debug("@currentBox:\t" + @currentBox.getTitleName())
     @currentBox.setYPosition(@currentBox.getYPosition() + 4)
@@ -187,6 +191,7 @@ class @Boxes extends Backbone.Collection
       @flash = "Box#{@currentBox.getTitleName()} cannot be moved DOWN!"
     @currentBox.printPoints()
     @testCollision()
+    @updateCurrentBox()
   left: () =>
     Logger.debug("@currentBox:\t" + @currentBox.getTitleName())
     @currentBox.setXPosition(@currentBox.getXPosition() - 4)
@@ -197,6 +202,7 @@ class @Boxes extends Backbone.Collection
       @flash = "Box#{@currentBox.getTitleName()} cannot be moved LEFT!"
     @currentBox.printPoints()
     @testCollision()
+    @updateCurrentBox()
   right: () =>
     Logger.debug("@currentBox:\t" + @currentBox.getTitleName())
     @currentBox.setXPosition(@currentBox.getXPosition() + 4)
@@ -207,12 +213,15 @@ class @Boxes extends Backbone.Collection
       @flash = "Box#{@currentBox.getTitleName()} cannot be moved RIGHT!"
     @currentBox.printPoints()
     @testCollision()
+    @updateCurrentBox()
   validateZone: (box) ->
     result = _.reduce([box.getPointA(),box.getPointB(),box.getPointC(),box.getPointD()], 
                 ((status, point) ->
                   status && @validateZoneX(point) && @validateZoneY(point)), 
                   true, this)
     Logger.debug("validresult:\t #{result}")
+    if result
+      @flash = ""
     result
   validateZoneX: (point) ->
     Logger.debug("validateZoneX: point.x #{point.x}, @zone.x #{@zone.x}")
@@ -225,11 +234,22 @@ class @StackBoard
   constructor: ->
     @stage = new Kinetic.Stage(
       container: "canvas_container"
-      width:  400  
-      height: 720
+      width:  360
+      height: 480
     )
-    @zone = {x:298, y:360}
+    @zone = {x:300, y:380}
+#    rgb(255,​ 228,​ 196)
     @layer = new Kinetic.Layer()
+    stage_bg = new Kinetic.Rect(
+        x:            0
+        y:            0
+        width:        300
+        height:       380
+        fillRed:      255
+        fillGreen:    228
+        fillBlue:     196
+      )
+    @layer.add stage_bg
     @stage.add @layer
     Logger.debug("StackBoard: Stage Initialized!")
     Logger.info("StackBoard: Initialized!")
@@ -238,8 +258,6 @@ class @StackBoard
     rivets.bind $('.boxes'),{boxes: @boxes}
 
 board=new StackBoard
-
-
 
 #/====== Skip This Part, this is configuration =============
 rivets.config.handler = (context, ev, binding) ->

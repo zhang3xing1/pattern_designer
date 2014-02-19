@@ -1,3 +1,40 @@
+
+.column {
+    padding-bottom: 10px;
+}
+
+#container {
+    margin-top: 80px;
+}
+
+#canvas_container{
+  margin-left: 12%;
+  padding-top: 10px;
+  /*border: solid bisque;*/
+}
+
+#dashboard{
+    margin-left: -5%;
+}
+
+.label-info {
+    color: #ffffff;
+}
+
+.panel-heading-info {
+    color: #ffffff !important;
+    background-color: rgb(91, 192, 222) !important;
+}
+
+.panel-heading-info span{
+    font-size: 105%;
+    font-style: oblique;
+}
+
+.flash-info{
+    margin-left: 10%;
+    color: greenyellow;
+}
 /*body {
         margin:   28px;
         padding:  0px;
