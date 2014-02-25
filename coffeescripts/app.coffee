@@ -54,7 +54,7 @@ class @Logger
 
 class @Box extends Backbone.Model
   defaults: {
-    boxId:        '99999'
+    boxId:        'nullID'
     fillColor:    {red:60, green:118, blue: 61}
   }
   initialize: ->
@@ -88,8 +88,8 @@ class @Box extends Backbone.Model
     Logger.debug('Box: Generate a new box.')
 
     @box().on "dblclick", =>
-      @box().rotation(45)
-      Logger.debug "@box().rotation(45)"
+      @box().rotation(90)
+      Logger.debug "@box().rotation(90)"
 
   setTitleName: (newTitle) ->
     @get('title').setText(newTitle) 
@@ -151,17 +151,18 @@ class @Box extends Backbone.Model
 class @Boxes extends Backbone.Collection
   model: Box
   initialize: (@layer,@zone)->
-    @collisionUtil = new CollisionUtil(boxes: [])
     @on('add', @showCurrentBoxPanel)
-    @on('all', @draw)
+    @on('all', @testCollision) # include @draw event!!!
+    @collisionUtil = new CollisionUtil
     @currentBox = new Box
     @availableNewBoxId = 1
     @flash = "Initialized completed!"
-    # @_collisionPool = new CollisionPool
 
-  updateCollisionStatus: ->
-    @collisionUtil = new CollisionUtil(boxes: @models)
+  updateCollisionStatus:(options) ->
+    @collisionUtil.updateRelation(options)
 
+  testCollisionPair: (boxA, boxB) ->
+    @collisionUtil.testCollisionPair(boxA, boxB)
   addNewBox: =>
     newBox  = new Box
     newBox.setXPosition(newBox.getXPosition() + @availableNewBoxId * 4 )
@@ -193,8 +194,8 @@ class @Boxes extends Backbone.Collection
     Logger.debug("...Collision start...")
     result =_.reduce(@models,
                     ((status, box) ->
-                      if @currentBox.getTitleName() != box.getTitleName()
-                        @collisionUtil.testCollisionPair(@currentBox, box) || status
+                      if @currentBox.getTitleName() != box.getTitleName() && @currentBox.getTitleName() != 'nullID'
+                        @testCollisionPair(@currentBox, box) || status
                       else
                         status), 
                     false, this)
@@ -219,12 +220,9 @@ class @Boxes extends Backbone.Collection
   up: () =>
     Logger.debug("@currentBox:\t" + @currentBox.getTitleName())
     @currentBox.setYPosition(@currentBox.getYPosition() - 4)
-    if @validateZone(@currentBox)
-      # @draw()
-    else
+    unless @validateZone(@currentBox)
       @currentBox.setYPosition(@currentBox.getYPosition() + 4)
       @flash = "Box#{@currentBox.getTitleName()} cannot be moved UP!"
-    @currentBox.printPoints()
     @testCollision()
     @updateCurrentBox()
   down: () =>
@@ -233,7 +231,6 @@ class @Boxes extends Backbone.Collection
     unless @validateZone(@currentBox)
       @currentBox.setYPosition(@currentBox.getYPosition() - 4)
       @flash = "Box#{@currentBox.getTitleName()} cannot be moved DOWN!"
-    @currentBox.printPoints()
     @testCollision()
     @updateCurrentBox()
   left: () =>
@@ -242,7 +239,6 @@ class @Boxes extends Backbone.Collection
     unless @validateZone(@currentBox)
       @currentBox.setXPosition(@currentBox.getXPosition() + 4)
       @flash = "Box#{@currentBox.getTitleName()} cannot be moved LEFT!"
-    @currentBox.printPoints()
     @testCollision()
     @updateCurrentBox()
   right: () =>
@@ -252,7 +248,6 @@ class @Boxes extends Backbone.Collection
     unless @validateZone(@currentBox)
       @currentBox.setXPosition(@currentBox.getXPosition() - 4)
       @flash = "Box#{@currentBox.getTitleName()} cannot be moved RIGHT!"
-    @currentBox.printPoints()
     @testCollision()
     @updateCurrentBox()
   validateZone: (box) ->
@@ -272,13 +267,29 @@ class @Boxes extends Backbone.Collection
     0<= point.y <= @zone.y
 
 
-class CollisionUtil extends Backbone.Model
+class CollisionPair extends Backbone.Model
+  ## class CollisionRelation ##
+  class CollisionRelation extends Backbone.Model
+    defaults: {
+      status: false
+    }
+    initialize:(options) ->
+      # options{boxId: aBoxId}
+      @set boxId: options.boxId
+  ###########################
 
+  initialize: (options)->
+    # options{boxId: aBoxId}
+    @set boxId: options.boxId
+    @set relationCollection: new CollisionRelation
+
+
+class CollisionUtil extends Backbone.Collection
+  model: CollisionPair
   initialize: (options) ->
     console.log('*CollisionUtil initialize* to do')
 
-  generateStatus: ->
-    #
+
   removeCollisionPair:(boxA, boxB) ->
     Logger.dev("removeCollisionPair: box#{boxA.getTitleName()}, box#{boxB.getTitleName()}")
     @removeRelation(boxA, boxB)
@@ -298,9 +309,23 @@ class CollisionUtil extends Backbone.Model
     # 
     status
 
+  updateRelation:(options) ->
+  #options
+  #action: add, box: box
+  #action: remove, box: box
+  #action: changeID, box: box
+    box = options.box
+    if options.action == 'add'
+      Logger.dev("CollisionUtil:\t add box")
+    else if options.action == 'remove'
+      Logger.dev("CollisionUtil:\t remove box")
+    else if options.action == 'changeID'
+      Logger.dev("CollisionUtil:\t changeID box")
+
   removeRelation: (boxA, boxB) ->
     Logger.dev("removeRelation: box#{boxA.getTitleName()}, box#{boxB.getTitleName()}")
   addRelation: (boxA, boxB) ->
+
     Logger.dev("addCollisionPair: box#{boxA.getTitleName()}, box#{boxB.getTitleName()}")
   ######## public api ########
   testCollisionPair:(boxA,boxB) ->
@@ -314,12 +339,11 @@ class CollisionUtil extends Backbone.Model
     boxBLeft   =  boxB.getXPosition()
     boxBRight  =  boxB.getXPosition() + boxB.getWidth()
     status = true  unless boxABottom < boxBTop or boxATop > boxBBottom or boxALeft > boxBRight or boxARight < boxBLeft
-    Logger.dev("testCollisionPair: #{status}")
+    Logger.dev("testCollisionPair: box#{boxA.getTitleName()} box#{boxB.getTitleName()} #{status}")
     if status
       @addCollisionPair(boxA, boxB)
     else
       @removeCollisionPair(boxA, boxB)
-
     status
 
 
