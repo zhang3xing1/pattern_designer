@@ -1,6 +1,6 @@
 (function() {
   "use strict";
-  var CollisionPool, Item, ItemCollection, ItemView, Store, editUsingViews, storeItems,
+  var CollisionPool, board,
     __hasProp = {}.hasOwnProperty,
     __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
     __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
@@ -16,12 +16,7 @@
     },
     read: function(obj, keypath) {
       console.log("3.read:\t\t\t " + obj + " ||\t " + keypath);
-      if ((obj.get(keypath)) === void 0) {
-        console.log("3.read:++ " + (obj[keypath]()) + " \t " + (obj.get(keypath)));
-        return obj[keypath]();
-      } else {
-        return obj.get(keypath);
-      }
+      return obj.get(keypath);
     },
     publish: function(obj, keypath, value) {
       console.log("4.publish:\t\t " + obj + " ||\t " + keypath);
@@ -498,120 +493,7 @@
 
   })();
 
-  Item = (function(_super) {
-    __extends(Item, _super);
-
-    function Item() {
-      this.Edit = __bind(this.Edit, this);
-      return Item.__super__.constructor.apply(this, arguments);
-    }
-
-    Item.prototype.initialize = function() {
-      return this.set({
-        ttext: 'dddd'
-      });
-    };
-
-    Item.prototype.GetText = function() {
-      return this.get("Name") + " | $" + this.get("Price");
-    };
-
-    Item.prototype.desc = function() {
-      return this.get("Name") + " -- $" + this.get("Price");
-    };
-
-    Item.prototype.Edit = function() {
-      console.log(this);
-      this.trigger("edit", this);
-    };
-
-    return Item;
-
-  })(Backbone.Model);
-
-  ItemCollection = Backbone.Collection.extend({
-    model: Item
-  });
-
-  ItemView = Backbone.View.extend({
-    templateId: "#editItemDialog",
-    events: {
-      "click .close-link": "close"
-    },
-    render: function() {
-      var html, templateFunction;
-      templateFunction = _.template($(this.templateId).html());
-      html = templateFunction();
-      this.setElement(html);
-      rivets.bind(this.$el, {
-        item: this.model
-      });
-      return this;
-    },
-    close: function() {
-      this.$el.empty();
-    }
-  });
-
-  Store = Backbone.Model.extend({
-    initialize: function(options) {
-      this.set({
-        Title: "Cyclist Stuff",
-        Items: options.Items
-      });
-    }
-  });
-
-  editUsingViews = function(item) {
-    var view;
-    view = new ItemView({
-      model: item
-    });
-    $("#holder").empty().append(view.render().el);
-    return false;
-  };
-
-  storeItems = _.map([
-    {
-      Name: "Awesome Carbon Wheels",
-      Price: "100",
-      Description: "Something to covet for a cyclist"
-    }, {
-      Name: "Speedplay Pedals",
-      Price: "10",
-      Description: "Something else to covet for a cyclist"
-    }, {
-      Name: "LOTOJA",
-      Price: "25",
-      Description: "Big bike ride"
-    }
-  ], function(obj) {
-    var item;
-    item = new Item(obj);
-    console.log(item.get('Name'));
-    item.on("edit", editUsingViews);
-    return item;
-  });
-
-  rivets.formatters.currency = {
-    read: function(value) {
-      return (value / Math.pow(10, 2)).toFixed(2);
-    },
-    publish: function(value) {
-      return Math.round(parseFloat(value) * Math.pow(10, 2));
-    }
-  };
-
-  this.storeItemsCollection = new ItemCollection(storeItems);
-
-  this.store = new Store({
-    Items: this.storeItemsCollection
-  });
-
-  rivets.bind($("#store1"), {
-    store: this.store,
-    storeItems: this.storeItemsCollection
-  });
+  board = new StackBoard;
 
 }).call(this);
 

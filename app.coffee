@@ -1,4 +1,33 @@
 "use strict"
+###### rivets adapter configure, below ######
+rivets.adapters[":"] =
+  subscribe: (obj, keypath, callback) ->
+    console.log("1.subscribe:\t #{obj} ||\t #{keypath}")
+    obj.on "change:" + keypath, callback
+    return
+
+  unsubscribe: (obj, keypath, callback) ->
+    console.log("2.unsubscribe:\t #{obj} ||\t #{keypath}")
+    obj.off "change:" + keypath, callback
+    return
+
+  read: (obj, keypath) ->
+    console.log("3.read:\t\t\t #{obj} ||\t #{keypath}")
+    # if((obj.get keypath) == undefined)
+    #   console.log("3.read:++ #{obj[keypath]()} \t #{(obj.get keypath)}")
+    #   obj[keypath]()
+    # else
+    #   obj.get keypath
+    obj.get keypath
+
+  publish: (obj, keypath, value) ->
+    console.log("4.publish:\t\t #{obj} ||\t #{keypath}")
+    obj.set keypath, value
+    return
+
+###### rivets adapter configure, above######
+
+
 class @Logger
   instance = null
   class Horn
@@ -15,11 +44,12 @@ class @Logger
 
 class @Box extends Backbone.Model
   defaults: {
-    boxId:   '9999'
+    boxId:        '9999'
+    fillColor:    {red:60, green:118, blue: 61}
   }
   initialize: ->
     @on('change:rect', @rectChanged)
-    #rgb(60, 118, 61);
+    #Fill Color: rgb(60, 118, 61)
     @set rect: new Kinetic.Rect(
                                   x:            0
                                   y:            0
@@ -87,24 +117,42 @@ class @Box extends Backbone.Model
     pointC = 
       x: @getXPosition() + @get('rect').getWidth()
       y: @getYPosition() + @get('rect').getHeight()
+  updateRectStyle: (options) ->
+    Logger.debug("updateRectStyle: #{@getTitleName()}")
+    @get('rect').setFill(options.color)
+
   rectChanged:() ->
     Logger.debug('box model changed by rect.')
-
   box: ->
     @get('group')
   printPoints: ->
-    Logger.info("PointA(x:#{@getPointA().x},y:#{@getPointA().y}) " +
+    Logger.debug("PointA(x:#{@getPointA().x},y:#{@getPointA().y}) " +
                 "PointB(x:#{@getPointB().x},y:#{@getPointB().y}) " +
                 "PointC(x:#{@getPointC().x},y:#{@getPointC().y}) " +
                 "PointD(x:#{@getPointD().x},y:#{@getPointD().y}) ")
+
+class CollisionPool
+#   # store ONLY *box ID*
+#   constructor: ->
+#     @pairs = []
+#     @existBoxes = []
+#   add: (box) ->
+#     if @existBoxes.length > 1
+#       @makePair
+#     else
+  
+#   makePair:
+
 
 class @Boxes extends Backbone.Collection
   model: Box
   initialize: (@layer,@zone)->
     @on('add', @showCurrentBoxPanel)
     @currentBox = new Box
-    @availableNewBoxId  = 1
+    @availableNewBoxId = 1
     @flash = "Initialized completed!"
+    @_collisionPool = new CollisionPool
+
   addNewBox: =>
     newBox  = new Box
     newBox.setXPosition(newBox.getXPosition() + @availableNewBoxId * 4 )
@@ -135,22 +183,25 @@ class @Boxes extends Backbone.Collection
     @showCurrentBoxPanel()
     Logger.debug("remove button clicked!")
   testCollision:()->
+    Logger.debug("...Collision start...")
     result =_.reduce(@models,
                     ((status, box) ->
                       if @currentBox.getTitleName() != box.getTitleName()
-                        Logger.debug("testCollision #{@currentBox.getTitleName()} #{box.getTitleName()}")
-                        status || @testBoxCollision(box, @currentBox)
+                        # Logger.debug("start testCollision box: #{box.getTitleName()} currentBox: #{@currentBox.getTitleName()}")
+                        @testBoxCollision(@currentBox, box) || status
                       else
-                        status ), 
+                        # Logger.debug("not testCollision box: #{box.getTitleName()} currentBox: #{@currentBox.getTitleName()}")
+                        status), 
                     false, this)
-    Logger.debug("testCollision: #{result}")
+    Logger.debug("...Collision result: #{result}")
   draw: () ->
     for box in @models
+      Logger.debug("In draw: Box#{box.getTitleName()}.color=#{box.get('rect').getFill()}")
       @layer.add(box.box())
     @layer.draw()
   testBoxCollision: (boxA, boxB) ->
     status  =     false
-    boxATop =     boxA.getXPosition()
+    boxATop =     boxA.getYPosition()
     boxABottom =  boxA.getYPosition() + boxA.getHeight()
     boxALeft   =  boxA.getXPosition()
     boxARight  =  boxA.getXPosition() + boxA.getWidth()
@@ -159,7 +210,23 @@ class @Boxes extends Backbone.Collection
     boxBLeft   =  boxB.getXPosition()
     boxBRight  =  boxB.getXPosition() + boxB.getWidth()
     status = true  unless boxABottom < boxBTop or boxATop > boxBBottom or boxALeft > boxBRight or boxARight < boxBLeft
+#    Logger.debug("\tboxA: #{boxA.getTitleName()}, boxB: #{boxB.getTitleName()}")
+#    Logger.debug("\tstatus: #{status}")
+    if status
+      # collision happened
+      @updateBoxStyle(boxA, {collision: true, collisionBox: boxB})
+    else
+      @updateBoxStyle(boxA, {recoverFillColor: true})
     status
+
+  updateBoxStyle: (boxA, options) ->
+    if options.collision
+      options.collisionBox.updateRectStyle({color: 'yellow'})
+      boxA.updateRectStyle({color: 'yellow'})
+    if options.recoverFillColor
+      boxA.updateRectStyle({color: 'green'})
+    @draw()
+
   updateCurrentBox: (newBox = @currentBox) ->
     @currentBox = newBox
     rivets.bind $('.box'),{box: newBox}
@@ -230,6 +297,12 @@ class @Boxes extends Backbone.Collection
     Logger.debug("validateZoneY: point.y #{point.y}, @zone.x #{@zone.y}")
     0<= point.y <= @zone.y
 
+# class @Boxes2
+#   initialize: (options)->
+#     @set boxes: new Boxes(options)
+
+
+
 class @StackBoard
   constructor: ->
     @stage = new Kinetic.Stage(
@@ -256,180 +329,101 @@ class @StackBoard
     @boxes = new Boxes(@layer,@zone)
     @boxes.shift()
     rivets.bind $('.boxes'),{boxes: @boxes}
-
-board=new StackBoard
-
-#/====== Skip This Part, this is configuration =============
-rivets.config.handler = (context, ev, binding) ->
-  if binding.model instanceof binding.model.____
-    @call binding.model, ev, context # Event Target !!
-  else
-    @call context, ev, binding.view.models
-
-rivets.binders.input =
-  publishes: true
-  routine: rivets.binders.value.routine
-  bind: (el) ->
-    el.addEventListener "input", @publish
-    return
-
-  unbind: (el) ->
-    el.removeEventListener "input", @publish
-    return
+    # @boxes2 = new Boxes(layer: @layer,zone: @zone)
+    # rivets.bind $('.boxes'),{boxes: @boxes2.get('boxes')}
+board = new StackBoard
 
 
-#================ Acutal Code Start from Here =============
-rivets.formatters.rupee = (val) ->
-  "$ " + val
+########  TEST  #########
 
-Person = ->
-  @name = "Narendra"
-  @job = {}
+## http://jsfiddle.net/EAvXT/8/
 
-  @job.task = "Engineer"
-  @____ = Person
-  return
+# class Item extends Backbone.Model
+#   initialize: ->
+#     @set ttext: 'dddd'
+#     @on 
 
-Person:: =
-  show: ->
-    @display()
-    return
+#   GetText: ->
+#     # console.log this
+#     @get("Name") + " | $" + @get("Price")
 
-  change: ->
-    @name = "Deepak"
-    @job.task = "Playing"
-    return
+#   desc: ->
+#     # console.log this
+#     @get("Name") + " -- $" + @get("Price")
+#   Edit: =>
+#     console.log this
+#     @trigger "edit", this
+#     return
 
-  display: ->
-    alert JSON.stringify(this)
-    return
+# ItemCollection = Backbone.Collection.extend(model: Item)
+# ItemView = Backbone.View.extend(
+#   templateId: "#editItemDialog"
+#   events:
+#     "click .close-link": "close"
 
-  total: ->
-    window.parseInt(@price) * window.parseInt(@quantity)
+#   render: ->
+#     templateFunction = _.template($(@templateId).html())
+#     html = templateFunction()
+#     @setElement html
+#     rivets.bind @$el,
+#       item: @model
 
-person = new Person()
-rivets.bind document.querySelector("#asdasd"),
-  scope: person
+#     this
 
-##### Example two way binding with rivets #####
-# ///====== Skip This Part, this is configuration =============
-# rivets.config.handler = function (context, ev, binding) {
-#     if (binding.model instanceof binding.model.____) {
-#         return this.call(binding.model, ev, context); // Event Target !!d
-#     } else {
-#         return this.call(context, ev, binding.view.models);
-#     }
-# };
-
-# rivets.binders.input = {
-#     publishes: true,d
-#     routine: rivets.binders.value.routine,
-#     bind: function (el) {
-#         el.addEventListener('input', this.publish);
-#     },
-#     unbind: function (el) {
-#         el.removeEventListener('input', this.publish);
-#     }
-# };
-
-# //================ Acutal Code Start from Here =============
-# rivets.formatters.rupee = function (val) {
-#     return "$ " + val;
-# };
-
-# var Person = function () {
-#     this.name = "Narendra",
-#     this.job = {};
-#     this.job.task = "Engineer";
-#     this.____ = Person;
-# };
-
-# Person.prototype = {
-#     show: function () {
-#         this.display();
-#     },
-#     change: function () {
-#         this.name = "Deepak";
-#         this.job.task = "Playing";
-#     },
-#     display: function () {
-#         alert(JSON.stringify(this));
-#     },
-#     total: function () {
-#         return window.parseInt(this.price) * window.parseInt(this.quantity);
-#     }
-# };
-################################################
-
-
-
-# var person = new Person();
-# rivets.bind(document.querySelector("#asdasd"), {
-#     scope: person
-# });
-
-# rivets.binders.color = (el, value) ->
-#   el.style.color = value
-
-# rivets.bind $('.boxes'),{boxes: boxes}
-# test
-# BINDING BACKBONE.JS MODEL(S) TO A VIEW
-# user = new Backbone.Model(
-#   name: "Joe"
+#   close: ->
+#     @$el.empty()
+#     return
 # )
-# class User extends Backbone.Model
-#   defaults: {
-#     name: "Joe"
+# Store = Backbone.Model.extend(initialize: (options) ->
+#   @set
+#     Title: "Cyclist Stuff"
+#     Items: options.Items
+
+#   return
+# )
+# editUsingViews = (item) ->
+#   view = new ItemView(model: item)
+#   $("#holder").empty().append view.render().el
+#   false
+
+# storeItems = _.map([
+#   {
+#     Name: "Awesome Carbon Wheels"
+#     Price: "100"
+#     Description: "Something to covet for a cyclist"
 #   }
-#   add_u: ->
-#     console.log('d')
-
-# el = document.getElementById("user-view")
-# rivets.bind el,
-#   user: user=new User
-
-# Canvas test
-
-# stage = new Kinetic.Stage(
-#   container: "canvas_container"
-#   width: 300  
-#   height: 360
-# )
-# layer = new Kinetic.Layer()
-# rect = new Kinetic.Rect(
-#   x: 10
-#   y: 10
-#   width: 20
-#   height: 20
-#   fill: "green"
-#   strokeWidth: 4
+#   {
+#     Name: "Speedplay Pedals"
+#     Price: "10"
+#     Description: "Something else to covet for a cyclist"
+#   }
+#   {
+#     Name: "LOTOJA"
+#     Price: "25"
+#     Description: "Big bike ride"
+#   }
+# ], (obj) ->
+#   item = new Item(obj)
+#   console.log item.get('Name')
+#   item.on "edit", editUsingViews
+#   item
 # )
 
-# # add the shape to the layer
-# layer.add rect
+# rivets.formatters.currency =
+#   read: (value) ->
+#     (value / Math.pow(10, 2)).toFixed 2
 
-# # add the layer to the stage
-# stage.add layer
+#   publish: (value) ->
+#     Math.round parseFloat(value) * Math.pow(10, 2)
 
-#
-# Calculate the fibonacci numbers
-#
-# Warning: This script can go really slow if you try to calculate the number with n > 20
-#
 
-#
-# Generate a RFC 4122 GUID
-#
-# See section 4.4 (Algorithms for Creating a UUID from Truly Random or
-# Pseudo-Random Numbers) for generating a GUID, since we don't have
-# hardware access within JavaScript.
-#
-# More info:
-#
-#   - http://www.rfc-archive.org/getrfc.php?rfc=4122
-#   - http://www.broofa.com/2008/09/javascript-uuid-function/
-#   - http://stackoverflow.com/questions/105034/how-to-create-a-guid-uuid-in-javascript
-#
+# @storeItemsCollection = new ItemCollection(storeItems)
+# @store = new Store(Items: @storeItemsCollection)
+
+
+# rivets.bind $("#store1"),
+#   store: @store
+#   storeItems: @storeItemsCollection
 
 
 
