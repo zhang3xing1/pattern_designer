@@ -1,6 +1,5 @@
 (function() {
-  "use strict";
-  var CollisionPool, board,
+  var CollisionUtil,
     __hasProp = {}.hasOwnProperty,
     __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
     __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
@@ -25,11 +24,15 @@
   };
 
   this.Logger = (function() {
-    var Horn, instance;
+    var Horn, instance, statuses;
 
     function Logger() {}
 
     instance = null;
+
+    statuses = ['info', 'debug', "dev"];
+
+    statuses = ["dev"];
 
     Horn = (function() {
       function Horn() {}
@@ -42,22 +45,39 @@
         return 'DEBUG:\t' + message;
       };
 
+      Horn.prototype.dev = function(message) {
+        return 'Dev:\t' + message;
+      };
+
       return Horn;
 
     })();
 
     Logger.info = function(message) {
-      if (instance == null) {
-        instance = new Horn;
+      if (_.contains(statuses, 'info')) {
+        if (instance == null) {
+          instance = new Horn;
+        }
+        return console.log(instance.info(message));
       }
-      return console.log(instance.info(message));
     };
 
     Logger.debug = function(message) {
-      if (instance == null) {
-        instance = new Horn;
+      if (_.contains(statuses, 'debug')) {
+        if (instance == null) {
+          instance = new Horn;
+        }
+        return console.log(instance.debug(message));
       }
-      return console.log(instance.debug(message));
+    };
+
+    Logger.dev = function(message) {
+      if (_.contains(statuses, 'dev')) {
+        if (instance == null) {
+          instance = new Horn;
+        }
+        return console.log(instance.dev(message));
+      }
     };
 
     return Logger;
@@ -72,7 +92,7 @@
     }
 
     Box.prototype.defaults = {
-      boxId: '9999',
+      boxId: '99999',
       fillColor: {
         red: 60,
         green: 118,
@@ -206,6 +226,16 @@
       return this.get('group');
     };
 
+    Box.prototype.makeCollisionStatus = function() {
+      Logger.dev("box" + (this.getTitleName()) + ": makeCollisionStatus");
+      return this.get('rect').setFill('red');
+    };
+
+    Box.prototype.makeUnCollisionStatus = function() {
+      Logger.dev("box" + (this.getTitleName()) + ": makeUnCollisionStatus");
+      return this.get('rect').setFill('green');
+    };
+
     Box.prototype.printPoints = function() {
       return Logger.debug(("PointA(x:" + (this.getPointA().x) + ",y:" + (this.getPointA().y) + ") ") + ("PointB(x:" + (this.getPointB().x) + ",y:" + (this.getPointB().y) + ") ") + ("PointC(x:" + (this.getPointC().x) + ",y:" + (this.getPointC().y) + ") ") + ("PointD(x:" + (this.getPointD().x) + ",y:" + (this.getPointD().y) + ") "));
     };
@@ -213,13 +243,6 @@
     return Box;
 
   })(Backbone.Model);
-
-  CollisionPool = (function() {
-    function CollisionPool() {}
-
-    return CollisionPool;
-
-  })();
 
   this.Boxes = (function(_super) {
     __extends(Boxes, _super);
@@ -239,11 +262,20 @@
     Boxes.prototype.initialize = function(layer, zone) {
       this.layer = layer;
       this.zone = zone;
+      this.collisionUtil = new CollisionUtil({
+        boxes: []
+      });
       this.on('add', this.showCurrentBoxPanel);
+      this.on('all', this.draw);
       this.currentBox = new Box;
       this.availableNewBoxId = 1;
-      this.flash = "Initialized completed!";
-      return this._collisionPool = new CollisionPool;
+      return this.flash = "Initialized completed!";
+    };
+
+    Boxes.prototype.updateCollisionStatus = function() {
+      return this.collisionUtil = new CollisionUtil({
+        boxes: this.models
+      });
     };
 
     Boxes.prototype.addNewBox = function() {
@@ -260,7 +292,6 @@
         };
       })(this));
       this.add(newBox);
-      this.draw();
       this.updateCurrentBox(newBox);
       this.availableNewBoxId += 1;
       return Logger.debug("@availableNewBoxId:\t" + this.availableNewBoxId);
@@ -274,7 +305,6 @@
         this.remove(this.currentBox);
         this.currentBox = this.last();
       }
-      this.draw();
       if (this.length === 0) {
         this.flash = 'There is no box.';
       }
@@ -287,12 +317,13 @@
       Logger.debug("...Collision start...");
       result = _.reduce(this.models, (function(status, box) {
         if (this.currentBox.getTitleName() !== box.getTitleName()) {
-          return this.testBoxCollision(this.currentBox, box) || status;
+          return this.collisionUtil.testCollisionPair(this.currentBox, box) || status;
         } else {
           return status;
         }
       }), false, this);
-      return Logger.debug("...Collision result: " + result);
+      Logger.debug("...Collision result: " + result);
+      return this.draw();
     };
 
     Boxes.prototype.draw = function() {
@@ -304,50 +335,6 @@
         this.layer.add(box.box());
       }
       return this.layer.draw();
-    };
-
-    Boxes.prototype.testBoxCollision = function(boxA, boxB) {
-      var boxABottom, boxALeft, boxARight, boxATop, boxBBottom, boxBLeft, boxBRight, boxBTop, status;
-      status = false;
-      boxATop = boxA.getYPosition();
-      boxABottom = boxA.getYPosition() + boxA.getHeight();
-      boxALeft = boxA.getXPosition();
-      boxARight = boxA.getXPosition() + boxA.getWidth();
-      boxBTop = boxB.getYPosition();
-      boxBBottom = boxB.getYPosition() + boxB.getHeight();
-      boxBLeft = boxB.getXPosition();
-      boxBRight = boxB.getXPosition() + boxB.getWidth();
-      if (!(boxABottom < boxBTop || boxATop > boxBBottom || boxALeft > boxBRight || boxARight < boxBLeft)) {
-        status = true;
-      }
-      if (status) {
-        this.updateBoxStyle(boxA, {
-          collision: true,
-          collisionBox: boxB
-        });
-      } else {
-        this.updateBoxStyle(boxA, {
-          recoverFillColor: true
-        });
-      }
-      return status;
-    };
-
-    Boxes.prototype.updateBoxStyle = function(boxA, options) {
-      if (options.collision) {
-        options.collisionBox.updateRectStyle({
-          color: 'yellow'
-        });
-        boxA.updateRectStyle({
-          color: 'yellow'
-        });
-      }
-      if (options.recoverFillColor) {
-        boxA.updateRectStyle({
-          color: 'green'
-        });
-      }
-      return this.draw();
     };
 
     Boxes.prototype.updateCurrentBox = function(newBox) {
@@ -376,7 +363,7 @@
       Logger.debug("@currentBox:\t" + this.currentBox.getTitleName());
       this.currentBox.setYPosition(this.currentBox.getYPosition() - 4);
       if (this.validateZone(this.currentBox)) {
-        this.draw();
+
       } else {
         this.currentBox.setYPosition(this.currentBox.getYPosition() + 4);
         this.flash = "Box" + (this.currentBox.getTitleName()) + " cannot be moved UP!";
@@ -389,9 +376,7 @@
     Boxes.prototype.down = function() {
       Logger.debug("@currentBox:\t" + this.currentBox.getTitleName());
       this.currentBox.setYPosition(this.currentBox.getYPosition() + 4);
-      if (this.validateZone(this.currentBox)) {
-        this.draw();
-      } else {
+      if (!this.validateZone(this.currentBox)) {
         this.currentBox.setYPosition(this.currentBox.getYPosition() - 4);
         this.flash = "Box" + (this.currentBox.getTitleName()) + " cannot be moved DOWN!";
       }
@@ -403,9 +388,7 @@
     Boxes.prototype.left = function() {
       Logger.debug("@currentBox:\t" + this.currentBox.getTitleName());
       this.currentBox.setXPosition(this.currentBox.getXPosition() - 4);
-      if (this.validateZone(this.currentBox)) {
-        this.draw();
-      } else {
+      if (!this.validateZone(this.currentBox)) {
         this.currentBox.setXPosition(this.currentBox.getXPosition() + 4);
         this.flash = "Box" + (this.currentBox.getTitleName()) + " cannot be moved LEFT!";
       }
@@ -416,10 +399,9 @@
 
     Boxes.prototype.right = function() {
       Logger.debug("@currentBox:\t" + this.currentBox.getTitleName());
+      Logger.debug("@currentBox:\t" + this.currentBox.getXPosition());
       this.currentBox.setXPosition(this.currentBox.getXPosition() + 4);
-      if (this.validateZone(this.currentBox)) {
-        this.draw();
-      } else {
+      if (!this.validateZone(this.currentBox)) {
         this.currentBox.setXPosition(this.currentBox.getXPosition() - 4);
         this.flash = "Box" + (this.currentBox.getTitleName()) + " cannot be moved RIGHT!";
       }
@@ -455,6 +437,78 @@
     return Boxes;
 
   })(Backbone.Collection);
+
+  CollisionUtil = (function(_super) {
+    __extends(CollisionUtil, _super);
+
+    function CollisionUtil() {
+      return CollisionUtil.__super__.constructor.apply(this, arguments);
+    }
+
+    CollisionUtil.prototype.initialize = function(options) {
+      return console.log('*CollisionUtil initialize* to do');
+    };
+
+    CollisionUtil.prototype.generateStatus = function() {};
+
+    CollisionUtil.prototype.removeCollisionPair = function(boxA, boxB) {
+      Logger.dev("removeCollisionPair: box" + (boxA.getTitleName()) + ", box" + (boxB.getTitleName()));
+      this.removeRelation(boxA, boxB);
+      if (!this.isRelationInclude(boxA)) {
+        boxA.makeUnCollisionStatus();
+      }
+      if (!this.isRelationInclude(boxB)) {
+        return boxB.makeUnCollisionStatus();
+      }
+    };
+
+    CollisionUtil.prototype.addCollisionPair = function(boxA, boxB) {
+      Logger.dev("addCollisionPair: box" + (boxA.getTitleName()) + ", box" + (boxB.getTitleName()));
+      this.addRelation(boxA, boxB);
+      boxA.makeCollisionStatus();
+      return boxB.makeCollisionStatus();
+    };
+
+    CollisionUtil.prototype.isRelationInclude = function(boxA) {
+      var status;
+      status = false;
+      return status;
+    };
+
+    CollisionUtil.prototype.removeRelation = function(boxA, boxB) {
+      return Logger.dev("removeRelation: box" + (boxA.getTitleName()) + ", box" + (boxB.getTitleName()));
+    };
+
+    CollisionUtil.prototype.addRelation = function(boxA, boxB) {
+      return Logger.dev("addCollisionPair: box" + (boxA.getTitleName()) + ", box" + (boxB.getTitleName()));
+    };
+
+    CollisionUtil.prototype.testCollisionPair = function(boxA, boxB) {
+      var boxABottom, boxALeft, boxARight, boxATop, boxBBottom, boxBLeft, boxBRight, boxBTop, status;
+      status = false;
+      boxATop = boxA.getYPosition();
+      boxABottom = boxA.getYPosition() + boxA.getHeight();
+      boxALeft = boxA.getXPosition();
+      boxARight = boxA.getXPosition() + boxA.getWidth();
+      boxBTop = boxB.getYPosition();
+      boxBBottom = boxB.getYPosition() + boxB.getHeight();
+      boxBLeft = boxB.getXPosition();
+      boxBRight = boxB.getXPosition() + boxB.getWidth();
+      if (!(boxABottom < boxBTop || boxATop > boxBBottom || boxALeft > boxBRight || boxARight < boxBLeft)) {
+        status = true;
+      }
+      Logger.dev("testCollisionPair: " + status);
+      if (status) {
+        this.addCollisionPair(boxA, boxB);
+      } else {
+        this.removeCollisionPair(boxA, boxB);
+      }
+      return status;
+    };
+
+    return CollisionUtil;
+
+  })(Backbone.Model);
 
   this.StackBoard = (function() {
     function StackBoard() {
@@ -493,7 +547,7 @@
 
   })();
 
-  board = new StackBoard;
+  this.board = new StackBoard;
 
 }).call(this);
 

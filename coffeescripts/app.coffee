@@ -1,4 +1,4 @@
-"use strict"
+# "use strict"
 ###### rivets adapter configure, below ######
 rivets.adapters[":"] =
   subscribe: (obj, keypath, callback) ->
@@ -27,24 +27,34 @@ rivets.adapters[":"] =
 
 ###### rivets adapter configure, above######
 
-
 class @Logger
   instance = null
+  statuses = ['info', 'debug', "dev"]
+  # statuses = ['info']
+  statuses = ["dev"]
   class Horn
     info: (message) -> 
       'INFO:\t' + message
     debug: (message) -> 
       'DEBUG:\t' + message
+    dev: (message) -> 
+      'Dev:\t' + message
   @info: (message) ->
-    instance ?= new Horn
-    console.log(instance.info(message))
+    if _.contains(statuses, 'info')
+      instance ?= new Horn
+      console.log(instance.info(message))
   @debug: (message) ->
-    instance ?= new Horn
-    console.log(instance.debug(message))
+    if _.contains(statuses, 'debug')
+      instance ?= new Horn
+      console.log(instance.debug(message))
+  @dev: (message) ->
+    if _.contains(statuses, 'dev')
+      instance ?= new Horn
+      console.log(instance.dev(message))
 
 class @Box extends Backbone.Model
   defaults: {
-    boxId:        '9999'
+    boxId:        '99999'
     fillColor:    {red:60, green:118, blue: 61}
   }
   initialize: ->
@@ -125,33 +135,32 @@ class @Box extends Backbone.Model
     Logger.debug('box model changed by rect.')
   box: ->
     @get('group')
+  makeCollisionStatus: ->
+    Logger.dev("box#{@getTitleName()}: makeCollisionStatus")
+    @get('rect').setFill('red')
+  makeUnCollisionStatus: ->
+    Logger.dev("box#{@getTitleName()}: makeUnCollisionStatus")
+    @get('rect').setFill('green')
   printPoints: ->
     Logger.debug("PointA(x:#{@getPointA().x},y:#{@getPointA().y}) " +
                 "PointB(x:#{@getPointB().x},y:#{@getPointB().y}) " +
                 "PointC(x:#{@getPointC().x},y:#{@getPointC().y}) " +
                 "PointD(x:#{@getPointD().x},y:#{@getPointD().y}) ")
 
-class CollisionPool
-#   # store ONLY *box ID*
-#   constructor: ->
-#     @pairs = []
-#     @existBoxes = []
-#   add: (box) ->
-#     if @existBoxes.length > 1
-#       @makePair
-#     else
-  
-#   makePair:
-
 
 class @Boxes extends Backbone.Collection
   model: Box
   initialize: (@layer,@zone)->
+    @collisionUtil = new CollisionUtil(boxes: [])
     @on('add', @showCurrentBoxPanel)
+    @on('all', @draw)
     @currentBox = new Box
     @availableNewBoxId = 1
     @flash = "Initialized completed!"
-    @_collisionPool = new CollisionPool
+    # @_collisionPool = new CollisionPool
+
+  updateCollisionStatus: ->
+    @collisionUtil = new CollisionUtil(boxes: @models)
 
   addNewBox: =>
     newBox  = new Box
@@ -164,7 +173,6 @@ class @Boxes extends Backbone.Collection
       @updateCurrentBox(newBox)
 
     @add(newBox)
-    @draw()
     
     @updateCurrentBox(newBox)
     @availableNewBoxId += 1
@@ -177,7 +185,6 @@ class @Boxes extends Backbone.Collection
       @currentBox.get('group').destroy()
       @remove(@currentBox)
       @currentBox = @last()
-    @draw()
     if @length == 0
       @flash = 'There is no box.'
     @showCurrentBoxPanel()
@@ -187,45 +194,17 @@ class @Boxes extends Backbone.Collection
     result =_.reduce(@models,
                     ((status, box) ->
                       if @currentBox.getTitleName() != box.getTitleName()
-                        # Logger.debug("start testCollision box: #{box.getTitleName()} currentBox: #{@currentBox.getTitleName()}")
-                        @testBoxCollision(@currentBox, box) || status
+                        @collisionUtil.testCollisionPair(@currentBox, box) || status
                       else
-                        # Logger.debug("not testCollision box: #{box.getTitleName()} currentBox: #{@currentBox.getTitleName()}")
                         status), 
                     false, this)
     Logger.debug("...Collision result: #{result}")
+    @draw()
   draw: () ->
     for box in @models
       Logger.debug("In draw: Box#{box.getTitleName()}.color=#{box.get('rect').getFill()}")
       @layer.add(box.box())
     @layer.draw()
-  testBoxCollision: (boxA, boxB) ->
-    status  =     false
-    boxATop =     boxA.getYPosition()
-    boxABottom =  boxA.getYPosition() + boxA.getHeight()
-    boxALeft   =  boxA.getXPosition()
-    boxARight  =  boxA.getXPosition() + boxA.getWidth()
-    boxBTop    =  boxB.getYPosition()
-    boxBBottom =  boxB.getYPosition() + boxB.getHeight()
-    boxBLeft   =  boxB.getXPosition()
-    boxBRight  =  boxB.getXPosition() + boxB.getWidth()
-    status = true  unless boxABottom < boxBTop or boxATop > boxBBottom or boxALeft > boxBRight or boxARight < boxBLeft
-#    Logger.debug("\tboxA: #{boxA.getTitleName()}, boxB: #{boxB.getTitleName()}")
-#    Logger.debug("\tstatus: #{status}")
-    if status
-      # collision happened
-      @updateBoxStyle(boxA, {collision: true, collisionBox: boxB})
-    else
-      @updateBoxStyle(boxA, {recoverFillColor: true})
-    status
-
-  updateBoxStyle: (boxA, options) ->
-    if options.collision
-      options.collisionBox.updateRectStyle({color: 'yellow'})
-      boxA.updateRectStyle({color: 'yellow'})
-    if options.recoverFillColor
-      boxA.updateRectStyle({color: 'green'})
-    @draw()
 
   updateCurrentBox: (newBox = @currentBox) ->
     @currentBox = newBox
@@ -241,7 +220,7 @@ class @Boxes extends Backbone.Collection
     Logger.debug("@currentBox:\t" + @currentBox.getTitleName())
     @currentBox.setYPosition(@currentBox.getYPosition() - 4)
     if @validateZone(@currentBox)
-      @draw()
+      # @draw()
     else
       @currentBox.setYPosition(@currentBox.getYPosition() + 4)
       @flash = "Box#{@currentBox.getTitleName()} cannot be moved UP!"
@@ -251,9 +230,7 @@ class @Boxes extends Backbone.Collection
   down: () =>
     Logger.debug("@currentBox:\t" + @currentBox.getTitleName())
     @currentBox.setYPosition(@currentBox.getYPosition() + 4)
-    if @validateZone(@currentBox)
-      @draw()
-    else
+    unless @validateZone(@currentBox)
       @currentBox.setYPosition(@currentBox.getYPosition() - 4)
       @flash = "Box#{@currentBox.getTitleName()} cannot be moved DOWN!"
     @currentBox.printPoints()
@@ -262,9 +239,7 @@ class @Boxes extends Backbone.Collection
   left: () =>
     Logger.debug("@currentBox:\t" + @currentBox.getTitleName())
     @currentBox.setXPosition(@currentBox.getXPosition() - 4)
-    if @validateZone(@currentBox)
-      @draw()
-    else
+    unless @validateZone(@currentBox)
       @currentBox.setXPosition(@currentBox.getXPosition() + 4)
       @flash = "Box#{@currentBox.getTitleName()} cannot be moved LEFT!"
     @currentBox.printPoints()
@@ -272,10 +247,9 @@ class @Boxes extends Backbone.Collection
     @updateCurrentBox()
   right: () =>
     Logger.debug("@currentBox:\t" + @currentBox.getTitleName())
+    Logger.debug("@currentBox:\t" + @currentBox.getXPosition())
     @currentBox.setXPosition(@currentBox.getXPosition() + 4)
-    if @validateZone(@currentBox)
-      @draw()
-    else
+    unless @validateZone(@currentBox)
       @currentBox.setXPosition(@currentBox.getXPosition() - 4)
       @flash = "Box#{@currentBox.getTitleName()} cannot be moved RIGHT!"
     @currentBox.printPoints()
@@ -297,10 +271,56 @@ class @Boxes extends Backbone.Collection
     Logger.debug("validateZoneY: point.y #{point.y}, @zone.x #{@zone.y}")
     0<= point.y <= @zone.y
 
-# class @Boxes2
-#   initialize: (options)->
-#     @set boxes: new Boxes(options)
 
+class CollisionUtil extends Backbone.Model
+
+  initialize: (options) ->
+    console.log('*CollisionUtil initialize* to do')
+
+  generateStatus: ->
+    #
+  removeCollisionPair:(boxA, boxB) ->
+    Logger.dev("removeCollisionPair: box#{boxA.getTitleName()}, box#{boxB.getTitleName()}")
+    @removeRelation(boxA, boxB)
+    unless @isRelationInclude(boxA)
+      boxA.makeUnCollisionStatus()
+    unless @isRelationInclude(boxB)
+      boxB.makeUnCollisionStatus()
+
+  addCollisionPair:(boxA, boxB) ->
+    Logger.dev("addCollisionPair: box#{boxA.getTitleName()}, box#{boxB.getTitleName()}")
+    @addRelation(boxA, boxB)
+    boxA.makeCollisionStatus()
+    boxB.makeCollisionStatus()
+
+  isRelationInclude:(boxA) ->
+    status = false
+    # 
+    status
+
+  removeRelation: (boxA, boxB) ->
+    Logger.dev("removeRelation: box#{boxA.getTitleName()}, box#{boxB.getTitleName()}")
+  addRelation: (boxA, boxB) ->
+    Logger.dev("addCollisionPair: box#{boxA.getTitleName()}, box#{boxB.getTitleName()}")
+  ######## public api ########
+  testCollisionPair:(boxA,boxB) ->
+    status  =     false
+    boxATop =     boxA.getYPosition()
+    boxABottom =  boxA.getYPosition() + boxA.getHeight()
+    boxALeft   =  boxA.getXPosition()
+    boxARight  =  boxA.getXPosition() + boxA.getWidth()
+    boxBTop    =  boxB.getYPosition()
+    boxBBottom =  boxB.getYPosition() + boxB.getHeight()
+    boxBLeft   =  boxB.getXPosition()
+    boxBRight  =  boxB.getXPosition() + boxB.getWidth()
+    status = true  unless boxABottom < boxBTop or boxATop > boxBBottom or boxALeft > boxBRight or boxARight < boxBLeft
+    Logger.dev("testCollisionPair: #{status}")
+    if status
+      @addCollisionPair(boxA, boxB)
+    else
+      @removeCollisionPair(boxA, boxB)
+
+    status
 
 
 class @StackBoard
@@ -329,9 +349,7 @@ class @StackBoard
     @boxes = new Boxes(@layer,@zone)
     @boxes.shift()
     rivets.bind $('.boxes'),{boxes: @boxes}
-    # @boxes2 = new Boxes(layer: @layer,zone: @zone)
-    # rivets.bind $('.boxes'),{boxes: @boxes2.get('boxes')}
-board = new StackBoard
+@board = new StackBoard
 
 
 ########  TEST  #########

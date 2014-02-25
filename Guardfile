@@ -8,7 +8,11 @@ guard 'livereload' do
 end
 
 guard 'coffeescript', :output => 'javascripts', :source_map => true do
-  watch(/^(.*)\.coffee/)
+  watch(/^coffeescripts\/(.*)\.coffee/)
+  callback(:run_on_modifications_end) { puts '-'*100; 
+  FileUtils.cp_r('coffeescripts', 'javascripts')
+  }
+  callback(:reload_end) { puts '+'*1000}
 end
  
 guard 'coffeescript', :output => 'spec/javascripts' do
