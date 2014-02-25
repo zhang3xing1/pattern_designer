@@ -24,13 +24,13 @@
                 <button class="btn btn-primary" rv-on-click="boxes.addNewBox">+</button>
               </span>
           </div>
-          <div class="panel panel-default row box" style="display: none">
+          <div class="panel panel-default row" style="display: none">
                 <div class="panel-heading panel-heading-info ">
                     <span>Current Box</span>
                     <span class="flash-info boxes">{ boxes.flash }</span>
                 </div>
                 <div class="panel-body">
-                        <div class="row column">
+                        <div class="row column box">
                             <div class="col-md-6" >
                                 <div class="input-group" >
                                     <span class="input-group-addon label-info">X :</span>
@@ -44,11 +44,11 @@
                                 </div>
                             </div>
                         </div>
-                    <div class="row column">
+                    <div class="row column box">
                         <div class="col-md-6" >
                             <div class="input-group ">
                                 <span class="input-group-addon label-info">Width :</span>
-                                <input type="text" class="form-control" rv-value="box.getWidth">
+                                <input type="text" class="form-control box" rv-value="box.getWidth">
                             </div>
                         </div>
                         <div class="col-md-6" >
@@ -122,41 +122,9 @@
         <div class="alert alert-success boxes row">
             <span>{ boxes.flash }</span>
         </div>
-<div id="asdasd">
-    <input rv-value="showbutton" type="checkbox">
-    <label>Hide button</label>
-    <div rv-hide="showbutton">
-        <button rv-on-click="scope.change">Change Model Data</button>
-        <button rv-on-click="scope.show">Show Model Data</button>
-    </div>
-      <h3>
-    <span>Name : { scope.name } & Task: { scope.job.task}</span>
-  </h3>
-
-    <input rv-input="scope.name">
-    <input rv-input="scope.job.task">
-    <p><b>Computed Properties !</b>
-    </p>
-    <label>Price</label>
-    <input rv-input="scope.price ">
-    <label>Quantity</label>
-    <input rv-input="scope.quantity">
-    <label>Total =</label>  <span rv-text="scope.total < quantity price | rupee"></span>
-
-</div>
 
 
 
-    <!-- test -->
-    <!--     <div id="user-view">
-      <span>{ user:name }</span>
-      <input rv-value="user:name">
-      <button name="add_new_box" rv-on-click="user.add_u">+</button>
-    </div>
-
-    <div id="new-box-test">
-      <button name="add_new_box" rv-on-click="boxes.addNewBox">addbox</button>
-    </div> -->
 
    </div>
 </body>
@@ -164,9 +132,48 @@
   <script src="javascripts/jquery-2.1.0.min.js"></script>
   <script src='javascripts/underscore-min.js'></script>
   <script src='javascripts/backbone.min.js'></script>
-  <script src="javascripts/rivets.min.js"></script>
-  <script src='javascripts/configure.js'></script>
+
   <script src="javascripts/kinetic-v5.0.1.min.js"></script>
-  <script src='javascripts/app.js'></script>
+  
   <script src="javascripts/bootstrap.min.js"></script>
+
+<!-- rivetsjs test -->
+
+<div id="store1">
+    <h2 rv-text="store:Title"></h2>
+    <ul>
+        <li rv-each-item="storeItems.models">
+            <span rv-text="item:GetText"></span>
+            <span rv-text="item:Price | currency"></span>
+            
+            <a href="#" rv-on-click="item.Edit">Edit</a>
+        </li>
+    </ul>
+</div>
+<div id="holder">
+</div>
+
+<script type="text/template" id="editItemDialog">
+    <div>
+        <hr>
+        <div>
+            <label>name:</label><input rv-value="item:Name"/>
+        </div>
+        <div>
+            <label>price:</label><input rv-value="item:Price"/>
+        </div>
+        <div>
+            <label>description:</label><textarea rv-text="item:Description"></textarea>
+        </div>
+        <hr>
+        <div><a href="#" class="close-link">Close</a></div>
+    </div>
+</script>
+
+
+<!--  -->
+<script src="javascripts/rivets.min.js"></script>
+<!-- <script src='javascripts/configure.js'></script> -->
+<script src='javascripts/app.js'></script>
+
 </html>

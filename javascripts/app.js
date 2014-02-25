@@ -1,9 +1,33 @@
 (function() {
   "use strict";
-  var Person, board, person,
+  var CollisionPool, Item, ItemCollection, ItemView, Store, editUsingViews, storeItems,
     __hasProp = {}.hasOwnProperty,
     __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
     __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
+
+  rivets.adapters[":"] = {
+    subscribe: function(obj, keypath, callback) {
+      console.log("1.subscribe:\t " + obj + " ||\t " + keypath);
+      obj.on("change:" + keypath, callback);
+    },
+    unsubscribe: function(obj, keypath, callback) {
+      console.log("2.unsubscribe:\t " + obj + " ||\t " + keypath);
+      obj.off("change:" + keypath, callback);
+    },
+    read: function(obj, keypath) {
+      console.log("3.read:\t\t\t " + obj + " ||\t " + keypath);
+      if ((obj.get(keypath)) === void 0) {
+        console.log("3.read:++ " + (obj[keypath]()) + " \t " + (obj.get(keypath)));
+        return obj[keypath]();
+      } else {
+        return obj.get(keypath);
+      }
+    },
+    publish: function(obj, keypath, value) {
+      console.log("4.publish:\t\t " + obj + " ||\t " + keypath);
+      obj.set(keypath, value);
+    }
+  };
 
   this.Logger = (function() {
     var Horn, instance;
@@ -53,7 +77,12 @@
     }
 
     Box.prototype.defaults = {
-      boxId: '9999'
+      boxId: '9999',
+      fillColor: {
+        red: 60,
+        green: 118,
+        blue: 61
+      }
     };
 
     Box.prototype.initialize = function() {
@@ -169,6 +198,11 @@
       };
     };
 
+    Box.prototype.updateRectStyle = function(options) {
+      Logger.debug("updateRectStyle: " + (this.getTitleName()));
+      return this.get('rect').setFill(options.color);
+    };
+
     Box.prototype.rectChanged = function() {
       return Logger.debug('box model changed by rect.');
     };
@@ -178,12 +212,19 @@
     };
 
     Box.prototype.printPoints = function() {
-      return Logger.info(("PointA(x:" + (this.getPointA().x) + ",y:" + (this.getPointA().y) + ") ") + ("PointB(x:" + (this.getPointB().x) + ",y:" + (this.getPointB().y) + ") ") + ("PointC(x:" + (this.getPointC().x) + ",y:" + (this.getPointC().y) + ") ") + ("PointD(x:" + (this.getPointD().x) + ",y:" + (this.getPointD().y) + ") "));
+      return Logger.debug(("PointA(x:" + (this.getPointA().x) + ",y:" + (this.getPointA().y) + ") ") + ("PointB(x:" + (this.getPointB().x) + ",y:" + (this.getPointB().y) + ") ") + ("PointC(x:" + (this.getPointC().x) + ",y:" + (this.getPointC().y) + ") ") + ("PointD(x:" + (this.getPointD().x) + ",y:" + (this.getPointD().y) + ") "));
     };
 
     return Box;
 
   })(Backbone.Model);
+
+  CollisionPool = (function() {
+    function CollisionPool() {}
+
+    return CollisionPool;
+
+  })();
 
   this.Boxes = (function(_super) {
     __extends(Boxes, _super);
@@ -206,7 +247,8 @@
       this.on('add', this.showCurrentBoxPanel);
       this.currentBox = new Box;
       this.availableNewBoxId = 1;
-      return this.flash = "Initialized completed!";
+      this.flash = "Initialized completed!";
+      return this._collisionPool = new CollisionPool;
     };
 
     Boxes.prototype.addNewBox = function() {
@@ -247,15 +289,15 @@
 
     Boxes.prototype.testCollision = function() {
       var result;
+      Logger.debug("...Collision start...");
       result = _.reduce(this.models, (function(status, box) {
         if (this.currentBox.getTitleName() !== box.getTitleName()) {
-          Logger.debug("testCollision " + (this.currentBox.getTitleName()) + " " + (box.getTitleName()));
-          return status || this.testBoxCollision(box, this.currentBox);
+          return this.testBoxCollision(this.currentBox, box) || status;
         } else {
           return status;
         }
       }), false, this);
-      return Logger.debug("testCollision: " + result);
+      return Logger.debug("...Collision result: " + result);
     };
 
     Boxes.prototype.draw = function() {
@@ -263,6 +305,7 @@
       _ref = this.models;
       for (_i = 0, _len = _ref.length; _i < _len; _i++) {
         box = _ref[_i];
+        Logger.debug("In draw: Box" + (box.getTitleName()) + ".color=" + (box.get('rect').getFill()));
         this.layer.add(box.box());
       }
       return this.layer.draw();
@@ -271,7 +314,7 @@
     Boxes.prototype.testBoxCollision = function(boxA, boxB) {
       var boxABottom, boxALeft, boxARight, boxATop, boxBBottom, boxBLeft, boxBRight, boxBTop, status;
       status = false;
-      boxATop = boxA.getXPosition();
+      boxATop = boxA.getYPosition();
       boxABottom = boxA.getYPosition() + boxA.getHeight();
       boxALeft = boxA.getXPosition();
       boxARight = boxA.getXPosition() + boxA.getWidth();
@@ -282,7 +325,34 @@
       if (!(boxABottom < boxBTop || boxATop > boxBBottom || boxALeft > boxBRight || boxARight < boxBLeft)) {
         status = true;
       }
+      if (status) {
+        this.updateBoxStyle(boxA, {
+          collision: true,
+          collisionBox: boxB
+        });
+      } else {
+        this.updateBoxStyle(boxA, {
+          recoverFillColor: true
+        });
+      }
       return status;
+    };
+
+    Boxes.prototype.updateBoxStyle = function(boxA, options) {
+      if (options.collision) {
+        options.collisionBox.updateRectStyle({
+          color: 'yellow'
+        });
+        boxA.updateRectStyle({
+          color: 'yellow'
+        });
+      }
+      if (options.recoverFillColor) {
+        boxA.updateRectStyle({
+          color: 'green'
+        });
+      }
+      return this.draw();
     };
 
     Boxes.prototype.updateCurrentBox = function(newBox) {
@@ -428,58 +498,123 @@
 
   })();
 
-  board = new StackBoard;
+  Item = (function(_super) {
+    __extends(Item, _super);
 
-  rivets.config.handler = function(context, ev, binding) {
-    if (binding.model instanceof binding.model.____) {
-      return this.call(binding.model, ev, context);
-    } else {
-      return this.call(context, ev, binding.view.models);
+    function Item() {
+      this.Edit = __bind(this.Edit, this);
+      return Item.__super__.constructor.apply(this, arguments);
+    }
+
+    Item.prototype.initialize = function() {
+      return this.set({
+        ttext: 'dddd'
+      });
+    };
+
+    Item.prototype.GetText = function() {
+      return this.get("Name") + " | $" + this.get("Price");
+    };
+
+    Item.prototype.desc = function() {
+      return this.get("Name") + " -- $" + this.get("Price");
+    };
+
+    Item.prototype.Edit = function() {
+      console.log(this);
+      this.trigger("edit", this);
+    };
+
+    return Item;
+
+  })(Backbone.Model);
+
+  ItemCollection = Backbone.Collection.extend({
+    model: Item
+  });
+
+  ItemView = Backbone.View.extend({
+    templateId: "#editItemDialog",
+    events: {
+      "click .close-link": "close"
+    },
+    render: function() {
+      var html, templateFunction;
+      templateFunction = _.template($(this.templateId).html());
+      html = templateFunction();
+      this.setElement(html);
+      rivets.bind(this.$el, {
+        item: this.model
+      });
+      return this;
+    },
+    close: function() {
+      this.$el.empty();
+    }
+  });
+
+  Store = Backbone.Model.extend({
+    initialize: function(options) {
+      this.set({
+        Title: "Cyclist Stuff",
+        Items: options.Items
+      });
+    }
+  });
+
+  editUsingViews = function(item) {
+    var view;
+    view = new ItemView({
+      model: item
+    });
+    $("#holder").empty().append(view.render().el);
+    return false;
+  };
+
+  storeItems = _.map([
+    {
+      Name: "Awesome Carbon Wheels",
+      Price: "100",
+      Description: "Something to covet for a cyclist"
+    }, {
+      Name: "Speedplay Pedals",
+      Price: "10",
+      Description: "Something else to covet for a cyclist"
+    }, {
+      Name: "LOTOJA",
+      Price: "25",
+      Description: "Big bike ride"
+    }
+  ], function(obj) {
+    var item;
+    item = new Item(obj);
+    console.log(item.get('Name'));
+    item.on("edit", editUsingViews);
+    return item;
+  });
+
+  rivets.formatters.currency = {
+    read: function(value) {
+      return (value / Math.pow(10, 2)).toFixed(2);
+    },
+    publish: function(value) {
+      return Math.round(parseFloat(value) * Math.pow(10, 2));
     }
   };
 
-  rivets.binders.input = {
-    publishes: true,
-    routine: rivets.binders.value.routine,
-    bind: function(el) {
-      el.addEventListener("input", this.publish);
-    },
-    unbind: function(el) {
-      el.removeEventListener("input", this.publish);
-    }
-  };
+  this.storeItemsCollection = new ItemCollection(storeItems);
 
-  rivets.formatters.rupee = function(val) {
-    return "$ " + val;
-  };
+  this.store = new Store({
+    Items: this.storeItemsCollection
+  });
 
-  Person = function() {
-    this.name = "Narendra";
-    this.job = {};
-    this.job.task = "Engineer";
-    this.____ = Person;
-  };
-
-  Person.prototype = {
-    show: function() {
-      this.display();
-    },
-    change: function() {
-      this.name = "Deepak";
-      this.job.task = "Playing";
-    },
-    display: function() {
-      alert(JSON.stringify(this));
-    },
-    total: function() {
-      return window.parseInt(this.price) * window.parseInt(this.quantity);
-    }
-  };
-
-  person = new Person();
-
-  rivets.bind(document.querySelector("#asdasd"), {
-    scope: person
+  rivets.bind($("#store1"), {
+    store: this.store,
+    storeItems: this.storeItemsCollection
   });
 
 }).call(this);
+
+/*
+//@ sourceMappingURL=app.js.map
+*/

@@ -7,8 +7,8 @@ guard 'livereload' do
   watch(%r{css/.+\.css$})
 end
 
-guard 'coffeescript', :output => 'javascripts' do
-  watch(/^coffeescripts\/(.*)\.coffee/)
+guard 'coffeescript', :output => 'javascripts', :source_map => true do
+  watch(/^javascripts\/(.*)\.coffee/)
 end
  
 guard 'coffeescript', :output => 'spec/javascripts' do
