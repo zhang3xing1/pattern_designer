@@ -15,11 +15,11 @@
         <div id="dashboard" class='col-md-4'>
           <div class="input-group row column">
               <span class="input-group-addon label-info colomn-label-info">Layer :</span>
-              <input type="text" class="form-control" placeholder="layer name" readonly="readonly">
+              <input type="text" class="form-control" placeholder="layer name">
           </div>
           <div id="new_box" class="boxes input-group row column">
               <span class="input-group-addon label-info">New Box :</span>
-              <input type="text" name="new_box" class="form-control" placeholder="name" rv-value="boxes.availableNewBoxId">
+              <input type="text" name="new_box" class="form-control" placeholder="name" readonly="readOnly" rv-value="boxes.availableNewBoxId">
               <span class="input-group-btn">
                 <button class="btn btn-primary" rv-on-click="boxes.addNewBox">+</button>
               </span>
@@ -134,7 +134,7 @@
   
   <script src="javascripts/bootstrap.min.js" type="text/javascript"></script>
 
-  
+
 
 
 <!-- rivetsjs test -->

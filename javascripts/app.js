@@ -93,11 +93,7 @@
 
     Box.prototype.defaults = {
       boxId: 'nullID',
-      fillColor: {
-        red: 60,
-        green: 118,
-        blue: 61
-      }
+      collisionStatus: false
     };
 
     Box.prototype.initialize = function() {
@@ -108,9 +104,7 @@
           y: 0,
           width: 100,
           height: 50,
-          fillRed: 60,
-          fillGreen: 118,
-          fillBlue: 61
+          fill: 'green'
         })
       });
       this.set({
@@ -132,13 +126,7 @@
       });
       this.get('group').add(this.get('rect'));
       this.get('group').add(this.get('title'));
-      Logger.debug('Box: Generate a new box.');
-      return this.box().on("dblclick", (function(_this) {
-        return function() {
-          _this.box().rotation(90);
-          return Logger.debug("@box().rotation(90)");
-        };
-      })(this));
+      return Logger.debug('Box: Generate a new box.');
     };
 
     Box.prototype.setTitleName = function(newTitle) {
@@ -228,12 +216,20 @@
 
     Box.prototype.makeCollisionStatus = function() {
       Logger.dev("box" + (this.getTitleName()) + ": makeCollisionStatus");
-      return this.get('rect').setFill('red');
+      return this.set('collisionStatus', true);
     };
 
     Box.prototype.makeUnCollisionStatus = function() {
       Logger.dev("box" + (this.getTitleName()) + ": makeUnCollisionStatus");
-      return this.get('rect').setFill('green');
+      return this.set('collisionStatus', false);
+    };
+
+    Box.prototype.changeFillColor = function() {
+      if (this.get('collisionStatus')) {
+        return this.get('rect').setFill('red');
+      } else {
+        return this.get('rect').setFill('green');
+      }
     };
 
     Box.prototype.printPoints = function() {
@@ -263,15 +259,28 @@
       this.layer = layer;
       this.zone = zone;
       this.on('add', this.showCurrentBoxPanel);
-      this.on('all', this.testCollision);
+      this.on('all', this.draw);
       this.collisionUtil = new CollisionUtil;
       this.currentBox = new Box;
       this.availableNewBoxId = 1;
       return this.flash = "Initialized completed!";
     };
 
+    Boxes.prototype.pprint = function() {
+      return _.reduce(this.models, (function(str, box) {
+        return "" + str + " box" + (box.getTitleName());
+      }), "");
+    };
+
     Boxes.prototype.updateCollisionStatus = function(options) {
       return this.collisionUtil.updateRelation(options);
+    };
+
+    Boxes.prototype.deleteCollisionWith = function(box) {
+      if (box == null) {
+        box = this.currentBox;
+      }
+      return this.collisionUtil.deleteCollisionWith(box, this.models);
     };
 
     Boxes.prototype.testCollisionBetween = function(boxA, boxB) {
@@ -295,28 +304,32 @@
       this.add(newBox);
       this.updateCurrentBox(newBox);
       this.availableNewBoxId += 1;
-      this.testCollision();
-      return Logger.debug("@availableNewBoxId:\t" + this.availableNewBoxId);
+      return this.testCollision();
     };
 
     Boxes.prototype.removeCurrentBox = function() {
       if (this.length === 0) {
         this.flash = 'There is no box.';
       } else {
+        this.deleteCollisionWith();
         this.currentBox.get('group').destroy();
         this.remove(this.currentBox);
-        this.currentBox = this.last();
+        if (this.length === 0) {
+          this.currentBox = new Box;
+          this.flash = 'There is no box.';
+        } else {
+          this.currentBox = this.last();
+        }
       }
-      if (this.length === 0) {
-        this.flash = 'There is no box.';
-      }
+      this.draw();
       this.showCurrentBoxPanel();
-      return Logger.debug("remove button clicked!");
+      return Logger.dev("remove button clicked!");
     };
 
     Boxes.prototype.testCollision = function() {
       var result;
       Logger.debug("...Collision start...");
+      result = false;
       result = _.reduce(this.models, (function(status, box) {
         if (this.currentBox.getTitleName() !== box.getTitleName() && this.currentBox.getTitleName() !== 'nullID') {
           return this.testCollisionBetween(this.currentBox, box) || status;
@@ -324,6 +337,7 @@
           return status;
         }
       }), false, this);
+      result;
       Logger.debug("...Collision result: " + result);
       return this.draw();
     };
@@ -333,7 +347,8 @@
       _ref = this.models;
       for (_i = 0, _len = _ref.length; _i < _len; _i++) {
         box = _ref[_i];
-        Logger.debug("In draw: Box" + (box.getTitleName()) + ".color=" + (box.get('rect').getFill()));
+        Logger.dev("In draw: Box" + (box.getTitleName()) + ".collision=" + (box.get('collisionStatus')));
+        box.changeFillColor();
         this.layer.add(box.box());
       }
       return this.layer.draw();
@@ -353,7 +368,9 @@
       rivets.bind($('.box'), {
         box: this.currentBox
       });
-      Logger.debug("showCurrentBoxPanel: " + this.length);
+      Logger.dev("showCurrentBoxPanel: Box number: " + this.length + "; ");
+      Logger.dev("In Boxes: " + (this.pprint()) + "; ");
+      this.pprint();
       if (this.length === 0) {
         return $('.panel').css('display', 'none');
       } else {
@@ -530,6 +547,7 @@
         });
         relations = this.get('relations');
         relations.add(new Relation(boxId));
+        relations.findRelationWith(boxId).set('status', true);
       } else {
         relations = this.get('relations');
         relations.findRelationWith(boxId).set('status', true);
@@ -553,6 +571,17 @@
       }
     };
 
+    CollisionPair.prototype.makeUnCollisionRelationAll = function() {
+      var relations;
+      relations = this.get('relations');
+      if (relations !== void 0) {
+        return _.each(relations.models, (function(aRelation) {
+          aRelation.set('status', false);
+          return Logger.dev("In makeUnCollisionRelationAll: Pair" + this.boxId + ", withBox" + (aRelation.get('boxId')) + " " + (aRelation.get('status')));
+        }), this);
+      }
+    };
+
     return CollisionPair;
 
   })(Backbone.Model);
@@ -570,7 +599,7 @@
 
     CollisionUtil.prototype.pprint = function() {
       return _.each(this.models, function(pair) {
-        return Logger.dev("pair." + (pair.pprint()));
+        return Logger.dev("In CollisionUtil: pair." + (pair.pprint()));
       });
     };
 
@@ -609,10 +638,27 @@
       return boxB.makeCollisionStatus();
     };
 
+    CollisionUtil.prototype.deleteCollisionWith = function(box, boxes) {
+      var toDeletedBoxId;
+      toDeletedBoxId = box.getTitleName();
+      this.updateCollisionRelationBetween({
+        action: 'delete',
+        boxId: toDeletedBoxId
+      });
+      return _.each(boxes, (function(aBox) {
+        if (this.isCollisionInclude(aBox)) {
+          return aBox.makeCollisionStatus();
+        } else {
+          return aBox.makeUnCollisionStatus();
+        }
+      }), this);
+    };
+
     CollisionUtil.prototype.updateCollisionRelationBetween = function(options) {
-      var boxAId, boxAPair, boxBId, boxBPair;
+      var boxAId, boxAPair, boxBId, boxBPair, toDeletedBoxId, toDeletedBoxPair;
       boxAId = options.boxAId;
       boxBId = options.boxBId;
+      toDeletedBoxId = options.boxId;
       if (options.action === 'add') {
         boxAPair = this.findPair(boxAId);
         boxBPair = this.findPair(boxBId);
@@ -624,7 +670,7 @@
           boxBPair = new CollisionPair(boxBId);
           this.add(boxBPair);
         }
-        Logger.dev("CollisionUtil:\t add box | box" + boxAPair.boxId + " |box" + boxBPair.boxId);
+        Logger.dev("CollisionUtil:\t addPair:  box" + boxAPair.boxId + " box" + boxBPair.boxId);
         boxAPair.makeCollisionRelationWith(boxBId);
         boxBPair.makeCollisionRelationWith(boxAId);
       } else if (options.action === 'remove') {
@@ -638,21 +684,34 @@
           boxBPair = new CollisionPair(boxBId);
           this.add(boxBPair);
         }
-        Logger.dev("CollisionUtil:\t remove box | box" + boxAPair.boxId + " |box" + boxBPair.boxId);
+        Logger.dev("CollisionUtil:\t removePair:  box" + boxAPair.boxId + " box" + boxBPair.boxId);
         boxAPair.makeUnCollisionRelationWith(boxBId);
         boxBPair.makeUnCollisionRelationWith(boxAId);
+      } else if (options.action === 'delete') {
+        toDeletedBoxPair = this.findPair(toDeletedBoxId);
+        _.each(this.models, (function(pair) {
+          if (pair.boxId === toDeletedBoxId) {
+            this.remove(toDeletedBoxPair);
+          } else {
+            pair.makeUnCollisionRelationWith(toDeletedBoxId);
+          }
+          Logger.dev("In delete: toDeletedBoxId: " + toDeletedBoxId);
+          Logger.dev("In delete: pair Relation: " + (pair.pprint()));
+          return Logger.dev("In delete: toDeletedBoxPair Relation: " + (toDeletedBoxPair.pprint()));
+        }), this);
       } else if (options.action === 'changeID') {
         Logger.dev("CollisionUtil:\t changeID box");
       }
-      Logger.dev("boxAPair Relation: " + (boxAPair.pprint()));
-      return Logger.dev("boxBPair Relation: " + (boxBPair.pprint()));
+      Logger.dev("---->Show pair status: ");
+      this.pprint();
+      return Logger.dev("<----Show pair status: ");
     };
 
     CollisionUtil.prototype.isCollisionInclude = function(boxA) {
       var boxAId, result, status;
       boxAId = boxA.getTitleName();
       result = _.filter(this.models, function(pair) {
-        return pair.get('boxId') !== boxAId && pair.isCollisionWith(boxAId);
+        return pair.boxId !== boxAId && pair.isCollisionWith(boxAId);
       });
       return status = result.length > 0;
     };
@@ -722,6 +781,8 @@
   })();
 
   this.board = new StackBoard;
+
+  $("input").prop("readonly", true);
 
 }).call(this);
 
