@@ -32,7 +32,7 @@
 
     statuses = ['info', 'debug', "dev"];
 
-    statuses = ["dev"];
+    statuses = [];
 
     Horn = (function() {
       function Horn() {}
@@ -274,8 +274,8 @@
       return this.collisionUtil.updateRelation(options);
     };
 
-    Boxes.prototype.testCollisionPair = function(boxA, boxB) {
-      return this.collisionUtil.testCollisionPair(boxA, boxB);
+    Boxes.prototype.testCollisionBetween = function(boxA, boxB) {
+      return this.collisionUtil.testCollisionBetween(boxA, boxB);
     };
 
     Boxes.prototype.addNewBox = function() {
@@ -288,12 +288,14 @@
       newBox.box().on("click", (function(_this) {
         return function() {
           Logger.debug("box" + (newBox.getTitleName()) + " clicked!");
+          _this.flash = "box" + (newBox.getTitleName()) + " selected!";
           return _this.updateCurrentBox(newBox);
         };
       })(this));
       this.add(newBox);
       this.updateCurrentBox(newBox);
       this.availableNewBoxId += 1;
+      this.testCollision();
       return Logger.debug("@availableNewBoxId:\t" + this.availableNewBoxId);
     };
 
@@ -317,7 +319,7 @@
       Logger.debug("...Collision start...");
       result = _.reduce(this.models, (function(status, box) {
         if (this.currentBox.getTitleName() !== box.getTitleName() && this.currentBox.getTitleName() !== 'nullID') {
-          return this.testCollisionPair(this.currentBox, box) || status;
+          return this.testCollisionBetween(this.currentBox, box) || status;
         } else {
           return status;
         }
@@ -410,9 +412,6 @@
         return status && this.validateZoneX(point) && this.validateZoneY(point);
       }), true, this);
       Logger.debug("validresult:\t " + result);
-      if (result) {
-        this.flash = "";
-      }
       return result;
     };
 
@@ -433,7 +432,7 @@
   })(Backbone.Collection);
 
   CollisionPair = (function(_super) {
-    var CollisionRelation;
+    var Relation, RelationCollection;
 
     __extends(CollisionPair, _super);
 
@@ -441,34 +440,117 @@
       return CollisionPair.__super__.constructor.apply(this, arguments);
     }
 
-    CollisionRelation = (function(_super1) {
-      __extends(CollisionRelation, _super1);
+    Relation = (function(_super1) {
+      __extends(Relation, _super1);
 
-      function CollisionRelation() {
-        return CollisionRelation.__super__.constructor.apply(this, arguments);
+      function Relation() {
+        return Relation.__super__.constructor.apply(this, arguments);
       }
 
-      CollisionRelation.prototype.defaults = {
+      Relation.prototype.defaults = {
         status: false
       };
 
-      CollisionRelation.prototype.initialize = function(options) {
+      Relation.prototype.initialize = function(boxId) {
         return this.set({
-          boxId: options.boxId
+          boxId: boxId
         });
       };
 
-      return CollisionRelation;
+      Relation.prototype.pprint = function() {
+        return "" + (this.get('boxId')) + " " + (this.get('status'));
+      };
+
+      return Relation;
 
     })(Backbone.Model);
 
-    CollisionPair.prototype.initialize = function(options) {
-      this.set({
-        boxId: options.boxId
-      });
-      return this.set({
-        relationCollection: new CollisionRelation
-      });
+    RelationCollection = (function(_super1) {
+      __extends(RelationCollection, _super1);
+
+      function RelationCollection() {
+        return RelationCollection.__super__.constructor.apply(this, arguments);
+      }
+
+      RelationCollection.prototype.model = Relation;
+
+      RelationCollection.prototype.pprint = function() {
+        return _.reduce(this.models, (function(str, aRelation) {
+          return "" + str + " | " + (aRelation.pprint());
+        }), "");
+      };
+
+      RelationCollection.prototype.findRelationWith = function(boxId) {
+        var aRelation;
+        aRelation = _.find(this.models, function(aRelation) {
+          return aRelation.get('boxId') === boxId;
+        });
+        if (aRelation === void 0) {
+          aRelation = new Relation(boxId);
+          this.add(aRelation);
+        }
+        return aRelation;
+      };
+
+      return RelationCollection;
+
+    })(Backbone.Collection);
+
+    CollisionPair.prototype.initialize = function(boxId) {
+      return this.boxId = boxId;
+    };
+
+    CollisionPair.prototype.findRelationWith = function(boxId) {
+      return this.get('relations').findRelationWith(boxId);
+    };
+
+    CollisionPair.prototype.pprint = function() {
+      return "box" + this.boxId + " " + (this.get('relations').pprint());
+    };
+
+    CollisionPair.prototype.isRelationEmpty = function() {
+      return this.get('relations') === void 0;
+    };
+
+    CollisionPair.prototype.isCollisionWith = function(boxId) {
+      if (this.isRelationEmpty()) {
+        this.makeUnCollisionRelationWith(boxId);
+      }
+      return this.findRelationWith(boxId).get('status');
+    };
+
+    CollisionPair.prototype.makeCollisionRelationWith = function(boxId) {
+      var relations;
+      if (this.get('boxId') === boxId) {
+        return;
+      }
+      if (this.isRelationEmpty()) {
+        this.set({
+          relations: new RelationCollection
+        });
+        relations = this.get('relations');
+        relations.add(new Relation(boxId));
+      } else {
+        relations = this.get('relations');
+        relations.findRelationWith(boxId).set('status', true);
+      }
+    };
+
+    CollisionPair.prototype.makeUnCollisionRelationWith = function(boxId) {
+      var relations;
+      if (this.get('boxId') === boxId) {
+        return;
+      }
+      if (this.isRelationEmpty()) {
+        this.set({
+          relations: new RelationCollection
+        });
+        relations = this.get('relations');
+        relations.add(new Relation(boxId));
+      } else {
+        relations = this.get('relations');
+        relations.findRelationWith(boxId).set('status', false);
+      }
     };
 
     return CollisionPair;
@@ -484,55 +566,98 @@
 
     CollisionUtil.prototype.model = CollisionPair;
 
-    CollisionUtil.prototype.initialize = function(options) {
-      return console.log('*CollisionUtil initialize* to do');
+    CollisionUtil.prototype.initialize = function() {};
+
+    CollisionUtil.prototype.pprint = function() {
+      return _.each(this.models, function(pair) {
+        return Logger.dev("pair." + (pair.pprint()));
+      });
+    };
+
+    CollisionUtil.prototype.findPair = function(boxId) {
+      var aPair;
+      aPair = _.find(this.models, function(pair) {
+        return pair.boxId === boxId;
+      });
+      return aPair;
     };
 
     CollisionUtil.prototype.removeCollisionPair = function(boxA, boxB) {
       Logger.dev("removeCollisionPair: box" + (boxA.getTitleName()) + ", box" + (boxB.getTitleName()));
-      this.removeRelation(boxA, boxB);
-      if (!this.isRelationInclude(boxA)) {
+      this.updateCollisionRelationBetween({
+        action: 'remove',
+        boxAId: boxA.getTitleName(),
+        boxBId: boxB.getTitleName()
+      });
+      Logger.dev("@isCollisionInclude(boxA) " + (this.isCollisionInclude(boxA)) + "  isCollisionInclude(boxB) " + (this.isCollisionInclude(boxB)));
+      if (!this.isCollisionInclude(boxA)) {
         boxA.makeUnCollisionStatus();
       }
-      if (!this.isRelationInclude(boxB)) {
+      if (!this.isCollisionInclude(boxB)) {
         return boxB.makeUnCollisionStatus();
       }
     };
 
     CollisionUtil.prototype.addCollisionPair = function(boxA, boxB) {
       Logger.dev("addCollisionPair: box" + (boxA.getTitleName()) + ", box" + (boxB.getTitleName()));
-      this.addRelation(boxA, boxB);
+      this.updateCollisionRelationBetween({
+        action: 'add',
+        boxAId: boxA.getTitleName(),
+        boxBId: boxB.getTitleName()
+      });
       boxA.makeCollisionStatus();
       return boxB.makeCollisionStatus();
     };
 
-    CollisionUtil.prototype.isRelationInclude = function(boxA) {
-      var status;
-      status = false;
-      return status;
-    };
-
-    CollisionUtil.prototype.updateRelation = function(options) {
-      var box;
-      box = options.box;
+    CollisionUtil.prototype.updateCollisionRelationBetween = function(options) {
+      var boxAId, boxAPair, boxBId, boxBPair;
+      boxAId = options.boxAId;
+      boxBId = options.boxBId;
       if (options.action === 'add') {
-        return Logger.dev("CollisionUtil:\t add box");
+        boxAPair = this.findPair(boxAId);
+        boxBPair = this.findPair(boxBId);
+        if (boxAPair === void 0) {
+          boxAPair = new CollisionPair(boxAId);
+          this.add(boxAPair);
+        }
+        if (boxBPair === void 0) {
+          boxBPair = new CollisionPair(boxBId);
+          this.add(boxBPair);
+        }
+        Logger.dev("CollisionUtil:\t add box | box" + boxAPair.boxId + " |box" + boxBPair.boxId);
+        boxAPair.makeCollisionRelationWith(boxBId);
+        boxBPair.makeCollisionRelationWith(boxAId);
       } else if (options.action === 'remove') {
-        return Logger.dev("CollisionUtil:\t remove box");
+        boxAPair = this.findPair(boxAId);
+        boxBPair = this.findPair(boxBId);
+        if (boxAPair === void 0) {
+          boxAPair = new CollisionPair(boxAId);
+          this.add(boxAPair);
+        }
+        if (boxBPair === void 0) {
+          boxBPair = new CollisionPair(boxBId);
+          this.add(boxBPair);
+        }
+        Logger.dev("CollisionUtil:\t remove box | box" + boxAPair.boxId + " |box" + boxBPair.boxId);
+        boxAPair.makeUnCollisionRelationWith(boxBId);
+        boxBPair.makeUnCollisionRelationWith(boxAId);
       } else if (options.action === 'changeID') {
-        return Logger.dev("CollisionUtil:\t changeID box");
+        Logger.dev("CollisionUtil:\t changeID box");
       }
+      Logger.dev("boxAPair Relation: " + (boxAPair.pprint()));
+      return Logger.dev("boxBPair Relation: " + (boxBPair.pprint()));
     };
 
-    CollisionUtil.prototype.removeRelation = function(boxA, boxB) {
-      return Logger.dev("removeRelation: box" + (boxA.getTitleName()) + ", box" + (boxB.getTitleName()));
+    CollisionUtil.prototype.isCollisionInclude = function(boxA) {
+      var boxAId, result, status;
+      boxAId = boxA.getTitleName();
+      result = _.filter(this.models, function(pair) {
+        return pair.get('boxId') !== boxAId && pair.isCollisionWith(boxAId);
+      });
+      return status = result.length > 0;
     };
 
-    CollisionUtil.prototype.addRelation = function(boxA, boxB) {
-      return Logger.dev("addCollisionPair: box" + (boxA.getTitleName()) + ", box" + (boxB.getTitleName()));
-    };
-
-    CollisionUtil.prototype.testCollisionPair = function(boxA, boxB) {
+    CollisionUtil.prototype.testCollisionBetween = function(boxA, boxB) {
       var boxABottom, boxALeft, boxARight, boxATop, boxBBottom, boxBLeft, boxBRight, boxBTop, status;
       status = false;
       boxATop = boxA.getYPosition();
@@ -546,7 +671,7 @@
       if (!(boxABottom < boxBTop || boxATop > boxBBottom || boxALeft > boxBRight || boxARight < boxBLeft)) {
         status = true;
       }
-      Logger.dev("testCollisionPair: box" + (boxA.getTitleName()) + " box" + (boxB.getTitleName()) + " " + status);
+      Logger.dev("testCollisionBetween: box" + (boxA.getTitleName()) + " box" + (boxB.getTitleName()) + " " + status);
       if (status) {
         this.addCollisionPair(boxA, boxB);
       } else {

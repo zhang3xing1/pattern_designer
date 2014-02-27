@@ -4,17 +4,18 @@
 }
 
 #container {
-    margin-top: 80px;
+    margin-top: 5%;
+    /*margin: auto;*/
 }
 
 #canvas_container{
-  margin-left: 12%;
+  /*margin-left: 5%;*/
   padding-top: 10px;
   /*border: solid bisque;*/
 }
 
 #dashboard{
-    margin-left: -5%;
+    margin-left: -3%;
 }
 
 .label-info {

@@ -31,7 +31,7 @@ class @Logger
   instance = null
   statuses = ['info', 'debug', "dev"]
   # statuses = ['info']
-  statuses = ["dev"]
+  statuses = []
   class Horn
     info: (message) -> 
       'INFO:\t' + message
@@ -161,8 +161,8 @@ class @Boxes extends Backbone.Collection
   updateCollisionStatus:(options) ->
     @collisionUtil.updateRelation(options)
 
-  testCollisionPair: (boxA, boxB) ->
-    @collisionUtil.testCollisionPair(boxA, boxB)
+  testCollisionBetween: (boxA, boxB) ->
+    @collisionUtil.testCollisionBetween(boxA, boxB)
   addNewBox: =>
     newBox  = new Box
     newBox.setXPosition(newBox.getXPosition() + @availableNewBoxId * 4 )
@@ -171,13 +171,14 @@ class @Boxes extends Backbone.Collection
     newBox.set('boxId', @availableNewBoxId)
     newBox.box().on "click", =>
       Logger.debug "box#{newBox.getTitleName()} clicked!"
+      @flash =  "box#{newBox.getTitleName()} selected!"
       @updateCurrentBox(newBox)
 
     @add(newBox)
-    
     @updateCurrentBox(newBox)
     @availableNewBoxId += 1
 
+    @testCollision()
     Logger.debug("@availableNewBoxId:\t" + @availableNewBoxId)
   removeCurrentBox: =>
     if @length == 0
@@ -195,7 +196,7 @@ class @Boxes extends Backbone.Collection
     result =_.reduce(@models,
                     ((status, box) ->
                       if @currentBox.getTitleName() != box.getTitleName() && @currentBox.getTitleName() != 'nullID'
-                        @testCollisionPair(@currentBox, box) || status
+                        @testCollisionBetween(@currentBox, box) || status
                       else
                         status), 
                     false, this)
@@ -256,8 +257,6 @@ class @Boxes extends Backbone.Collection
                   status && @validateZoneX(point) && @validateZoneY(point)), 
                   true, this)
     Logger.debug("validresult:\t #{result}")
-    if result
-      @flash = ""
     result
   validateZoneX: (point) ->
     Logger.debug("validateZoneX: point.x #{point.x}, @zone.x #{@zone.x}")
@@ -268,67 +267,152 @@ class @Boxes extends Backbone.Collection
 
 
 class CollisionPair extends Backbone.Model
-  ## class CollisionRelation ##
-  class CollisionRelation extends Backbone.Model
+  ## attributes:
+  ##  boxId
+  ##  RelationCollection
+  ##
+  ## Like:
+  ## {boxId :  1, relations: [{boxId : 2, status : false}, {boxId : 3, status : true}]}
+
+  ## class RelationCollection ##
+  class Relation extends Backbone.Model
     defaults: {
       status: false
     }
-    initialize:(options) ->
-      # options{boxId: aBoxId}
-      @set boxId: options.boxId
-  ###########################
+    initialize: (boxId) ->
+      @set boxId: boxId
+    pprint: () ->
+      "#{@get('boxId')} #{@get('status')}"
+  class RelationCollection extends Backbone.Collection
+    model: Relation
+    # attr: boxId
+    pprint: () ->
+      _.reduce @models, ((str, aRelation) ->
+        "#{str} | #{aRelation.pprint()}"), ""
+    findRelationWith:(boxId) ->
+      aRelation = _.find @models, (aRelation) ->
+          aRelation.get('boxId') == boxId
+      if aRelation == undefined
+        aRelation = new Relation(boxId)
+        @add(aRelation)
+      aRelation
+  ##############################
+  initialize:(boxId) ->
+    @boxId = boxId
+  findRelationWith:(boxId) ->
+    @get('relations').findRelationWith(boxId)
+  pprint:() ->
+      "box#{@boxId} #{@get('relations').pprint()}"
 
-  initialize: (options)->
-    # options{boxId: aBoxId}
-    @set boxId: options.boxId
-    @set relationCollection: new CollisionRelation
+  isRelationEmpty: ->
+    (@get('relations') == undefined)
+    
+  isCollisionWith: (boxId) ->
+    if @isRelationEmpty()
+      @makeUnCollisionRelationWith(boxId) 
+    @findRelationWith(boxId).get('status') 
 
+  makeCollisionRelationWith:(boxId) ->
+    if @get('boxId') == boxId
+      return
+    if @isRelationEmpty()
+      @set relations: new RelationCollection
+      relations = @get('relations')
+      relations.add(new Relation(boxId)) 
+    else
+      relations = @get('relations')
+      relations.findRelationWith(boxId).set('status', true) 
+    return
+  makeUnCollisionRelationWith:(boxId) ->
+    if @get('boxId') == boxId
+      return
+    if @isRelationEmpty()
+      @set relations: new RelationCollection
+      relations = @get('relations')
+      relations.add(new Relation(boxId))      
+    else
+      relations = @get('relations')
+      relations.findRelationWith(boxId).set('status', false) 
+    return    
 
 class CollisionUtil extends Backbone.Collection
   model: CollisionPair
-  initialize: (options) ->
-    console.log('*CollisionUtil initialize* to do')
 
+  initialize: ->
+    # @on("change", @pprint)
 
+  pprint: () ->
+    _.each(@models, (pair) ->
+      Logger.dev "pair.#{pair.pprint()}")
+  findPair:(boxId) ->
+    aPair = _.find @models, (pair) ->
+          pair.boxId == boxId
+    # if aPair == undefined
+    #   aPair = new CollisionPair(boxId: boxId)
+    #   @add(aPair)
+    aPair
   removeCollisionPair:(boxA, boxB) ->
     Logger.dev("removeCollisionPair: box#{boxA.getTitleName()}, box#{boxB.getTitleName()}")
-    @removeRelation(boxA, boxB)
-    unless @isRelationInclude(boxA)
+    @updateCollisionRelationBetween(action: 'remove', boxAId: boxA.getTitleName(), boxBId: boxB.getTitleName())
+    Logger.dev("@isCollisionInclude(boxA) #{@isCollisionInclude(boxA)}  isCollisionInclude(boxB) #{ @isCollisionInclude(boxB)}")
+    unless @isCollisionInclude(boxA)
       boxA.makeUnCollisionStatus()
-    unless @isRelationInclude(boxB)
+    unless @isCollisionInclude(boxB)
       boxB.makeUnCollisionStatus()
 
   addCollisionPair:(boxA, boxB) ->
     Logger.dev("addCollisionPair: box#{boxA.getTitleName()}, box#{boxB.getTitleName()}")
-    @addRelation(boxA, boxB)
+    @updateCollisionRelationBetween(action: 'add', boxAId: boxA.getTitleName(), boxBId: boxB.getTitleName())
     boxA.makeCollisionStatus()
     boxB.makeCollisionStatus()
 
-  isRelationInclude:(boxA) ->
-    status = false
-    # 
-    status
-
-  updateRelation:(options) ->
-  #options
-  #action: add, box: box
-  #action: remove, box: box
-  #action: changeID, box: box
-    box = options.box
+  updateCollisionRelationBetween:(options) ->
+  ##options
+  ##action: add,         boxAId: boxA, boxBId: boxB, collisionStatus: status
+  ##action: remove,      boxAId: boxA, boxBId: boxB, collisionStatus: status
+  ##action: changeID,    boxAId: boxA, boxBId: boxB
+    boxAId = options.boxAId
+    boxBId = options.boxBId
     if options.action == 'add'
-      Logger.dev("CollisionUtil:\t add box")
+      boxAPair = @findPair(boxAId)
+      boxBPair = @findPair(boxBId)
+      if boxAPair == undefined
+        boxAPair = new CollisionPair(boxAId)
+        @add(boxAPair)
+      if boxBPair == undefined
+        boxBPair = new CollisionPair(boxBId)
+        @add(boxBPair)
+      Logger.dev("CollisionUtil:\t add box | box#{boxAPair.boxId} |box#{boxBPair.boxId}")
+      boxAPair.makeCollisionRelationWith(boxBId)
+      boxBPair.makeCollisionRelationWith(boxAId)
+
     else if options.action == 'remove'
-      Logger.dev("CollisionUtil:\t remove box")
+      boxAPair = @findPair(boxAId)
+      boxBPair = @findPair(boxBId)
+      if boxAPair == undefined
+        boxAPair = new CollisionPair(boxAId)
+        @add(boxAPair)
+      if boxBPair == undefined
+        boxBPair = new CollisionPair(boxBId)
+        @add(boxBPair)
+      Logger.dev("CollisionUtil:\t remove box | box#{boxAPair.boxId} |box#{boxBPair.boxId}")
+      boxAPair.makeUnCollisionRelationWith(boxBId)
+      boxBPair.makeUnCollisionRelationWith(boxAId)
+
     else if options.action == 'changeID'
       Logger.dev("CollisionUtil:\t changeID box")
 
-  removeRelation: (boxA, boxB) ->
-    Logger.dev("removeRelation: box#{boxA.getTitleName()}, box#{boxB.getTitleName()}")
-  addRelation: (boxA, boxB) ->
+    Logger.dev("boxAPair Relation: #{boxAPair.pprint()}")
+    Logger.dev("boxBPair Relation: #{boxBPair.pprint()}")
+  isCollisionInclude:(boxA) ->
+    boxAId = boxA.getTitleName()
+    result= _.filter @models, (pair) ->
+        pair.get('boxId') != boxAId && pair.isCollisionWith(boxAId)
+    status  = (result.length > 0)
 
-    Logger.dev("addCollisionPair: box#{boxA.getTitleName()}, box#{boxB.getTitleName()}")
+
   ######## public api ########
-  testCollisionPair:(boxA,boxB) ->
+  testCollisionBetween:(boxA,boxB) ->
     status  =     false
     boxATop =     boxA.getYPosition()
     boxABottom =  boxA.getYPosition() + boxA.getHeight()
@@ -339,13 +423,12 @@ class CollisionUtil extends Backbone.Collection
     boxBLeft   =  boxB.getXPosition()
     boxBRight  =  boxB.getXPosition() + boxB.getWidth()
     status = true  unless boxABottom < boxBTop or boxATop > boxBBottom or boxALeft > boxBRight or boxARight < boxBLeft
-    Logger.dev("testCollisionPair: box#{boxA.getTitleName()} box#{boxB.getTitleName()} #{status}")
+    Logger.dev("testCollisionBetween: box#{boxA.getTitleName()} box#{boxB.getTitleName()} #{status}")
     if status
       @addCollisionPair(boxA, boxB)
     else
       @removeCollisionPair(boxA, boxB)
     status
-
 
 class @StackBoard
   constructor: ->
