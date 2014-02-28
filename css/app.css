@@ -39,8 +39,11 @@
     color: greenyellow;
 }
 
-input {
-  readonly: true
+
+
+#offsetSlider {
+  margin-top: 5%;
+  width: 120px;
 }
 /*body {
         margin:   28px;
@@ -137,4 +140,4 @@ button {
 }
 .direction{
   display:none;
-}*/
+}

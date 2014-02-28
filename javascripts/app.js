@@ -6,19 +6,15 @@
 
   rivets.adapters[":"] = {
     subscribe: function(obj, keypath, callback) {
-      console.log("1.subscribe:\t " + obj + " ||\t " + keypath);
       obj.on("change:" + keypath, callback);
     },
     unsubscribe: function(obj, keypath, callback) {
-      console.log("2.unsubscribe:\t " + obj + " ||\t " + keypath);
       obj.off("change:" + keypath, callback);
     },
     read: function(obj, keypath) {
-      console.log("3.read:\t\t\t " + obj + " ||\t " + keypath);
       return obj.get(keypath);
     },
     publish: function(obj, keypath, value) {
-      console.log("4.publish:\t\t " + obj + " ||\t " + keypath);
       obj.set(keypath, value);
     }
   };
@@ -128,6 +124,17 @@
       this.get('group').add(this.get('rect'));
       this.get('group').add(this.get('title'));
       return Logger.debug('Box: Generate a new box.');
+    };
+
+    Box.prototype.getMoveOffset = function() {
+      var offset;
+      offset = Number($("#ex8").val()) % 99;
+      if (offset % 99 > 0) {
+        this.set('moveOffset', offset % 99);
+        return offset % 99;
+      } else {
+        return 4;
+      }
     };
 
     Box.prototype.setTitleName = function(newTitle) {
@@ -291,8 +298,8 @@
     Boxes.prototype.addNewBox = function() {
       var newBox;
       newBox = new Box;
-      newBox.setXPosition(newBox.getXPosition() + this.availableNewBoxId * Number(this.currentBox.get('moveOffset')));
-      newBox.setYPosition(newBox.getYPosition() + this.availableNewBoxId * Number(this.currentBox.get('moveOffset')));
+      newBox.setXPosition(newBox.getXPosition() + this.availableNewBoxId * newBox.getMoveOffset());
+      newBox.setYPosition(newBox.getYPosition() + this.availableNewBoxId * newBox.getMoveOffset());
       newBox.setTitleName(this.availableNewBoxId);
       newBox.set('boxId', this.availableNewBoxId);
       newBox.box().on("click", (function(_this) {
@@ -383,7 +390,7 @@
 
     Boxes.prototype.up = function() {
       Logger.debug("@currentBox:\t" + this.currentBox.getTitleName());
-      this.currentBox.setYPosition(this.currentBox.getYPosition() - Number(this.currentBox.get('moveOffset')));
+      this.currentBox.setYPosition(this.currentBox.getYPosition() - this.currentBox.getMoveOffset());
       if (!this.validateZone(this.currentBox)) {
         this.currentBox.setYPosition(0);
         this.flash = "Box" + (this.currentBox.getTitleName()) + " cannot be moved UP!";
@@ -396,7 +403,7 @@
 
     Boxes.prototype.down = function() {
       Logger.debug("@currentBox:\t" + this.currentBox.getTitleName());
-      this.currentBox.setYPosition(this.currentBox.getYPosition() + Number(this.currentBox.get('moveOffset')));
+      this.currentBox.setYPosition(this.currentBox.getYPosition() + this.currentBox.getMoveOffset());
       if (!this.validateZone(this.currentBox)) {
         this.currentBox.setYPosition(this.zone.y - this.currentBox.getHeight());
         this.flash = "Box" + (this.currentBox.getTitleName()) + " cannot be moved DOWN!";
@@ -409,7 +416,7 @@
 
     Boxes.prototype.left = function() {
       Logger.debug("@currentBox:\t" + this.currentBox.getTitleName());
-      this.currentBox.setXPosition(this.currentBox.getXPosition() - Number(this.currentBox.get('moveOffset')));
+      this.currentBox.setXPosition(this.currentBox.getXPosition() - this.currentBox.getMoveOffset());
       if (!this.validateZone(this.currentBox)) {
         this.currentBox.setXPosition(0);
         this.flash = "Box" + (this.currentBox.getTitleName()) + " cannot be moved LEFT!";
@@ -423,7 +430,7 @@
     Boxes.prototype.right = function() {
       Logger.debug("@currentBox:\t" + this.currentBox.getTitleName());
       Logger.debug("@currentBox:\t" + this.currentBox.getXPosition());
-      this.currentBox.setXPosition(this.currentBox.getXPosition() + Number(this.currentBox.get('moveOffset')));
+      this.currentBox.setXPosition(this.currentBox.getXPosition() + this.currentBox.getMoveOffset());
       if (!this.validateZone(this.currentBox)) {
         this.currentBox.setXPosition(this.zone.x - this.currentBox.getWidth());
         this.flash = "Box" + (this.currentBox.getTitleName()) + " cannot be moved RIGHT!";
@@ -800,6 +807,12 @@
   $("input").prop("readonly", true);
 
   $(".offset").prop("readonly", false);
+
+  $("#ex8").slider();
+
+  $("#ex8").on("slideStop", function(slideEvt) {
+    $("#box-move-offset").val($("#ex8").val());
+  });
 
 }).call(this);
 

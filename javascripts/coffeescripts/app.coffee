@@ -2,17 +2,17 @@
 ###### rivets adapter configure, below ######
 rivets.adapters[":"] =
   subscribe: (obj, keypath, callback) ->
-    console.log("1.subscribe:\t #{obj} ||\t #{keypath}")
+    # console.log("1.subscribe:\t #{obj} ||\t #{keypath}")
     obj.on "change:" + keypath, callback
     return
 
   unsubscribe: (obj, keypath, callback) ->
-    console.log("2.unsubscribe:\t #{obj} ||\t #{keypath}")
+    # console.log("2.unsubscribe:\t #{obj} ||\t #{keypath}")
     obj.off "change:" + keypath, callback
     return
 
   read: (obj, keypath) ->
-    console.log("3.read:\t\t\t #{obj} ||\t #{keypath}")
+    # console.log("3.read:\t\t\t #{obj} ||\t #{keypath}")
     # if((obj.get keypath) == undefined)
     #   console.log("3.read:++ #{obj[keypath]()} \t #{(obj.get keypath)}")
     #   obj[keypath]()
@@ -21,7 +21,7 @@ rivets.adapters[":"] =
     obj.get keypath
 
   publish: (obj, keypath, value) ->
-    console.log("4.publish:\t\t #{obj} ||\t #{keypath}")
+    # console.log("4.publish:\t\t #{obj} ||\t #{keypath}")
     obj.set keypath, value
     return
 
@@ -86,6 +86,13 @@ class @Box extends Backbone.Model
     @get('group').add(@get('title'))
     Logger.debug('Box: Generate a new box.')
 
+  getMoveOffset: () ->
+    offset = Number($("#ex8").val()) % 99
+    if offset % 99 > 0
+      @set('moveOffset', offset % 99)
+      offset % 99
+    else
+      4
   setTitleName: (newTitle) ->
     @get('title').setText(newTitle) 
   getTitleName: () ->
@@ -174,8 +181,8 @@ class @Boxes extends Backbone.Collection
     @collisionUtil.testCollisionBetween(boxA, boxB)
   addNewBox: =>
     newBox  = new Box
-    newBox.setXPosition(newBox.getXPosition() + @availableNewBoxId * Number(@currentBox.get('moveOffset')) )
-    newBox.setYPosition(newBox.getYPosition() + @availableNewBoxId * Number(@currentBox.get('moveOffset')) )
+    newBox.setXPosition(newBox.getXPosition() + @availableNewBoxId * newBox.getMoveOffset())
+    newBox.setYPosition(newBox.getYPosition() + @availableNewBoxId * newBox.getMoveOffset())
     newBox.setTitleName(@availableNewBoxId)
     newBox.set('boxId', @availableNewBoxId)
     newBox.box().on "click", =>
@@ -243,7 +250,7 @@ class @Boxes extends Backbone.Collection
       $('.panel').css('display','block')
   up: () =>
     Logger.debug("@currentBox:\t" + @currentBox.getTitleName())
-    @currentBox.setYPosition(@currentBox.getYPosition() - Number(@currentBox.get('moveOffset')))
+    @currentBox.setYPosition(@currentBox.getYPosition() - @currentBox.getMoveOffset())
     unless @validateZone(@currentBox)
       @currentBox.setYPosition(0)
       @flash = "Box#{@currentBox.getTitleName()} cannot be moved UP!"
@@ -253,7 +260,7 @@ class @Boxes extends Backbone.Collection
     @updateCurrentBox()
   down: () =>
     Logger.debug("@currentBox:\t" + @currentBox.getTitleName())
-    @currentBox.setYPosition(@currentBox.getYPosition() + Number(@currentBox.get('moveOffset')))
+    @currentBox.setYPosition(@currentBox.getYPosition() + @currentBox.getMoveOffset())
     unless @validateZone(@currentBox)
       @currentBox.setYPosition(@zone.y - @currentBox.getHeight())
       @flash = "Box#{@currentBox.getTitleName()} cannot be moved DOWN!"
@@ -263,7 +270,7 @@ class @Boxes extends Backbone.Collection
     @updateCurrentBox()
   left: () =>
     Logger.debug("@currentBox:\t" + @currentBox.getTitleName())
-    @currentBox.setXPosition(@currentBox.getXPosition() - Number(@currentBox.get('moveOffset')))
+    @currentBox.setXPosition(@currentBox.getXPosition() - @currentBox.getMoveOffset())
     unless @validateZone(@currentBox)
       @currentBox.setXPosition(0)
       @flash = "Box#{@currentBox.getTitleName()} cannot be moved LEFT!"
@@ -274,7 +281,7 @@ class @Boxes extends Backbone.Collection
   right: () =>
     Logger.debug("@currentBox:\t" + @currentBox.getTitleName())
     Logger.debug("@currentBox:\t" + @currentBox.getXPosition())
-    @currentBox.setXPosition(@currentBox.getXPosition() + Number(@currentBox.get('moveOffset')))
+    @currentBox.setXPosition(@currentBox.getXPosition() + @currentBox.getMoveOffset())
     unless @validateZone(@currentBox)
       @currentBox.setXPosition(@zone.x - @currentBox.getWidth())
       @flash = "Box#{@currentBox.getTitleName()} cannot be moved RIGHT!"
@@ -522,6 +529,13 @@ rivets.formatters.offset = (value) ->
 
 $("input").prop "readonly", true
 $(".offset").prop "readonly", false
+
+$("#ex8").slider()
+
+$("#ex8").on "slideStop", (slideEvt) ->
+  $("#box-move-offset").val($("#ex8").val())
+  return
+
 
 ########  TEST  #########
 
