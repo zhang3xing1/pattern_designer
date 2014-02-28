@@ -9,13 +9,15 @@
 }
 
 #canvas_container{
+  width: 400px;
   /*margin-left: 5%;*/
-  padding-top: 10px;
-  /*border: solid bisque;*/
+  padding-top: 1%;
+  /*border: solid bisque;*/ 
 }
 
 #dashboard{
-    margin-left: -3%;
+  width: 400px;
+    margin-left: -5%;
 }
 
 .label-info {

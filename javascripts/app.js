@@ -93,7 +93,8 @@
 
     Box.prototype.defaults = {
       boxId: 'nullID',
-      collisionStatus: false
+      collisionStatus: false,
+      moveOffset: 4
     };
 
     Box.prototype.initialize = function() {
@@ -102,8 +103,8 @@
         rect: new Kinetic.Rect({
           x: 0,
           y: 0,
-          width: 100,
-          height: 50,
+          width: 80,
+          height: 40,
           fill: 'green'
         })
       });
@@ -119,8 +120,8 @@
       });
       this.set({
         group: new Kinetic.Group({
-          x: 4,
-          y: 8,
+          x: 6,
+          y: 6,
           rotation: 0
         })
       });
@@ -290,8 +291,8 @@
     Boxes.prototype.addNewBox = function() {
       var newBox;
       newBox = new Box;
-      newBox.setXPosition(newBox.getXPosition() + this.availableNewBoxId * 4);
-      newBox.setYPosition(newBox.getYPosition() + this.availableNewBoxId * 4);
+      newBox.setXPosition(newBox.getXPosition() + this.availableNewBoxId * Number(this.currentBox.get('moveOffset')));
+      newBox.setYPosition(newBox.getYPosition() + this.availableNewBoxId * Number(this.currentBox.get('moveOffset')));
       newBox.setTitleName(this.availableNewBoxId);
       newBox.set('boxId', this.availableNewBoxId);
       newBox.box().on("click", (function(_this) {
@@ -303,6 +304,7 @@
       })(this));
       this.add(newBox);
       this.updateCurrentBox(newBox);
+      this.flash = "box" + (this.currentBox.getTitleName()) + " selected!";
       this.availableNewBoxId += 1;
       return this.testCollision();
     };
@@ -323,6 +325,7 @@
       }
       this.draw();
       this.showCurrentBoxPanel();
+      this.flash = "box" + (this.currentBox.getTitleName()) + " selected!";
       return Logger.dev("remove button clicked!");
     };
 
@@ -380,10 +383,12 @@
 
     Boxes.prototype.up = function() {
       Logger.debug("@currentBox:\t" + this.currentBox.getTitleName());
-      this.currentBox.setYPosition(this.currentBox.getYPosition() - 4);
+      this.currentBox.setYPosition(this.currentBox.getYPosition() - Number(this.currentBox.get('moveOffset')));
       if (!this.validateZone(this.currentBox)) {
-        this.currentBox.setYPosition(this.currentBox.getYPosition() + 4);
+        this.currentBox.setYPosition(0);
         this.flash = "Box" + (this.currentBox.getTitleName()) + " cannot be moved UP!";
+      } else {
+        this.flash = "box" + (this.currentBox.getTitleName()) + " selected!";
       }
       this.testCollision();
       return this.updateCurrentBox();
@@ -391,10 +396,12 @@
 
     Boxes.prototype.down = function() {
       Logger.debug("@currentBox:\t" + this.currentBox.getTitleName());
-      this.currentBox.setYPosition(this.currentBox.getYPosition() + 4);
+      this.currentBox.setYPosition(this.currentBox.getYPosition() + Number(this.currentBox.get('moveOffset')));
       if (!this.validateZone(this.currentBox)) {
-        this.currentBox.setYPosition(this.currentBox.getYPosition() - 4);
+        this.currentBox.setYPosition(this.zone.y - this.currentBox.getHeight());
         this.flash = "Box" + (this.currentBox.getTitleName()) + " cannot be moved DOWN!";
+      } else {
+        this.flash = "box" + (this.currentBox.getTitleName()) + " selected!";
       }
       this.testCollision();
       return this.updateCurrentBox();
@@ -402,10 +409,12 @@
 
     Boxes.prototype.left = function() {
       Logger.debug("@currentBox:\t" + this.currentBox.getTitleName());
-      this.currentBox.setXPosition(this.currentBox.getXPosition() - 4);
+      this.currentBox.setXPosition(this.currentBox.getXPosition() - Number(this.currentBox.get('moveOffset')));
       if (!this.validateZone(this.currentBox)) {
-        this.currentBox.setXPosition(this.currentBox.getXPosition() + 4);
+        this.currentBox.setXPosition(0);
         this.flash = "Box" + (this.currentBox.getTitleName()) + " cannot be moved LEFT!";
+      } else {
+        this.flash = "box" + (this.currentBox.getTitleName()) + " selected!";
       }
       this.testCollision();
       return this.updateCurrentBox();
@@ -414,10 +423,12 @@
     Boxes.prototype.right = function() {
       Logger.debug("@currentBox:\t" + this.currentBox.getTitleName());
       Logger.debug("@currentBox:\t" + this.currentBox.getXPosition());
-      this.currentBox.setXPosition(this.currentBox.getXPosition() + 4);
+      this.currentBox.setXPosition(this.currentBox.getXPosition() + Number(this.currentBox.get('moveOffset')));
       if (!this.validateZone(this.currentBox)) {
-        this.currentBox.setXPosition(this.currentBox.getXPosition() - 4);
+        this.currentBox.setXPosition(this.zone.x - this.currentBox.getWidth());
         this.flash = "Box" + (this.currentBox.getTitleName()) + " cannot be moved RIGHT!";
+      } else {
+        this.flash = "box" + (this.currentBox.getTitleName()) + " selected!";
       }
       this.testCollision();
       return this.updateCurrentBox();
@@ -782,7 +793,13 @@
 
   this.board = new StackBoard;
 
+  rivets.formatters.offset = function(value) {
+    return value = value % 99;
+  };
+
   $("input").prop("readonly", true);
+
+  $(".offset").prop("readonly", false);
 
 }).call(this);
 

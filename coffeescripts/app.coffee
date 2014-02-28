@@ -56,6 +56,7 @@ class @Box extends Backbone.Model
   defaults: {
     boxId:            'nullID'
     collisionStatus:  false
+    moveOffset:       4
   }
   initialize: ->
     @on('change:rect', @rectChanged)
@@ -63,8 +64,8 @@ class @Box extends Backbone.Model
     @set rect: new Kinetic.Rect(
                                   x:            0
                                   y:            0
-                                  width:        100
-                                  height:       50
+                                  width:        80
+                                  height:       40
                                   fill:         'green'
                                   # stroke:      'blue'
                                 )
@@ -77,17 +78,13 @@ class @Box extends Backbone.Model
                                   text:         @get('boxId')
                                 )
     @set group: new Kinetic.Group(
-                                  x: 4
-                                  y: 8
+                                  x: 6
+                                  y: 6
                                   rotation: 0
                                 )
     @get('group').add(@get('rect'))
     @get('group').add(@get('title'))
     Logger.debug('Box: Generate a new box.')
-
-    # @box().on "dblclick", =>
-    #   @box().rotation(90)
-    #   Logger.debug "@box().rotation(90)"
 
   setTitleName: (newTitle) ->
     @get('title').setText(newTitle) 
@@ -177,8 +174,8 @@ class @Boxes extends Backbone.Collection
     @collisionUtil.testCollisionBetween(boxA, boxB)
   addNewBox: =>
     newBox  = new Box
-    newBox.setXPosition(newBox.getXPosition() + @availableNewBoxId * 4 )
-    newBox.setYPosition(newBox.getYPosition() + @availableNewBoxId * 4 )
+    newBox.setXPosition(newBox.getXPosition() + @availableNewBoxId * Number(@currentBox.get('moveOffset')) )
+    newBox.setYPosition(newBox.getYPosition() + @availableNewBoxId * Number(@currentBox.get('moveOffset')) )
     newBox.setTitleName(@availableNewBoxId)
     newBox.set('boxId', @availableNewBoxId)
     newBox.box().on "click", =>
@@ -188,6 +185,7 @@ class @Boxes extends Backbone.Collection
 
     @add(newBox)
     @updateCurrentBox(newBox)
+    @flash =  "box#{@currentBox.getTitleName()} selected!"
     @availableNewBoxId += 1
 
     @testCollision()
@@ -205,6 +203,7 @@ class @Boxes extends Backbone.Collection
         @currentBox = @last()
     @draw()
     @showCurrentBoxPanel()
+    @flash =  "box#{@currentBox.getTitleName()} selected!"
     Logger.dev("remove button clicked!")
   testCollision:()->
     Logger.debug("...Collision start...")
@@ -244,35 +243,43 @@ class @Boxes extends Backbone.Collection
       $('.panel').css('display','block')
   up: () =>
     Logger.debug("@currentBox:\t" + @currentBox.getTitleName())
-    @currentBox.setYPosition(@currentBox.getYPosition() - 4)
+    @currentBox.setYPosition(@currentBox.getYPosition() - Number(@currentBox.get('moveOffset')))
     unless @validateZone(@currentBox)
-      @currentBox.setYPosition(@currentBox.getYPosition() + 4)
+      @currentBox.setYPosition(0)
       @flash = "Box#{@currentBox.getTitleName()} cannot be moved UP!"
+    else
+      @flash =  "box#{@currentBox.getTitleName()} selected!"
     @testCollision()
     @updateCurrentBox()
   down: () =>
     Logger.debug("@currentBox:\t" + @currentBox.getTitleName())
-    @currentBox.setYPosition(@currentBox.getYPosition() + 4)
+    @currentBox.setYPosition(@currentBox.getYPosition() + Number(@currentBox.get('moveOffset')))
     unless @validateZone(@currentBox)
-      @currentBox.setYPosition(@currentBox.getYPosition() - 4)
+      @currentBox.setYPosition(@zone.y - @currentBox.getHeight())
       @flash = "Box#{@currentBox.getTitleName()} cannot be moved DOWN!"
+    else
+      @flash =  "box#{@currentBox.getTitleName()} selected!"
     @testCollision()
     @updateCurrentBox()
   left: () =>
     Logger.debug("@currentBox:\t" + @currentBox.getTitleName())
-    @currentBox.setXPosition(@currentBox.getXPosition() - 4)
+    @currentBox.setXPosition(@currentBox.getXPosition() - Number(@currentBox.get('moveOffset')))
     unless @validateZone(@currentBox)
-      @currentBox.setXPosition(@currentBox.getXPosition() + 4)
+      @currentBox.setXPosition(0)
       @flash = "Box#{@currentBox.getTitleName()} cannot be moved LEFT!"
+    else
+      @flash =  "box#{@currentBox.getTitleName()} selected!"
     @testCollision()
     @updateCurrentBox()
   right: () =>
     Logger.debug("@currentBox:\t" + @currentBox.getTitleName())
     Logger.debug("@currentBox:\t" + @currentBox.getXPosition())
-    @currentBox.setXPosition(@currentBox.getXPosition() + 4)
+    @currentBox.setXPosition(@currentBox.getXPosition() + Number(@currentBox.get('moveOffset')))
     unless @validateZone(@currentBox)
-      @currentBox.setXPosition(@currentBox.getXPosition() - 4)
+      @currentBox.setXPosition(@zone.x - @currentBox.getWidth())
       @flash = "Box#{@currentBox.getTitleName()} cannot be moved RIGHT!"
+    else
+      @flash =  "box#{@currentBox.getTitleName()} selected!"
     @testCollision()
     @updateCurrentBox()
   validateZone: (box) ->
@@ -510,7 +517,11 @@ class @StackBoard
     rivets.bind $('.boxes'),{boxes: @boxes}
 @board = new StackBoard
 
+rivets.formatters.offset = (value) ->
+   value = value % 99 
+
 $("input").prop "readonly", true
+$(".offset").prop "readonly", false
 
 ########  TEST  #########
 
