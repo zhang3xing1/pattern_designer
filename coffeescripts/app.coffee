@@ -67,7 +67,8 @@ class @Box extends Backbone.Model
                                   width:        80
                                   height:       40
                                   fill:         'green'
-                                  # stroke:      'blue'
+                                  stroke:       'black'
+                                  strokeWidth:  2
                                 )
     @set title: new Kinetic.Text(
                                   x:            @get('rect').x() + @get('rect').width()/2  - 5
@@ -176,13 +177,12 @@ class @Boxes extends Backbone.Collection
   deleteCollisionWith:(box = @currentBox) ->
     @collisionUtil.deleteCollisionWith(box, @models)
 
-
   testCollisionBetween: (boxA, boxB) ->
     @collisionUtil.testCollisionBetween(boxA, boxB)
   addNewBox: =>
     newBox  = new Box
-    newBox.setXPosition(newBox.getXPosition() + @availableNewBoxId * newBox.getMoveOffset())
-    newBox.setYPosition(newBox.getYPosition() + @availableNewBoxId * newBox.getMoveOffset())
+    newBox.setXPosition(Math.min(newBox.getXPosition() + @availableNewBoxId * newBox.getMoveOffset(), @zone.x - newBox.getWidth() ))
+    newBox.setYPosition(Math.min(newBox.getYPosition() + @availableNewBoxId * newBox.getMoveOffset(), @zone.y - newBox.getHeight()))
     newBox.setTitleName(@availableNewBoxId)
     newBox.set('boxId', @availableNewBoxId)
     newBox.box().on "click", =>
@@ -532,7 +532,7 @@ $(".offset").prop "readonly", false
 
 $("#ex8").slider()
 
-$("#ex8").on "slideStop", (slideEvt) ->
+$("#ex8").on "slide", (slideEvt) ->
   $("#box-move-offset").val($("#ex8").val())
   return
 

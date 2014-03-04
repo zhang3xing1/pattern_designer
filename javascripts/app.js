@@ -101,7 +101,9 @@
           y: 0,
           width: 80,
           height: 40,
-          fill: 'green'
+          fill: 'green',
+          stroke: 'black',
+          strokeWidth: 2
         })
       });
       this.set({
@@ -298,8 +300,8 @@
     Boxes.prototype.addNewBox = function() {
       var newBox;
       newBox = new Box;
-      newBox.setXPosition(newBox.getXPosition() + this.availableNewBoxId * newBox.getMoveOffset());
-      newBox.setYPosition(newBox.getYPosition() + this.availableNewBoxId * newBox.getMoveOffset());
+      newBox.setXPosition(Math.min(newBox.getXPosition() + this.availableNewBoxId * newBox.getMoveOffset(), this.zone.x - newBox.getWidth()));
+      newBox.setYPosition(Math.min(newBox.getYPosition() + this.availableNewBoxId * newBox.getMoveOffset(), this.zone.y - newBox.getHeight()));
       newBox.setTitleName(this.availableNewBoxId);
       newBox.set('boxId', this.availableNewBoxId);
       newBox.box().on("click", (function(_this) {
@@ -810,7 +812,7 @@
 
   $("#ex8").slider();
 
-  $("#ex8").on("slideStop", function(slideEvt) {
+  $("#ex8").on("slide", function(slideEvt) {
     $("#box-move-offset").val($("#ex8").val());
   });
 

@@ -9,8 +9,12 @@ end
 
 guard 'coffeescript', :output => 'javascripts', :source_map => true do
   watch(/^coffeescripts\/(.*)\.coffee/)
-  callback(:run_on_modifications_end) { puts '-'*100; 
-  FileUtils.cp_r('coffeescripts', 'javascripts')
+  callback(:run_on_modifications_end) { 
+  	puts '-'*100; 
+  	FileUtils.cp_r('coffeescripts', 'javascripts')
+  	FileUtils.cp_r('javascripts', 'product/')
+    FileUtils.cp_r('css', 'product/')
+    FileUtils.cp('index.html', 'product')
   }
   callback(:reload_end) { puts '+'*1000}
 end
