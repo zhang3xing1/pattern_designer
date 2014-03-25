@@ -109,11 +109,12 @@
       this.set({
         title: new Kinetic.Text({
           x: this.get('rect').x() + this.get('rect').width() / 2 - 5,
-          y: this.get('rect').y() + this.get('rect').height() / 2 - 5,
+          y: this.get('rect').y() + this.get('rect').height() / 2 + 5,
           fontSize: 14,
           fontFamily: "Calibri",
           fill: "white",
-          text: this.get('boxId')
+          text: this.get('boxId'),
+          scaleY: -1
         })
       });
       this.set({
@@ -785,8 +786,10 @@
         fillGreen: 228,
         fillBlue: 196
       });
-      this.layer.add(stage_bg);
       this.stage.add(this.layer);
+      this.layer.add(stage_bg);
+      this.layer.getContext().translate(10, this.zone.y);
+      this.layer.getContext().scale(1, -1);
       Logger.debug("StackBoard: Stage Initialized!");
       Logger.info("StackBoard: Initialized!");
       this.boxes = new Boxes(this.layer, this.zone);

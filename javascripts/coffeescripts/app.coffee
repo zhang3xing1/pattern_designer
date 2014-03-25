@@ -72,11 +72,12 @@ class @Box extends Backbone.Model
                                 )
     @set title: new Kinetic.Text(
                                   x:            @get('rect').x() + @get('rect').width()/2  - 5
-                                  y:            @get('rect').y() + @get('rect').height()/2 - 5
+                                  y:            @get('rect').y() + @get('rect').height()/2 + 5
                                   fontSize:     14
                                   fontFamily:   "Calibri"
                                   fill:         "white"
                                   text:         @get('boxId')
+                                  scaleY:       -1
                                 )
     @set group: new Kinetic.Group(
                                   x: 6
@@ -235,6 +236,8 @@ class @Boxes extends Backbone.Collection
       box.changeFillColor()
       @layer.add(box.box())
     @layer.draw()
+    
+
 
   updateCurrentBox: (newBox = @currentBox) ->
     @currentBox = newBox
@@ -515,8 +518,13 @@ class @StackBoard
         fillGreen:    228
         fillBlue:     196
       )
-    @layer.add stage_bg
+
     @stage.add @layer
+    @layer.add stage_bg
+    @layer.getContext().translate(10, @zone.y)
+
+    @layer.getContext().scale(1, -1);
+    # context.transform(1, 0, 0, 1, tx, ty);
     Logger.debug("StackBoard: Stage Initialized!")
     Logger.info("StackBoard: Initialized!")
     @boxes = new Boxes(@layer,@zone)
