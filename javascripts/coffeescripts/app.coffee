@@ -182,8 +182,8 @@ class @Boxes extends Backbone.Collection
     @collisionUtil.testCollisionBetween(boxA, boxB)
   addNewBox: =>
     newBox  = new Box
-    newBox.setXPosition(Math.min(newBox.getXPosition() + @availableNewBoxId * newBox.getMoveOffset(), @zone.x - newBox.getWidth() ))
-    newBox.setYPosition(Math.min(newBox.getYPosition() + @availableNewBoxId * newBox.getMoveOffset(), @zone.y - newBox.getHeight()))
+    newBox.setXPosition(Math.min(newBox.getXPosition() + @availableNewBoxId * newBox.getMoveOffset(), @zone.width - newBox.getWidth() ))
+    newBox.setYPosition(Math.min(newBox.getYPosition() + @availableNewBoxId * newBox.getMoveOffset(), @zone.height - newBox.getHeight()))
     newBox.setTitleName(@availableNewBoxId)
     newBox.set('boxId', @availableNewBoxId)
     newBox.box().on "click", =>
@@ -265,7 +265,7 @@ class @Boxes extends Backbone.Collection
     Logger.debug("@currentBox:\t" + @currentBox.getTitleName())
     @currentBox.setYPosition(@currentBox.getYPosition() + @currentBox.getMoveOffset())
     unless @validateZone(@currentBox)
-      @currentBox.setYPosition(@zone.y - @currentBox.getHeight())
+      @currentBox.setYPosition(@zone.height - @currentBox.getHeight())
       @flash = "Box#{@currentBox.getTitleName()} cannot be moved DOWN!"
     else
       @flash =  "box#{@currentBox.getTitleName()} selected!"
@@ -286,7 +286,7 @@ class @Boxes extends Backbone.Collection
     Logger.debug("@currentBox:\t" + @currentBox.getXPosition())
     @currentBox.setXPosition(@currentBox.getXPosition() + @currentBox.getMoveOffset())
     unless @validateZone(@currentBox)
-      @currentBox.setXPosition(@zone.x - @currentBox.getWidth())
+      @currentBox.setXPosition(@zone.width - @currentBox.getWidth())
       @flash = "Box#{@currentBox.getTitleName()} cannot be moved RIGHT!"
     else
       @flash =  "box#{@currentBox.getTitleName()} selected!"
@@ -300,11 +300,11 @@ class @Boxes extends Backbone.Collection
     Logger.debug("validresult:\t #{result}")
     result
   validateZoneX: (point) ->
-    Logger.debug("validateZoneX: point.x #{point.x}, @zone.x #{@zone.x}")
-    0<= point.x <= @zone.x
+    Logger.debug("validateZoneX: point.x #{point.x}, @zone.width #{@zone.width}")
+    0<= point.x <= @zone.width
   validateZoneY: (point) ->
-    Logger.debug("validateZoneY: point.y #{point.y}, @zone.x #{@zone.y}")
-    0<= point.y <= @zone.y
+    Logger.debug("validateZoneY: point.y #{point.y}, @zone.width #{@zone.height}")
+    0<= point.y <= @zone.height
 
 
 class CollisionPair extends Backbone.Model
@@ -500,37 +500,62 @@ class CollisionUtil extends Backbone.Collection
     status
 
 class @StackBoard
-  constructor: ->
-    @stage = new Kinetic.Stage(
-      container: "canvas_container"
-      width:  360
-      height: 480
-    )
-    @zone = {x:300, y:380}
-#    rgb(255,​ 228,​ 196)
-    @layer = new Kinetic.Layer()
-    stage_bg = new Kinetic.Rect(
+  constructor:(params) ->
+    @zone = params.zone
+    #background_color: rgb(255,​ 228,​ 196)
+    
+    longerEdge = Math.max(pallet.width, pallet.height)
+    shorterEdge = Math.min(pallet.width, pallet.height)
+    @ratio = @zone.height / ( longerEdge + 2 * box.overhang)
+
+    stageBackground = new Kinetic.Rect(
         x:            0
         y:            0
-        width:        300
-        height:       380
+        width:        shorterEdge * @ratio + 2 * box.overhang * @ratio
+        height:       longerEdge * @ratio + 2 * box.overhang * @ratio
         fillRed:      255
         fillGreen:    228
         fillBlue:     196
       )
 
-    @stage.add @layer
-    @layer.add stage_bg
-    @layer.getContext().translate(10, @zone.y)
+    palletBackground = new Kinetic.Rect(
+        x:            box.overhang * @ratio
+        y:            box.overhang * @ratio
+        width:        shorterEdge * @ratio
+        height:       longerEdge * @ratio
+        fillRed:      0
+        fillGreen:    228
+        fillBlue:     196
+      )
 
-    @layer.getContext().scale(1, -1);
+    @stage = new Kinetic.Stage(
+      container: "canvas_container"
+      width:  360
+      height: 480
+    )
+
+    @layer = new Kinetic.Layer()
+    @stage.add @layer
+    @layer.add stageBackground
+    @layer.add palletBackground
+    # @layer.getContext().translate(0, @zone.height)
+    # @layer.getContext().scale(1, -1);
     # context.transform(1, 0, 0, 1, tx, ty);
     Logger.debug("StackBoard: Stage Initialized!")
     Logger.info("StackBoard: Initialized!")
     @boxes = new Boxes(@layer,@zone)
     @boxes.shift()
     rivets.bind $('.boxes'),{boxes: @boxes}
-@board = new StackBoard
+  calculateOriginPoint:() ->
+
+ 
+
+pallet =      {width:300, height:600}
+box    =      {width:80,  height:40, overhang: 10}
+canvasZone =  {width:300, height:380}
+params = {pallet: pallet, box: box, zone: canvasZone}
+
+@board = new StackBoard(params)
 
 rivets.formatters.offset = (value) ->
    value = value % 99 

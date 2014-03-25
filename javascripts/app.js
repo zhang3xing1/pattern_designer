@@ -1,5 +1,5 @@
 (function() {
-  var CollisionPair, CollisionUtil,
+  var CollisionPair, CollisionUtil, box, canvasZone, pallet, params,
     __hasProp = {}.hasOwnProperty,
     __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
     __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
@@ -301,8 +301,8 @@
     Boxes.prototype.addNewBox = function() {
       var newBox;
       newBox = new Box;
-      newBox.setXPosition(Math.min(newBox.getXPosition() + this.availableNewBoxId * newBox.getMoveOffset(), this.zone.x - newBox.getWidth()));
-      newBox.setYPosition(Math.min(newBox.getYPosition() + this.availableNewBoxId * newBox.getMoveOffset(), this.zone.y - newBox.getHeight()));
+      newBox.setXPosition(Math.min(newBox.getXPosition() + this.availableNewBoxId * newBox.getMoveOffset(), this.zone.width - newBox.getWidth()));
+      newBox.setYPosition(Math.min(newBox.getYPosition() + this.availableNewBoxId * newBox.getMoveOffset(), this.zone.height - newBox.getHeight()));
       newBox.setTitleName(this.availableNewBoxId);
       newBox.set('boxId', this.availableNewBoxId);
       newBox.box().on("click", (function(_this) {
@@ -408,7 +408,7 @@
       Logger.debug("@currentBox:\t" + this.currentBox.getTitleName());
       this.currentBox.setYPosition(this.currentBox.getYPosition() + this.currentBox.getMoveOffset());
       if (!this.validateZone(this.currentBox)) {
-        this.currentBox.setYPosition(this.zone.y - this.currentBox.getHeight());
+        this.currentBox.setYPosition(this.zone.height - this.currentBox.getHeight());
         this.flash = "Box" + (this.currentBox.getTitleName()) + " cannot be moved DOWN!";
       } else {
         this.flash = "box" + (this.currentBox.getTitleName()) + " selected!";
@@ -435,7 +435,7 @@
       Logger.debug("@currentBox:\t" + this.currentBox.getXPosition());
       this.currentBox.setXPosition(this.currentBox.getXPosition() + this.currentBox.getMoveOffset());
       if (!this.validateZone(this.currentBox)) {
-        this.currentBox.setXPosition(this.zone.x - this.currentBox.getWidth());
+        this.currentBox.setXPosition(this.zone.width - this.currentBox.getWidth());
         this.flash = "Box" + (this.currentBox.getTitleName()) + " cannot be moved RIGHT!";
       } else {
         this.flash = "box" + (this.currentBox.getTitleName()) + " selected!";
@@ -455,14 +455,14 @@
 
     Boxes.prototype.validateZoneX = function(point) {
       var _ref;
-      Logger.debug("validateZoneX: point.x " + point.x + ", @zone.x " + this.zone.x);
-      return (0 <= (_ref = point.x) && _ref <= this.zone.x);
+      Logger.debug("validateZoneX: point.x " + point.x + ", @zone.width " + this.zone.width);
+      return (0 <= (_ref = point.x) && _ref <= this.zone.width);
     };
 
     Boxes.prototype.validateZoneY = function(point) {
       var _ref;
-      Logger.debug("validateZoneY: point.y " + point.y + ", @zone.x " + this.zone.y);
-      return (0 <= (_ref = point.y) && _ref <= this.zone.y);
+      Logger.debug("validateZoneY: point.y " + point.y + ", @zone.width " + this.zone.height);
+      return (0 <= (_ref = point.y) && _ref <= this.zone.height);
     };
 
     return Boxes;
@@ -765,31 +765,39 @@
   })(Backbone.Collection);
 
   this.StackBoard = (function() {
-    function StackBoard() {
-      var stage_bg;
+    function StackBoard(params) {
+      var longerEdge, palletBackground, shorterEdge, stageBackground;
+      this.zone = params.zone;
+      longerEdge = Math.max(pallet.width, pallet.height);
+      shorterEdge = Math.min(pallet.width, pallet.height);
+      this.ratio = this.zone.height / (longerEdge + 2 * box.overhang);
+      stageBackground = new Kinetic.Rect({
+        x: 0,
+        y: 0,
+        width: shorterEdge * this.ratio + 2 * box.overhang * this.ratio,
+        height: longerEdge * this.ratio + 2 * box.overhang * this.ratio,
+        fillRed: 255,
+        fillGreen: 228,
+        fillBlue: 196
+      });
+      palletBackground = new Kinetic.Rect({
+        x: box.overhang * this.ratio,
+        y: box.overhang * this.ratio,
+        width: shorterEdge * this.ratio,
+        height: longerEdge * this.ratio,
+        fillRed: 0,
+        fillGreen: 228,
+        fillBlue: 196
+      });
       this.stage = new Kinetic.Stage({
         container: "canvas_container",
         width: 360,
         height: 480
       });
-      this.zone = {
-        x: 300,
-        y: 380
-      };
       this.layer = new Kinetic.Layer();
-      stage_bg = new Kinetic.Rect({
-        x: 0,
-        y: 0,
-        width: 300,
-        height: 380,
-        fillRed: 255,
-        fillGreen: 228,
-        fillBlue: 196
-      });
       this.stage.add(this.layer);
-      this.layer.add(stage_bg);
-      this.layer.getContext().translate(10, this.zone.y);
-      this.layer.getContext().scale(1, -1);
+      this.layer.add(stageBackground);
+      this.layer.add(palletBackground);
       Logger.debug("StackBoard: Stage Initialized!");
       Logger.info("StackBoard: Initialized!");
       this.boxes = new Boxes(this.layer, this.zone);
@@ -799,11 +807,35 @@
       });
     }
 
+    StackBoard.prototype.calculateOriginPoint = function() {};
+
     return StackBoard;
 
   })();
 
-  this.board = new StackBoard;
+  pallet = {
+    width: 300,
+    height: 600
+  };
+
+  box = {
+    width: 80,
+    height: 40,
+    overhang: 10
+  };
+
+  canvasZone = {
+    width: 300,
+    height: 380
+  };
+
+  params = {
+    pallet: pallet,
+    box: box,
+    zone: canvasZone
+  };
+
+  this.board = new StackBoard(params);
 
   rivets.formatters.offset = function(value) {
     return value = value % 99;
