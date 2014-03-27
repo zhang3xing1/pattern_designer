@@ -100,10 +100,7 @@
           x: 0,
           y: 0,
           width: 80,
-          height: 40,
-          fill: 'green',
-          stroke: 'black',
-          strokeWidth: 2
+          height: 40
         })
       });
       this.set({
@@ -237,9 +234,13 @@
 
     Box.prototype.changeFillColor = function() {
       if (this.get('collisionStatus')) {
-        return this.get('rect').setFill('red');
+        this.get('rect').fillRed(82);
+        this.get('rect').fillGreen(1);
+        return this.get('rect').fillBlue(246);
       } else {
-        return this.get('rect').setFill('green');
+        this.get('rect').fillRed(82);
+        this.get('rect').fillGreen(221);
+        return this.get('rect').fillBlue(246);
       }
     };
 
@@ -766,7 +767,7 @@
 
   this.StackBoard = (function() {
     function StackBoard(params) {
-      var longerEdge, palletBackground, shorterEdge, stageBackground;
+      var longerEdge, overhangBackground, palletBackground, shorterEdge, stageBackground;
       this.zone = params.zone;
       longerEdge = Math.max(pallet.width, pallet.height);
       shorterEdge = Math.min(pallet.width, pallet.height);
@@ -774,21 +775,30 @@
       stageBackground = new Kinetic.Rect({
         x: 0,
         y: 0,
-        width: shorterEdge * this.ratio + 2 * box.overhang * this.ratio,
-        height: longerEdge * this.ratio + 2 * box.overhang * this.ratio,
-        fillRed: 255,
-        fillGreen: 228,
-        fillBlue: 196
+        width: 260,
+        height: 320,
+        fill: 'white'
       });
       palletBackground = new Kinetic.Rect({
         x: box.overhang * this.ratio,
         y: box.overhang * this.ratio,
         width: shorterEdge * this.ratio,
         height: longerEdge * this.ratio,
-        fillRed: 0,
-        fillGreen: 228,
-        fillBlue: 196
+        fillRed: 251,
+        fillGreen: 209,
+        fillBlue: 175
       });
+      overhangBackground = new Kinetic.Rect({
+        x: box.overhang * this.ratio,
+        y: box.overhang * this.ratio,
+        width: shorterEdge * this.ratio + 10,
+        height: longerEdge * this.ratio + 10,
+        strokeRed: 238,
+        strokeGreen: 49,
+        strokeBlue: 109,
+        strokeAlpha: 0.5
+      });
+      overhangBackground.dash([4, 5]);
       this.stage = new Kinetic.Stage({
         container: "canvas_container",
         width: 360,
@@ -798,6 +808,7 @@
       this.stage.add(this.layer);
       this.layer.add(stageBackground);
       this.layer.add(palletBackground);
+      this.layer.add(overhangBackground);
       Logger.debug("StackBoard: Stage Initialized!");
       Logger.info("StackBoard: Initialized!");
       this.boxes = new Boxes(this.layer, this.zone);
@@ -825,8 +836,8 @@
   };
 
   canvasZone = {
-    width: 300,
-    height: 380
+    width: 260,
+    height: 320
   };
 
   params = {

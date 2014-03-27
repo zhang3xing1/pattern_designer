@@ -66,9 +66,6 @@ class @Box extends Backbone.Model
                                   y:            0
                                   width:        80
                                   height:       40
-                                  fill:         'green'
-                                  stroke:       'black'
-                                  strokeWidth:  2
                                 )
     @set title: new Kinetic.Text(
                                   x:            @get('rect').x() + @get('rect').width()/2  - 5
@@ -147,9 +144,13 @@ class @Box extends Backbone.Model
     @set('collisionStatus', false)
   changeFillColor: ->
     if @get('collisionStatus')
-      @get('rect').setFill('red')
+      @get('rect').fillRed(82)
+      @get('rect').fillGreen(1)
+      @get('rect').fillBlue(246)
     else
-      @get('rect').setFill('green')
+      @get('rect').fillRed(82)
+      @get('rect').fillGreen(221)
+      @get('rect').fillBlue(246)
 
   printPoints: ->
     Logger.debug("PointA(x:#{@getPointA().x},y:#{@getPointA().y}) " +
@@ -511,22 +512,31 @@ class @StackBoard
     stageBackground = new Kinetic.Rect(
         x:            0
         y:            0
-        width:        shorterEdge * @ratio + 2 * box.overhang * @ratio
-        height:       longerEdge * @ratio + 2 * box.overhang * @ratio
-        fillRed:      255
-        fillGreen:    228
-        fillBlue:     196
+        width:        260
+        height:       320
+        fill:         'white'
       )
-
     palletBackground = new Kinetic.Rect(
         x:            box.overhang * @ratio
         y:            box.overhang * @ratio
         width:        shorterEdge * @ratio
         height:       longerEdge * @ratio
-        fillRed:      0
-        fillGreen:    228
-        fillBlue:     196
+        fillRed:      251
+        fillGreen:    209
+        fillBlue:     175
       )
+    overhangBackground = new Kinetic.Rect(
+        x:            box.overhang * @ratio
+        y:            box.overhang * @ratio
+        width:        shorterEdge * @ratio + 10
+        height:       longerEdge * @ratio + 10
+        strokeRed:      238
+        strokeGreen:    49
+        strokeBlue:     109
+        strokeAlpha:    0.5
+      )
+
+    overhangBackground.dash(([4, 5]))
 
     @stage = new Kinetic.Stage(
       container: "canvas_container"
@@ -536,11 +546,14 @@ class @StackBoard
 
     @layer = new Kinetic.Layer()
     @stage.add @layer
+
     @layer.add stageBackground
     @layer.add palletBackground
+    @layer.add overhangBackground
     # @layer.getContext().translate(0, @zone.height)
     # @layer.getContext().scale(1, -1);
-    # context.transform(1, 0, 0, 1, tx, ty);
+
+
     Logger.debug("StackBoard: Stage Initialized!")
     Logger.info("StackBoard: Initialized!")
     @boxes = new Boxes(@layer,@zone)
@@ -552,7 +565,7 @@ class @StackBoard
 
 pallet =      {width:300, height:600}
 box    =      {width:80,  height:40, overhang: 10}
-canvasZone =  {width:300, height:380}
+canvasZone =  {width:260, height:320}
 params = {pallet: pallet, box: box, zone: canvasZone}
 
 @board = new StackBoard(params)
