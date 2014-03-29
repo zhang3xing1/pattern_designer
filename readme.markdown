@@ -19,3 +19,8 @@ Lint:
 	scale: set context.scaleY => -1
 		   set text.scaleY => -1 
 
+overhang 是box内边框的限制
+
+绘图区域
+
+

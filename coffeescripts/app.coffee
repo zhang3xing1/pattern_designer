@@ -507,18 +507,26 @@ class @StackBoard
     
     longerEdge = Math.max(pallet.width, pallet.height)
     shorterEdge = Math.min(pallet.width, pallet.height)
-    @ratio = @zone.height / ( longerEdge + 2 * box.overhang)
+    margin = Math.max(pallet.overhang, box.minDistance)
+    overhangOffset = {x: 0 , y: 0, edge: margin}
+    if box.minDistance > pallet.overhang  
+      overhangOffset.x = overhangOffset.y = box.minDistance - pallet.overhang
+      overhangOffset.edge = pallet.overhang - box.minDistance
+
+
+
+    @ratio = @zone.height / (longerEdge + 2 * margin)
 
     stageBackground = new Kinetic.Rect(
         x:            0
         y:            0
-        width:        260
-        height:       320
+        width:        @zone.width
+        height:       @zone.height
         fill:         'white'
       )
     palletBackground = new Kinetic.Rect(
-        x:            box.overhang * @ratio
-        y:            box.overhang * @ratio
+        x:            margin * @ratio
+        y:            margin * @ratio
         width:        shorterEdge * @ratio
         height:       longerEdge * @ratio
         fillRed:      251
@@ -526,10 +534,10 @@ class @StackBoard
         fillBlue:     175
       )
     overhangBackground = new Kinetic.Rect(
-        x:            box.overhang * @ratio
-        y:            box.overhang * @ratio
-        width:        shorterEdge * @ratio + 10
-        height:       longerEdge * @ratio + 10
+        x:            overhangOffset.x * @ratio
+        y:            overhangOffset.y * @ratio
+        width:        (shorterEdge + pallet.overhang * 2) * @ratio 
+        height:       (longerEdge + pallet.overhang * 2) * @ratio
         strokeRed:      238
         strokeGreen:    49
         strokeBlue:     109
@@ -562,9 +570,10 @@ class @StackBoard
   calculateOriginPoint:() ->
 
  
-
-pallet =      {width:300, height:600}
-box    =      {width:80,  height:40, overhang: 10}
+# unit: cm
+pallet =      {width:300, height:600, overhang: -10}  
+box    =      {width:80,  height:40,  minDistance: 20}
+# unit: pixal
 canvasZone =  {width:260, height:320}
 params = {pallet: pallet, box: box, zone: canvasZone}
 

@@ -767,21 +767,31 @@
 
   this.StackBoard = (function() {
     function StackBoard(params) {
-      var longerEdge, overhangBackground, palletBackground, shorterEdge, stageBackground;
+      var longerEdge, margin, overhangBackground, overhangOffset, palletBackground, shorterEdge, stageBackground;
       this.zone = params.zone;
       longerEdge = Math.max(pallet.width, pallet.height);
       shorterEdge = Math.min(pallet.width, pallet.height);
-      this.ratio = this.zone.height / (longerEdge + 2 * box.overhang);
+      margin = Math.max(pallet.overhang, box.minDistance);
+      overhangOffset = {
+        x: 0,
+        y: 0,
+        edge: margin
+      };
+      if (box.minDistance > pallet.overhang) {
+        overhangOffset.x = overhangOffset.y = box.minDistance - pallet.overhang;
+        overhangOffset.edge = pallet.overhang - box.minDistance;
+      }
+      this.ratio = this.zone.height / (longerEdge + 2 * margin);
       stageBackground = new Kinetic.Rect({
         x: 0,
         y: 0,
-        width: 260,
-        height: 320,
+        width: this.zone.width,
+        height: this.zone.height,
         fill: 'white'
       });
       palletBackground = new Kinetic.Rect({
-        x: box.overhang * this.ratio,
-        y: box.overhang * this.ratio,
+        x: margin * this.ratio,
+        y: margin * this.ratio,
         width: shorterEdge * this.ratio,
         height: longerEdge * this.ratio,
         fillRed: 251,
@@ -789,10 +799,10 @@
         fillBlue: 175
       });
       overhangBackground = new Kinetic.Rect({
-        x: box.overhang * this.ratio,
-        y: box.overhang * this.ratio,
-        width: shorterEdge * this.ratio + 10,
-        height: longerEdge * this.ratio + 10,
+        x: overhangOffset.x * this.ratio,
+        y: overhangOffset.y * this.ratio,
+        width: (shorterEdge + pallet.overhang * 2) * this.ratio,
+        height: (longerEdge + pallet.overhang * 2) * this.ratio,
         strokeRed: 238,
         strokeGreen: 49,
         strokeBlue: 109,
@@ -826,13 +836,14 @@
 
   pallet = {
     width: 300,
-    height: 600
+    height: 600,
+    overhang: -10
   };
 
   box = {
     width: 80,
     height: 40,
-    overhang: 10
+    minDistance: 20
   };
 
   canvasZone = {
