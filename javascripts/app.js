@@ -131,6 +131,7 @@
       });
       this.get('group').add(this.get('rect'));
       this.get('group').add(this.get('title'));
+      params.minDistance = $("#minDistance").val();
       if (params.minDistance > 0) {
         this.set({
           minDistance: params.minDistance
@@ -198,7 +199,7 @@
           innerOrOuter: 'inner'
         };
       }
-      if (options.innerOrOuter === 'outer') {
+      if (options.innerOrOuter === 'outer' && this.hasOuterRect()) {
         return this.get('group').x() - this.get('minDistance');
       } else {
         return this.get('group').x();
@@ -215,7 +216,7 @@
           innerOrOuter: 'inner'
         };
       }
-      if (options.innerOrOuter === 'outer') {
+      if (options.innerOrOuter === 'outer' && this.hasOuterRect()) {
         return this.get('group').y() - this.get('minDistance');
       } else {
         return this.get('group').y();
@@ -232,7 +233,7 @@
           innerOrOuter: 'inner'
         };
       }
-      if (options.innerOrOuter === 'outer') {
+      if (options.innerOrOuter === 'outer' && this.hasOuterRect()) {
         return this.get('rect').height() + this.get('minDistance') * 2;
       } else {
         return this.get('rect').height();
@@ -249,7 +250,7 @@
           innerOrOuter: 'inner'
         };
       }
-      if (options.innerOrOuter === 'outer') {
+      if (options.innerOrOuter === 'outer' && this.hasOuterRect()) {
         return this.get('rect').width() + this.get('minDistance') * 2;
       } else {
         return this.get('rect').width();
@@ -984,7 +985,7 @@
     y: 0,
     width: 60,
     height: 30,
-    minDistance: 5
+    minDistance: 10
   };
 
   canvasZone = {
@@ -1008,6 +1009,8 @@
   $("input").prop("readonly", true);
 
   $(".offset").prop("readonly", false);
+
+  $("#minDistance").prop("readonly", false);
 
   $("#ex8").slider();
 

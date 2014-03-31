@@ -88,6 +88,7 @@ class @Box extends Backbone.Model
     @get('group').add(@get('title'))
 
     ###### Box has an outer Rect ######
+    params.minDistance = $("#minDistance").val()
     if params.minDistance > 0
       @set minDistance: params.minDistance
       @set outerBox: {x: @get('innerBox').x - params.minDistance, \
@@ -126,28 +127,28 @@ class @Box extends Backbone.Model
   setXPosition: (x) ->
     @get('group').setX(x)
   getXPosition: (options={innerOrOuter: 'inner'}) ->
-    if options.innerOrOuter == 'outer'
+    if options.innerOrOuter == 'outer' && @hasOuterRect()
       @get('group').x() - @get('minDistance')
     else
       @get('group').x()
   setYPosition: (y) ->
     @get('group').setY(y)
   getYPosition: (options={innerOrOuter: 'inner'})  ->
-    if options.innerOrOuter == 'outer'
+    if options.innerOrOuter == 'outer' && @hasOuterRect()
       @get('group').y() - @get('minDistance')
     else    
       @get('group').y()
   setHeight: (height) ->
     @get('rect').setHeight(height)
   getHeight:(options={innerOrOuter: 'inner'}) ->
-    if options.innerOrOuter == 'outer'
+    if options.innerOrOuter == 'outer' && @hasOuterRect()
       @get('rect').height() + @get('minDistance') * 2
     else    
       @get('rect').height()
   setWidth: (width) ->
     @get('rect').setWidth(width)
   getWidth: (options={innerOrOuter: 'inner'}) ->
-    if options.innerOrOuter == 'outer'
+    if options.innerOrOuter == 'outer' && @hasOuterRect()
       @get('rect').width() + @get('minDistance') * 2
     else  
       @get('rect').width()
@@ -232,7 +233,6 @@ class @Boxes extends Backbone.Collection
     newBox.setYPosition(Math.min(newBox.getYPosition() + @availableNewBoxId * newBox.getMoveOffset(), @zone.height - newBox.getHeight()))
     newBox.setTitleName(@availableNewBoxId)
     newBox.set('boxId', @availableNewBoxId)
-    # alert(newBox.get('boxId'))
     newBox.box().on "click", =>
       Logger.debug "box#{newBox.getTitleName()} clicked!"
       @flash =  "box#{newBox.getTitleName()} selected!"
@@ -547,6 +547,7 @@ class CollisionUtil extends Backbone.Collection
         boxABottom =  boxA.getYPosition({innerOrOuter: 'outer'}) + boxA.getHeight({innerOrOuter: 'outer'})
         boxALeft   =  boxA.getXPosition({innerOrOuter: 'outer'})
         boxARight  =  boxA.getXPosition({innerOrOuter: 'outer'}) + boxA.getWidth({innerOrOuter: 'outer'})
+
         boxBTop    =  boxB.getYPosition()
         boxBBottom =  boxB.getYPosition() + boxB.getHeight()
         boxBLeft   =  boxB.getXPosition()
@@ -556,6 +557,7 @@ class CollisionUtil extends Backbone.Collection
         boxABottom =  boxA.getYPosition() + boxA.getHeight()
         boxALeft   =  boxA.getXPosition()
         boxARight  =  boxA.getXPosition() + boxA.getWidth()
+
         boxBTop    =  boxB.getYPosition({innerOrOuter: 'outer'})
         boxBBottom =  boxB.getYPosition({innerOrOuter: 'outer'}) + boxB.getHeight({innerOrOuter: 'outer'})
         boxBLeft   =  boxB.getXPosition({innerOrOuter: 'outer'})
@@ -642,7 +644,7 @@ class @StackBoard
 
 # unit: cm
 pallet =      {width:250, height:400, overhang: -10}  
-box    =      {x:0, y: 0, width:60,  height:30,  minDistance: 5}
+box    =      {x:0, y: 0, width:60,  height:30,  minDistance: 10}
 # unit: pixal
 # canvas available paiting zone
 canvasZone =  {width:260, height:320, stage_zoom: 1.5}
@@ -658,7 +660,9 @@ rivets.formatters.offset = (value) ->
    value = value % 99 
 
 $("input").prop "readonly", true
+
 $(".offset").prop "readonly", false
+$("#minDistance").prop "readonly", false
 
 $("#ex8").slider()
 
