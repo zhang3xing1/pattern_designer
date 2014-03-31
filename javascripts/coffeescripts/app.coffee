@@ -58,14 +58,14 @@ class @Box extends Backbone.Model
     collisionStatus:  false
     moveOffset:       4
   }
-  initialize: ->
+  initialize: (params) ->
     @on('change:rect', @rectChanged)
     #Fill Color: rgb(60, 118, 61)
     @set rect: new Kinetic.Rect(
                                   x:            0
                                   y:            0
-                                  width:        80
-                                  height:       40
+                                  width:        params.width
+                                  height:       params.height
                                 )
     @set title: new Kinetic.Text(
                                   x:            @get('rect').x() + @get('rect').width()/2  - 5
@@ -77,8 +77,8 @@ class @Box extends Backbone.Model
                                   scaleY:       -1
                                 )
     @set group: new Kinetic.Group(
-                                  x: 6
-                                  y: 6
+                                  x: 0
+                                  y: 0
                                   rotation: 0
                                 )
     @get('group').add(@get('rect'))
@@ -161,11 +161,15 @@ class @Box extends Backbone.Model
 
 class @Boxes extends Backbone.Collection
   model: Box
-  initialize: (@layer,@zone)->
+  initialize: (params)->
+    @layer = params.layer
+    @zone = params.zone
+    @box_params = params.box
+
     @on('add', @showCurrentBoxPanel)
     @on('all', @draw) 
     @collisionUtil = new CollisionUtil
-    @currentBox = new Box
+    @currentBox = new Box(@box_params)
     @availableNewBoxId = 1
     @flash = "Initialized completed!"
 
@@ -182,7 +186,7 @@ class @Boxes extends Backbone.Collection
   testCollisionBetween: (boxA, boxB) ->
     @collisionUtil.testCollisionBetween(boxA, boxB)
   addNewBox: =>
-    newBox  = new Box
+    newBox  = new Box(@box_params)
     newBox.setXPosition(Math.min(newBox.getXPosition() + @availableNewBoxId * newBox.getMoveOffset(), @zone.width - newBox.getWidth() ))
     newBox.setYPosition(Math.min(newBox.getYPosition() + @availableNewBoxId * newBox.getMoveOffset(), @zone.height - newBox.getHeight()))
     newBox.setTitleName(@availableNewBoxId)
@@ -206,7 +210,7 @@ class @Boxes extends Backbone.Collection
       @currentBox.get('group').destroy()
       @remove(@currentBox)
       if @length == 0
-        @currentBox = new Box # for alert from rivetsjs
+        @currentBox = new Box(@box_params) # for alert from rivetsjs
         @flash = 'There is no box.'
       else
         @currentBox = @last()
@@ -509,11 +513,10 @@ class @StackBoard
     shorterEdge = Math.min(pallet.width, pallet.height)
     margin = Math.max(pallet.overhang, box.minDistance)
     overhangOffset = {x: 0 , y: 0, edge: margin}
+
     if box.minDistance > pallet.overhang  
       overhangOffset.x = overhangOffset.y = box.minDistance - pallet.overhang
       overhangOffset.edge = pallet.overhang - box.minDistance
-
-
 
     @ratio = @zone.height / (longerEdge + 2 * margin)
 
@@ -548,8 +551,8 @@ class @StackBoard
 
     @stage = new Kinetic.Stage(
       container: "canvas_container"
-      width:  360
-      height: 480
+      width:  @zone.width * @zone.stage_zoom
+      height: @zone.height * @zone.stage_zoom
     )
 
     @layer = new Kinetic.Layer()
@@ -564,18 +567,25 @@ class @StackBoard
 
     Logger.debug("StackBoard: Stage Initialized!")
     Logger.info("StackBoard: Initialized!")
-    @boxes = new Boxes(@layer,@zone)
+    boxes_params = {layer: @layer, zone: @zone, box: params.box}
+    @boxes = new Boxes(boxes_params)
     @boxes.shift()
     rivets.bind $('.boxes'),{boxes: @boxes}
   calculateOriginPoint:() ->
 
- 
+#### Params ####
+
 # unit: cm
-pallet =      {width:300, height:600, overhang: -10}  
-box    =      {width:80,  height:40,  minDistance: 20}
+pallet =      {width:400, height:500, overhang: -10}  
+box    =      {width:60,  height:30,  minDistance: 20}
 # unit: pixal
-canvasZone =  {width:260, height:320}
+# canvas available paiting zone
+canvasZone =  {width:260, height:320, stage_zoom: 2}
+
 params = {pallet: pallet, box: box, zone: canvasZone}
+
+################
+
 
 @board = new StackBoard(params)
 

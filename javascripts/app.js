@@ -93,14 +93,14 @@
       moveOffset: 4
     };
 
-    Box.prototype.initialize = function() {
+    Box.prototype.initialize = function(params) {
       this.on('change:rect', this.rectChanged);
       this.set({
         rect: new Kinetic.Rect({
           x: 0,
           y: 0,
-          width: 80,
-          height: 40
+          width: params.width,
+          height: params.height
         })
       });
       this.set({
@@ -116,8 +116,8 @@
       });
       this.set({
         group: new Kinetic.Group({
-          x: 6,
-          y: 6,
+          x: 0,
+          y: 0,
           rotation: 0
         })
       });
@@ -267,13 +267,14 @@
 
     Boxes.prototype.model = Box;
 
-    Boxes.prototype.initialize = function(layer, zone) {
-      this.layer = layer;
-      this.zone = zone;
+    Boxes.prototype.initialize = function(params) {
+      this.layer = params.layer;
+      this.zone = params.zone;
+      this.box_params = params.box;
       this.on('add', this.showCurrentBoxPanel);
       this.on('all', this.draw);
       this.collisionUtil = new CollisionUtil;
-      this.currentBox = new Box;
+      this.currentBox = new Box(this.box_params);
       this.availableNewBoxId = 1;
       return this.flash = "Initialized completed!";
     };
@@ -301,7 +302,7 @@
 
     Boxes.prototype.addNewBox = function() {
       var newBox;
-      newBox = new Box;
+      newBox = new Box(this.box_params);
       newBox.setXPosition(Math.min(newBox.getXPosition() + this.availableNewBoxId * newBox.getMoveOffset(), this.zone.width - newBox.getWidth()));
       newBox.setYPosition(Math.min(newBox.getYPosition() + this.availableNewBoxId * newBox.getMoveOffset(), this.zone.height - newBox.getHeight()));
       newBox.setTitleName(this.availableNewBoxId);
@@ -328,7 +329,7 @@
         this.currentBox.get('group').destroy();
         this.remove(this.currentBox);
         if (this.length === 0) {
-          this.currentBox = new Box;
+          this.currentBox = new Box(this.box_params);
           this.flash = 'There is no box.';
         } else {
           this.currentBox = this.last();
@@ -767,7 +768,7 @@
 
   this.StackBoard = (function() {
     function StackBoard(params) {
-      var longerEdge, margin, overhangBackground, overhangOffset, palletBackground, shorterEdge, stageBackground;
+      var boxes_params, longerEdge, margin, overhangBackground, overhangOffset, palletBackground, shorterEdge, stageBackground;
       this.zone = params.zone;
       longerEdge = Math.max(pallet.width, pallet.height);
       shorterEdge = Math.min(pallet.width, pallet.height);
@@ -811,8 +812,8 @@
       overhangBackground.dash([4, 5]);
       this.stage = new Kinetic.Stage({
         container: "canvas_container",
-        width: 360,
-        height: 480
+        width: this.zone.width * this.zone.stage_zoom,
+        height: this.zone.height * this.zone.stage_zoom
       });
       this.layer = new Kinetic.Layer();
       this.stage.add(this.layer);
@@ -821,7 +822,12 @@
       this.layer.add(overhangBackground);
       Logger.debug("StackBoard: Stage Initialized!");
       Logger.info("StackBoard: Initialized!");
-      this.boxes = new Boxes(this.layer, this.zone);
+      boxes_params = {
+        layer: this.layer,
+        zone: this.zone,
+        box: params.box
+      };
+      this.boxes = new Boxes(boxes_params);
       this.boxes.shift();
       rivets.bind($('.boxes'), {
         boxes: this.boxes
@@ -835,20 +841,21 @@
   })();
 
   pallet = {
-    width: 300,
-    height: 600,
+    width: 400,
+    height: 500,
     overhang: -10
   };
 
   box = {
-    width: 80,
-    height: 40,
+    width: 60,
+    height: 30,
     minDistance: 20
   };
 
   canvasZone = {
     width: 260,
-    height: 320
+    height: 320,
+    stage_zoom: 2
   };
 
   params = {
