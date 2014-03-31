@@ -57,15 +57,19 @@ class @Box extends Backbone.Model
     boxId:            'nullID'
     collisionStatus:  false
     moveOffset:       4
+    rotate:           0
   }
   initialize: (params) ->
     @on('change:rect', @rectChanged)
     #Fill Color: rgb(60, 118, 61)
+
+    @set innerBox: {x: params.x, y: params.y, width: params.width, height: params.height}
+
     @set rect: new Kinetic.Rect(
                                   x:            0
                                   y:            0
-                                  width:        params.width
-                                  height:       params.height
+                                  width:        @get('innerBox').width
+                                  height:       @get('innerBox').height
                                 )
     @set title: new Kinetic.Text(
                                   x:            @get('rect').x() + @get('rect').width()/2  - 5
@@ -79,26 +83,33 @@ class @Box extends Backbone.Model
     @set group: new Kinetic.Group(
                                   x: 0
                                   y: 0
-                                  rotation: 0
                                 )
     @get('group').add(@get('rect'))
     @get('group').add(@get('title'))
 
+    ###### Box has an outer Rect ######
     if params.minDistance > 0
-      @set outRect: new Kinetic.Rect(
-                              x:            (-1) * params.minDistance
-                              y:            (-1) * params.minDistance
-                              width:        params.width  + 2 * params.minDistance
-                              height:       params.height + 2* params.minDistance
+      @set minDistance: params.minDistance
+      @set outerBox: {x: @get('innerBox').x - params.minDistance, \
+                      y: @get('innerBox').y - params.minDistance,  \
+                      width: @get('innerBox').width + 2 * params.minDistance, \
+                      height: @get('innerBox').height + 2 * params.minDistance}
+      @set outerRect: new Kinetic.Rect(
+                              x:              @get('outerBox').x
+                              y:              @get('outerBox').y
+                              width:          @get('outerBox').width
+                              height:         @get('outerBox').height
                               strokeRed:      38
                               strokeGreen:    49
                               strokeBlue:     9
                               strokeAlpha:    0.5
                             )
-      @get('outRect').dash(([4, 5]))
-      @get('group').add(@get('outRect'))
+      @get('outerRect').dash(([4, 5]))
+      @get('group').add(@get('outerRect'))
     Logger.debug('Box: Generate a new box.')
 
+  hasOuterRect: () ->
+    @get('minDistance') > 0
   getBoxId: () ->
     @get('boxId') 
   getMoveOffset: () ->
@@ -114,20 +125,32 @@ class @Box extends Backbone.Model
     @get('title').text() 
   setXPosition: (x) ->
     @get('group').setX(x)
-  getXPosition: () ->
-    @get('group').x()
+  getXPosition: (options={innerOrOuter: 'inner'}) ->
+    if options.innerOrOuter == 'outer'
+      @get('group').x() - @get('minDistance')
+    else
+      @get('group').x()
   setYPosition: (y) ->
     @get('group').setY(y)
-  getYPosition: ()  ->
-    @get('group').y()
+  getYPosition: (options={innerOrOuter: 'inner'})  ->
+    if options.innerOrOuter == 'outer'
+      @get('group').y() - @get('minDistance')
+    else    
+      @get('group').y()
   setHeight: (height) ->
     @get('rect').setHeight(height)
-  getHeight:() ->
-    @get('rect').height()
+  getHeight:(options={innerOrOuter: 'inner'}) ->
+    if options.innerOrOuter == 'outer'
+      @get('rect').height() + @get('minDistance') * 2
+    else    
+      @get('rect').height()
   setWidth: (width) ->
     @get('rect').setWidth(width)
-  getWidth: () ->
-    @get('rect').width()
+  getWidth: (options={innerOrOuter: 'inner'}) ->
+    if options.innerOrOuter == 'outer'
+      @get('rect').width() + @get('minDistance') * 2
+    else  
+      @get('rect').width()
   getPointA: () ->
     pointX = 
       x: @getXPosition()
@@ -202,7 +225,7 @@ class @Boxes extends Backbone.Collection
     @collisionUtil.deleteCollisionWith(box, @models)
 
   testCollisionBetween: (boxA, boxB) ->
-    @collisionUtil.testCollisionBetween(boxA, boxB)
+    @collisionUtil.testCollisionBetween(boxA, boxB, {collisionType: 'outer-outer'})
   addNewBox: =>
     newBox  = new Box(@box_params)
     newBox.setXPosition(Math.min(newBox.getXPosition() + @availableNewBoxId * newBox.getMoveOffset(), @zone.width - newBox.getWidth() ))
@@ -246,7 +269,7 @@ class @Boxes extends Backbone.Collection
     #   ), this)
     result =_.reduce(@models,
                     ((status, box) ->
-                      if @currentBox.getTitleName() != box.getTitleName() && @currentBox.getTitleName() != 'nullID'
+                      if @currentBox.getBoxId() != box.getBoxId() && @currentBox.getBoxId() != 'nullID'
                         @testCollisionBetween(@currentBox, box) || status
                       else
                         status), 
@@ -507,18 +530,39 @@ class CollisionUtil extends Backbone.Collection
 
 
   ######## public api ########
-  testCollisionBetween:(boxA,boxB) ->
+  testCollisionBetween:(boxA,boxB,options = {collisionType: 'inner-inner'}) ->
     status  =     false
-    boxATop =     boxA.getYPosition()
-    boxABottom =  boxA.getYPosition() + boxA.getHeight()
-    boxALeft   =  boxA.getXPosition()
-    boxARight  =  boxA.getXPosition() + boxA.getWidth()
-    boxBTop    =  boxB.getYPosition()
-    boxBBottom =  boxB.getYPosition() + boxB.getHeight()
-    boxBLeft   =  boxB.getXPosition()
-    boxBRight  =  boxB.getXPosition() + boxB.getWidth()
+    if options.collisionType == 'inner-inner'
+      boxATop =     boxA.getYPosition()
+      boxABottom =  boxA.getYPosition() + boxA.getHeight()
+      boxALeft   =  boxA.getXPosition()
+      boxARight  =  boxA.getXPosition() + boxA.getWidth()
+      boxBTop    =  boxB.getYPosition()
+      boxBBottom =  boxB.getYPosition() + boxB.getHeight()
+      boxBLeft   =  boxB.getXPosition()
+      boxBRight  =  boxB.getXPosition() + boxB.getWidth()
+    else if options.collisionType == 'outer-outer'
+      if boxA.hasOuterRect
+        boxATop =     boxA.getYPosition({innerOrOuter: 'outer'})
+        boxABottom =  boxA.getYPosition({innerOrOuter: 'outer'}) + boxA.getHeight({innerOrOuter: 'outer'})
+        boxALeft   =  boxA.getXPosition({innerOrOuter: 'outer'})
+        boxARight  =  boxA.getXPosition({innerOrOuter: 'outer'}) + boxA.getWidth({innerOrOuter: 'outer'})
+        boxBTop    =  boxB.getYPosition()
+        boxBBottom =  boxB.getYPosition() + boxB.getHeight()
+        boxBLeft   =  boxB.getXPosition()
+        boxBRight  =  boxB.getXPosition() + boxB.getWidth()
+      else
+        boxATop =     boxA.getYPosition()
+        boxABottom =  boxA.getYPosition() + boxA.getHeight()
+        boxALeft   =  boxA.getXPosition()
+        boxARight  =  boxA.getXPosition() + boxA.getWidth()
+        boxBTop    =  boxB.getYPosition({innerOrOuter: 'outer'})
+        boxBBottom =  boxB.getYPosition({innerOrOuter: 'outer'}) + boxB.getHeight({innerOrOuter: 'outer'})
+        boxBLeft   =  boxB.getXPosition({innerOrOuter: 'outer'})
+        boxBRight  =  boxB.getXPosition({innerOrOuter: 'outer'}) + boxB.getWidth({innerOrOuter: 'outer'})
+    
     status = true  unless boxABottom < boxBTop or boxATop > boxBBottom or boxALeft > boxBRight or boxARight < boxBLeft
-    Logger.dev("testCollisionBetween: box#{boxA.getBoxId()} box#{boxB.getBoxId()} #{status}")
+    Logger.dev("testCollisionBetween: box#{boxA.getBoxId()} box#{boxB.getBoxId()} #{status}")     
     if status
       @addCollisionPair(boxA, boxB)
     else
@@ -598,7 +642,7 @@ class @StackBoard
 
 # unit: cm
 pallet =      {width:250, height:400, overhang: -10}  
-box    =      {width:60,  height:30,  minDistance: 5}
+box    =      {x:0, y: 0, width:60,  height:30,  minDistance: 5}
 # unit: pixal
 # canvas available paiting zone
 canvasZone =  {width:260, height:320, stage_zoom: 1.5}

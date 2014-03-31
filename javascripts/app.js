@@ -90,17 +90,26 @@
     Box.prototype.defaults = {
       boxId: 'nullID',
       collisionStatus: false,
-      moveOffset: 4
+      moveOffset: 4,
+      rotate: 0
     };
 
     Box.prototype.initialize = function(params) {
       this.on('change:rect', this.rectChanged);
       this.set({
+        innerBox: {
+          x: params.x,
+          y: params.y,
+          width: params.width,
+          height: params.height
+        }
+      });
+      this.set({
         rect: new Kinetic.Rect({
           x: 0,
           y: 0,
-          width: params.width,
-          height: params.height
+          width: this.get('innerBox').width,
+          height: this.get('innerBox').height
         })
       });
       this.set({
@@ -117,29 +126,43 @@
       this.set({
         group: new Kinetic.Group({
           x: 0,
-          y: 0,
-          rotation: 0
+          y: 0
         })
       });
       this.get('group').add(this.get('rect'));
       this.get('group').add(this.get('title'));
       if (params.minDistance > 0) {
         this.set({
-          outRect: new Kinetic.Rect({
-            x: (-1) * params.minDistance,
-            y: (-1) * params.minDistance,
-            width: params.width + 2 * params.minDistance,
-            height: params.height + 2 * params.minDistance,
+          minDistance: params.minDistance
+        });
+        this.set({
+          outerBox: {
+            x: this.get('innerBox').x - params.minDistance,
+            y: this.get('innerBox').y - params.minDistance,
+            width: this.get('innerBox').width + 2 * params.minDistance,
+            height: this.get('innerBox').height + 2 * params.minDistance
+          }
+        });
+        this.set({
+          outerRect: new Kinetic.Rect({
+            x: this.get('outerBox').x,
+            y: this.get('outerBox').y,
+            width: this.get('outerBox').width,
+            height: this.get('outerBox').height,
             strokeRed: 38,
             strokeGreen: 49,
             strokeBlue: 9,
             strokeAlpha: 0.5
           })
         });
-        this.get('outRect').dash([4, 5]);
-        this.get('group').add(this.get('outRect'));
+        this.get('outerRect').dash([4, 5]);
+        this.get('group').add(this.get('outerRect'));
       }
       return Logger.debug('Box: Generate a new box.');
+    };
+
+    Box.prototype.hasOuterRect = function() {
+      return this.get('minDistance') > 0;
     };
 
     Box.prototype.getBoxId = function() {
@@ -169,32 +192,68 @@
       return this.get('group').setX(x);
     };
 
-    Box.prototype.getXPosition = function() {
-      return this.get('group').x();
+    Box.prototype.getXPosition = function(options) {
+      if (options == null) {
+        options = {
+          innerOrOuter: 'inner'
+        };
+      }
+      if (options.innerOrOuter === 'outer') {
+        return this.get('group').x() - this.get('minDistance');
+      } else {
+        return this.get('group').x();
+      }
     };
 
     Box.prototype.setYPosition = function(y) {
       return this.get('group').setY(y);
     };
 
-    Box.prototype.getYPosition = function() {
-      return this.get('group').y();
+    Box.prototype.getYPosition = function(options) {
+      if (options == null) {
+        options = {
+          innerOrOuter: 'inner'
+        };
+      }
+      if (options.innerOrOuter === 'outer') {
+        return this.get('group').y() - this.get('minDistance');
+      } else {
+        return this.get('group').y();
+      }
     };
 
     Box.prototype.setHeight = function(height) {
       return this.get('rect').setHeight(height);
     };
 
-    Box.prototype.getHeight = function() {
-      return this.get('rect').height();
+    Box.prototype.getHeight = function(options) {
+      if (options == null) {
+        options = {
+          innerOrOuter: 'inner'
+        };
+      }
+      if (options.innerOrOuter === 'outer') {
+        return this.get('rect').height() + this.get('minDistance') * 2;
+      } else {
+        return this.get('rect').height();
+      }
     };
 
     Box.prototype.setWidth = function(width) {
       return this.get('rect').setWidth(width);
     };
 
-    Box.prototype.getWidth = function() {
-      return this.get('rect').width();
+    Box.prototype.getWidth = function(options) {
+      if (options == null) {
+        options = {
+          innerOrOuter: 'inner'
+        };
+      }
+      if (options.innerOrOuter === 'outer') {
+        return this.get('rect').width() + this.get('minDistance') * 2;
+      } else {
+        return this.get('rect').width();
+      }
     };
 
     Box.prototype.getPointA = function() {
@@ -316,7 +375,9 @@
     };
 
     Boxes.prototype.testCollisionBetween = function(boxA, boxB) {
-      return this.collisionUtil.testCollisionBetween(boxA, boxB);
+      return this.collisionUtil.testCollisionBetween(boxA, boxB, {
+        collisionType: 'outer-outer'
+      });
     };
 
     Boxes.prototype.addNewBox = function() {
@@ -365,7 +426,7 @@
       Logger.debug("...Collision start...");
       result = false;
       result = _.reduce(this.models, (function(status, box) {
-        if (this.currentBox.getTitleName() !== box.getTitleName() && this.currentBox.getTitleName() !== 'nullID') {
+        if (this.currentBox.getBoxId() !== box.getBoxId() && this.currentBox.getBoxId() !== 'nullID') {
           return this.testCollisionBetween(this.currentBox, box) || status;
         } else {
           return status;
@@ -760,17 +821,68 @@
       return status = result.length > 0;
     };
 
-    CollisionUtil.prototype.testCollisionBetween = function(boxA, boxB) {
+    CollisionUtil.prototype.testCollisionBetween = function(boxA, boxB, options) {
       var boxABottom, boxALeft, boxARight, boxATop, boxBBottom, boxBLeft, boxBRight, boxBTop, status;
+      if (options == null) {
+        options = {
+          collisionType: 'inner-inner'
+        };
+      }
       status = false;
-      boxATop = boxA.getYPosition();
-      boxABottom = boxA.getYPosition() + boxA.getHeight();
-      boxALeft = boxA.getXPosition();
-      boxARight = boxA.getXPosition() + boxA.getWidth();
-      boxBTop = boxB.getYPosition();
-      boxBBottom = boxB.getYPosition() + boxB.getHeight();
-      boxBLeft = boxB.getXPosition();
-      boxBRight = boxB.getXPosition() + boxB.getWidth();
+      if (options.collisionType === 'inner-inner') {
+        boxATop = boxA.getYPosition();
+        boxABottom = boxA.getYPosition() + boxA.getHeight();
+        boxALeft = boxA.getXPosition();
+        boxARight = boxA.getXPosition() + boxA.getWidth();
+        boxBTop = boxB.getYPosition();
+        boxBBottom = boxB.getYPosition() + boxB.getHeight();
+        boxBLeft = boxB.getXPosition();
+        boxBRight = boxB.getXPosition() + boxB.getWidth();
+      } else if (options.collisionType === 'outer-outer') {
+        if (boxA.hasOuterRect) {
+          boxATop = boxA.getYPosition({
+            innerOrOuter: 'outer'
+          });
+          boxABottom = boxA.getYPosition({
+            innerOrOuter: 'outer'
+          }) + boxA.getHeight({
+            innerOrOuter: 'outer'
+          });
+          boxALeft = boxA.getXPosition({
+            innerOrOuter: 'outer'
+          });
+          boxARight = boxA.getXPosition({
+            innerOrOuter: 'outer'
+          }) + boxA.getWidth({
+            innerOrOuter: 'outer'
+          });
+          boxBTop = boxB.getYPosition();
+          boxBBottom = boxB.getYPosition() + boxB.getHeight();
+          boxBLeft = boxB.getXPosition();
+          boxBRight = boxB.getXPosition() + boxB.getWidth();
+        } else {
+          boxATop = boxA.getYPosition();
+          boxABottom = boxA.getYPosition() + boxA.getHeight();
+          boxALeft = boxA.getXPosition();
+          boxARight = boxA.getXPosition() + boxA.getWidth();
+          boxBTop = boxB.getYPosition({
+            innerOrOuter: 'outer'
+          });
+          boxBBottom = boxB.getYPosition({
+            innerOrOuter: 'outer'
+          }) + boxB.getHeight({
+            innerOrOuter: 'outer'
+          });
+          boxBLeft = boxB.getXPosition({
+            innerOrOuter: 'outer'
+          });
+          boxBRight = boxB.getXPosition({
+            innerOrOuter: 'outer'
+          }) + boxB.getWidth({
+            innerOrOuter: 'outer'
+          });
+        }
+      }
       if (!(boxABottom < boxBTop || boxATop > boxBBottom || boxALeft > boxBRight || boxARight < boxBLeft)) {
         status = true;
       }
@@ -868,6 +980,8 @@
   };
 
   box = {
+    x: 0,
+    y: 0,
     width: 60,
     height: 30,
     minDistance: 5
