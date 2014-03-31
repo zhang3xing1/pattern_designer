@@ -123,7 +123,27 @@
       });
       this.get('group').add(this.get('rect'));
       this.get('group').add(this.get('title'));
+      if (params.minDistance > 0) {
+        this.set({
+          outRect: new Kinetic.Rect({
+            x: (-1) * params.minDistance,
+            y: (-1) * params.minDistance,
+            width: params.width + 2 * params.minDistance,
+            height: params.height + 2 * params.minDistance,
+            strokeRed: 38,
+            strokeGreen: 49,
+            strokeBlue: 9,
+            strokeAlpha: 0.5
+          })
+        });
+        this.get('outRect').dash([4, 5]);
+        this.get('group').add(this.get('outRect'));
+      }
       return Logger.debug('Box: Generate a new box.');
+    };
+
+    Box.prototype.getBoxId = function() {
+      return this.get('boxId');
     };
 
     Box.prototype.getMoveOffset = function() {
@@ -209,9 +229,8 @@
       };
     };
 
-    Box.prototype.updateRectStyle = function(options) {
-      Logger.debug("updateRectStyle: " + (this.getTitleName()));
-      return this.get('rect').setFill(options.color);
+    Box.prototype.updateTitle = function(newTitle) {
+      return this.get('title').setText(newTitle);
     };
 
     Box.prototype.rectChanged = function() {
@@ -281,7 +300,7 @@
 
     Boxes.prototype.pprint = function() {
       return _.reduce(this.models, (function(str, box) {
-        return "" + str + " box" + (box.getTitleName());
+        return "" + str + " box" + (box.getBoxId());
       }), "");
     };
 
@@ -358,13 +377,15 @@
     };
 
     Boxes.prototype.draw = function() {
-      var box, _i, _len, _ref;
-      _ref = this.models;
-      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-        box = _ref[_i];
+      var box, index;
+      index = 0;
+      while (index < this.models.length) {
+        box = this.models[index];
         Logger.dev("In draw: Box" + (box.getTitleName()) + ".collision=" + (box.get('collisionStatus')));
         box.changeFillColor();
+        box.updateTitle(index + 1);
         this.layer.add(box.box());
+        index += 1;
       }
       return this.layer.draw();
     };
@@ -635,11 +656,11 @@
     };
 
     CollisionUtil.prototype.removeCollisionPair = function(boxA, boxB) {
-      Logger.dev("removeCollisionPair: box" + (boxA.getTitleName()) + ", box" + (boxB.getTitleName()));
+      Logger.dev("removeCollisionPair: box" + (boxA.getBoxId()) + ", box" + (boxB.getBoxId()));
       this.updateCollisionRelationBetween({
         action: 'remove',
-        boxAId: boxA.getTitleName(),
-        boxBId: boxB.getTitleName()
+        boxAId: boxA.getBoxId(),
+        boxBId: boxB.getBoxId()
       });
       Logger.dev("@isCollisionInclude(boxA) " + (this.isCollisionInclude(boxA)) + "  isCollisionInclude(boxB) " + (this.isCollisionInclude(boxB)));
       if (!this.isCollisionInclude(boxA)) {
@@ -651,11 +672,11 @@
     };
 
     CollisionUtil.prototype.addCollisionPair = function(boxA, boxB) {
-      Logger.dev("addCollisionPair: box" + (boxA.getTitleName()) + ", box" + (boxB.getTitleName()));
+      Logger.dev("addCollisionPair: box" + (boxA.getBoxId()) + ", box" + (boxB.getBoxId()));
       this.updateCollisionRelationBetween({
         action: 'add',
-        boxAId: boxA.getTitleName(),
-        boxBId: boxB.getTitleName()
+        boxAId: boxA.getBoxId(),
+        boxBId: boxB.getBoxId()
       });
       boxA.makeCollisionStatus();
       return boxB.makeCollisionStatus();
@@ -663,7 +684,7 @@
 
     CollisionUtil.prototype.deleteCollisionWith = function(box, boxes) {
       var toDeletedBoxId;
-      toDeletedBoxId = box.getTitleName();
+      toDeletedBoxId = box.getBoxId();
       this.updateCollisionRelationBetween({
         action: 'delete',
         boxId: toDeletedBoxId
@@ -732,7 +753,7 @@
 
     CollisionUtil.prototype.isCollisionInclude = function(boxA) {
       var boxAId, result, status;
-      boxAId = boxA.getTitleName();
+      boxAId = boxA.getBoxId();
       result = _.filter(this.models, function(pair) {
         return pair.boxId !== boxAId && pair.isCollisionWith(boxAId);
       });
@@ -753,7 +774,7 @@
       if (!(boxABottom < boxBTop || boxATop > boxBBottom || boxALeft > boxBRight || boxARight < boxBLeft)) {
         status = true;
       }
-      Logger.dev("testCollisionBetween: box" + (boxA.getTitleName()) + " box" + (boxB.getTitleName()) + " " + status);
+      Logger.dev("testCollisionBetween: box" + (boxA.getBoxId()) + " box" + (boxB.getBoxId()) + " " + status);
       if (status) {
         this.addCollisionPair(boxA, boxB);
       } else {
@@ -841,21 +862,21 @@
   })();
 
   pallet = {
-    width: 400,
-    height: 500,
+    width: 250,
+    height: 400,
     overhang: -10
   };
 
   box = {
     width: 60,
     height: 30,
-    minDistance: 20
+    minDistance: 5
   };
 
   canvasZone = {
     width: 260,
     height: 320,
-    stage_zoom: 2
+    stage_zoom: 1.5
   };
 
   params = {
