@@ -64,10 +64,15 @@ class @Box extends Backbone.Model
     @on('change:rect', @rectChanged)
     #Fill Color: rgb(60, 118, 61)
     
-    [box_params, @color_params] = [params.box, params.color]
+    [box_params, @color_params, @ratio, @zone] = [params.box, params.color, params.ratio, params.zone]
+
+    console.log params.ratio
     
-    console.log @color_params
-    @set innerBox: {x: box_params.x, y: box_params.y, width: box_params.width, height: box_params.height}
+    @set innerBox: 
+      x:      box_params.x 
+      y:      box_params.y
+      width:  box_params.width
+      height: box_params.height
 
     @set rect: new Kinetic.Rect(
                                   x:            0
@@ -77,12 +82,12 @@ class @Box extends Backbone.Model
                                 )
     @set title: new Kinetic.Text(
                                   x:            @get('rect').x() + @get('rect').width()/2  - 5
-                                  y:            @get('rect').y() + @get('rect').height()/2 + 5
+                                  y:            @get('rect').y() + @get('rect').height()/2 - 5
                                   fontSize:     14
                                   fontFamily:   "Calibri"
                                   fill:         "white"
                                   text:         @get('boxId')
-                                  scaleY:       -1
+                                  # scaleY:       -1
                                 )
     @set group: new Kinetic.Group(
                                   x: 0
@@ -95,10 +100,11 @@ class @Box extends Backbone.Model
     box_params.minDistance = $("input:checked","#minDistanceRadio").val()
     if box_params.minDistance > 0
       @set minDistance: box_params.minDistance
-      @set outerBox: {x: @get('innerBox').x - box_params.minDistance, \
-                      y: @get('innerBox').y - box_params.minDistance,  \
-                      width: @get('innerBox').width + 2 * box_params.minDistance, \
-                      height: @get('innerBox').height + 2 * box_params.minDistance}
+      @set outerBox: 
+          x:      @get('innerBox').x - box_params.minDistance
+          y:      @get('innerBox').y - box_params.minDistance
+          width:  @get('innerBox').width + 2 * box_params.minDistance
+          height: @get('innerBox').height + 2 * box_params.minDistance
       @set outerRect: new Kinetic.Rect(
                               x:              @get('outerBox').x
                               y:              @get('outerBox').y
@@ -130,6 +136,15 @@ class @Box extends Backbone.Model
     @get('title').text() 
   setXPosition: (x) ->
     @get('group').setX(x)
+  getXPositionByRatio: () ->
+    (@get('group').x() - @zone.bound.left) / @ratio
+  getYPositionByRatio: ()  ->   
+    (@zone.bound.bottom - @get('group').y() - @getHeight()) / @ratio
+  getWidthByRatio: () ->
+    @get('rect').width() / @ratio
+  getHeightByRatio: ()  ->   
+    @get('rect').height() / @ratio
+
   getXPosition: (options={innerOrOuter: 'inner'}) ->
     if options.innerOrOuter == 'outer' && @hasOuterRect()
       @get('group').x() - @get('minDistance')
@@ -242,6 +257,8 @@ class @Boxes extends Backbone.Collection
     @box_params = 
       box:    params.box
       color:  params.color
+      ratio:  params.ratio
+      zone:   params.zone
 
     @on('add', @showCurrentBoxPanel)
     @on('all', @draw) 
@@ -670,6 +687,14 @@ class @StackBoard
     )
 
     @layer = new Kinetic.Layer()
+
+    @layer.on "click", (evt) ->
+  
+      # get the shape that was clicked on
+      shape = evt.target
+      alert "you clicked on \"" + shape.getName() + "\""
+      return
+
     @stage.add @layer
 
     @layer.add stageBackground
@@ -677,13 +702,13 @@ class @StackBoard
     @layer.add overhangBackground
 
     #### flip context
-    # @layer.getContext().translate(0, @zone.height)
+    # @layer.getContext().translate(0, @zone.height + @zone.y * 2)
     # @layer.getContext().scale(1, -1);
 
 
     Logger.debug("StackBoard: Stage Initialized!")
     Logger.info("StackBoard: Initialized!")
-    boxes_params = {layer: @layer, zone: @zone, box: params.box, color: params.color}
+    boxes_params = {layer: @layer, zone: @zone, box: params.box, color: params.color, ratio: @ratio}
     @boxes = new Boxes(boxes_params)
     @boxes.shift()
     rivets.bind $('.boxes'),{boxes: @boxes}
@@ -695,7 +720,7 @@ class @StackBoard
 pallet =  
   width:    250
   height:   400 
-  overhang: 10 
+  overhang: 0 
 box  =      
   x:      0 
   y:      0
@@ -818,8 +843,8 @@ params =
 
 @board = new StackBoard(params)
 
-rivets.formatters.offset = (value) ->
-   value = value % 99 
+rivets.formatters.suffix_cm = (value) ->
+   "#{value.toFixed(2)} cm"
 
 $("input").prop "readonly", true
 

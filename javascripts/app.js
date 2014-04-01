@@ -98,8 +98,8 @@
     Box.prototype.initialize = function(params) {
       var box_params, _ref;
       this.on('change:rect', this.rectChanged);
-      _ref = [params.box, params.color], box_params = _ref[0], this.color_params = _ref[1];
-      console.log(this.color_params);
+      _ref = [params.box, params.color, params.ratio, params.zone], box_params = _ref[0], this.color_params = _ref[1], this.ratio = _ref[2], this.zone = _ref[3];
+      console.log(params.ratio);
       this.set({
         innerBox: {
           x: box_params.x,
@@ -119,12 +119,11 @@
       this.set({
         title: new Kinetic.Text({
           x: this.get('rect').x() + this.get('rect').width() / 2 - 5,
-          y: this.get('rect').y() + this.get('rect').height() / 2 + 5,
+          y: this.get('rect').y() + this.get('rect').height() / 2 - 5,
           fontSize: 14,
           fontFamily: "Calibri",
           fill: "white",
-          text: this.get('boxId'),
-          scaleY: -1
+          text: this.get('boxId')
         })
       });
       this.set({
@@ -195,6 +194,22 @@
 
     Box.prototype.setXPosition = function(x) {
       return this.get('group').setX(x);
+    };
+
+    Box.prototype.getXPositionByRatio = function() {
+      return (this.get('group').x() - this.zone.bound.left) / this.ratio;
+    };
+
+    Box.prototype.getYPositionByRatio = function() {
+      return (this.zone.bound.bottom - this.get('group').y() - this.getHeight()) / this.ratio;
+    };
+
+    Box.prototype.getWidthByRatio = function() {
+      return this.get('rect').width() / this.ratio;
+    };
+
+    Box.prototype.getHeightByRatio = function() {
+      return this.get('rect').height() / this.ratio;
     };
 
     Box.prototype.getXPosition = function(options) {
@@ -387,7 +402,9 @@
       this.zone = params.zone;
       this.box_params = {
         box: params.box,
-        color: params.color
+        color: params.color,
+        ratio: params.ratio,
+        zone: params.zone
       };
       this.on('add', this.showCurrentBoxPanel);
       this.on('all', this.draw);
@@ -1002,6 +1019,11 @@
         height: params.stage.height * params.stage.stage_zoom
       });
       this.layer = new Kinetic.Layer();
+      this.layer.on("click", function(evt) {
+        var shape;
+        shape = evt.target;
+        alert("you clicked on \"" + shape.getName() + "\"");
+      });
       this.stage.add(this.layer);
       this.layer.add(stageBackground);
       this.layer.add(palletBackground);
@@ -1012,7 +1034,8 @@
         layer: this.layer,
         zone: this.zone,
         box: params.box,
-        color: params.color
+        color: params.color,
+        ratio: this.ratio
       };
       this.boxes = new Boxes(boxes_params);
       this.boxes.shift();
@@ -1030,7 +1053,7 @@
   pallet = {
     width: 250,
     height: 400,
-    overhang: 10
+    overhang: 0
   };
 
   box = {
@@ -1178,8 +1201,8 @@
 
   this.board = new StackBoard(params);
 
-  rivets.formatters.offset = function(value) {
-    return value = value % 99;
+  rivets.formatters.suffix_cm = function(value) {
+    return "" + (value.toFixed(2)) + " cm";
   };
 
   $("input").prop("readonly", true);
