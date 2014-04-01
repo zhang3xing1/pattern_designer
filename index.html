@@ -24,7 +24,7 @@
               <input type="text" name="new_box" class="form-control" placeholder="name" readonly="readOnly" rv-value="boxes.availableNewBoxId">
               <span class="input-group-btn">
                 <button class="btn btn-primary" rv-on-click="boxes.addNewBox">Add</button>
-              </span>
+              </span> 
           </div>
           <div class="panel panel-default row" style="display: none">
                 <div class="panel-heading panel-heading-info ">
@@ -104,20 +104,14 @@
           </div>
           <div class="row">
               <div class="col-md-5" style="margin-left: -3%" >
-<!--                   <div class="btn-group dropup">
-                      <button type="button" class="btn btn-warning">Manul Stack</button>
-                      <button type="button" class="btn btn-warning dropdown-toggle" data-toggle="dropdown">
-                          <span class="caret"></span>
-                          <span class="sr-only">Toggle Dropdown</span>
-                      </button>
-                      <ul class="dropdown-menu" role="menu">
-                          <li><a href="#">4 Packages Example</a></li>
-                          <li><a href="#">5 Packages Example</a></li>
-                          <li><a href="#">6 Packages Example</a></li>
-                          <li class="divider"></li>
-                          <li><a href="#">Manul Stack Model</a></li>
-                      </ul>
-                  </div> -->
+                <div class="debug" style="background-color: white">
+                  <div id="minDistanceRadio">
+                    <input type="radio" name="minDistance"  value="5" checked="checked">
+                        5
+                    <input type="radio" name="minDistance"  value="0" >
+                        0           
+                  </div>
+                </div>
               </div>
               <div>
                   <div class="col-md-2" style="float: right; margin-right: 2%" >
@@ -131,6 +125,7 @@
           </div>
         </div>
       </div>
+
 
         <!-- test -->
 <!--         <div class="alert alert-success boxes row">
