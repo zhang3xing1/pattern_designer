@@ -56,14 +56,18 @@ class @Box extends Backbone.Model
   defaults: {
     boxId:            'nullID'
     collisionStatus:  false
+    overhangStatus:   false
     moveOffset:       4
     rotate:           0
   }
   initialize: (params) ->
     @on('change:rect', @rectChanged)
     #Fill Color: rgb(60, 118, 61)
-
-    @set innerBox: {x: params.x, y: params.y, width: params.width, height: params.height}
+    
+    [box_params, @color_params] = [params.box, params.color]
+    
+    console.log @color_params
+    @set innerBox: {x: box_params.x, y: box_params.y, width: box_params.width, height: box_params.height}
 
     @set rect: new Kinetic.Rect(
                                   x:            0
@@ -88,22 +92,22 @@ class @Box extends Backbone.Model
     @get('group').add(@get('title'))
 
     ###### Box has an outer Rect ######
-    params.minDistance = $("#minDistance").val()
-    if params.minDistance > 0
-      @set minDistance: params.minDistance
-      @set outerBox: {x: @get('innerBox').x - params.minDistance, \
-                      y: @get('innerBox').y - params.minDistance,  \
-                      width: @get('innerBox').width + 2 * params.minDistance, \
-                      height: @get('innerBox').height + 2 * params.minDistance}
+    box_params.minDistance = $("input:checked","#minDistanceRadio").val()
+    if box_params.minDistance > 0
+      @set minDistance: box_params.minDistance
+      @set outerBox: {x: @get('innerBox').x - box_params.minDistance, \
+                      y: @get('innerBox').y - box_params.minDistance,  \
+                      width: @get('innerBox').width + 2 * box_params.minDistance, \
+                      height: @get('innerBox').height + 2 * box_params.minDistance}
       @set outerRect: new Kinetic.Rect(
                               x:              @get('outerBox').x
                               y:              @get('outerBox').y
                               width:          @get('outerBox').width
                               height:         @get('outerBox').height
-                              strokeRed:      38
-                              strokeGreen:    49
-                              strokeBlue:     9
-                              strokeAlpha:    0.5
+                              strokeRed:      @color_params.boxWithOuterRect.normal.outer.stroke.red
+                              strokeGreen:    @color_params.boxWithOuterRect.normal.outer.stroke.green
+                              strokeBlue:     @color_params.boxWithOuterRect.normal.outer.stroke.blue
+                              strokeAlpha:    @color_params.boxWithOuterRect.normal.outer.stroke.alpha
                             )
       @get('outerRect').dash(([4, 5]))
       @get('group').add(@get('outerRect'))
@@ -186,13 +190,43 @@ class @Box extends Backbone.Model
     @set('collisionStatus', false)
   changeFillColor: ->
     if @get('collisionStatus')
-      @get('rect').fillRed(82)
-      @get('rect').fillGreen(1)
-      @get('rect').fillBlue(246)
+      if @hasOuterRect()
+        @get('rect').fillRed(   @color_params.boxWithOuterRect.collision.inner.red)
+        @get('rect').fillGreen( @color_params.boxWithOuterRect.collision.inner.green)
+        @get('rect').fillBlue(  @color_params.boxWithOuterRect.collision.inner.blue)
+        @get('rect').fillAlpha( @color_params.boxWithOuterRect.collision.inner.alpha)
+        @get('outerRect').fillRed(   @color_params.boxWithOuterRect.collision.outer.red)
+        @get('outerRect').fillGreen( @color_params.boxWithOuterRect.collision.outer.green)
+        @get('outerRect').fillBlue(  @color_params.boxWithOuterRect.collision.outer.blue)
+        @get('outerRect').fillAlpha( @color_params.boxWithOuterRect.collision.outer.alpha)
+        @get('outerRect').strokeRed(   @color_params.boxWithOuterRect.collision.outer.stroke.red)
+        @get('outerRect').strokeGreen( @color_params.boxWithOuterRect.collision.outer.stroke.green)
+        @get('outerRect').strokeBlue(  @color_params.boxWithOuterRect.collision.outer.stroke.blue)
+        @get('outerRect').strokeAlpha( @color_params.boxWithOuterRect.collision.outer.stroke.alpha)
+      else
+        @get('rect').fillRed(   @color_params.boxOnlyInnerRect.collision.red)
+        @get('rect').fillGreen( @color_params.boxOnlyInnerRect.collision.green)
+        @get('rect').fillBlue(  @color_params.boxOnlyInnerRect.collision.blue)
+        @get('rect').fillAlpha( @color_params.boxOnlyInnerRect.collision.alpha)
     else
-      @get('rect').fillRed(82)
-      @get('rect').fillGreen(221)
-      @get('rect').fillBlue(246)
+      if @hasOuterRect()
+        @get('rect').fillRed(   @color_params.boxWithOuterRect.normal.inner.red)
+        @get('rect').fillGreen( @color_params.boxWithOuterRect.normal.inner.green)
+        @get('rect').fillBlue(  @color_params.boxWithOuterRect.normal.inner.blue)
+        @get('rect').fillAlpha( @color_params.boxWithOuterRect.normal.inner.alpha)
+        @get('outerRect').fillRed(   @color_params.boxWithOuterRect.normal.outer.red)
+        @get('outerRect').fillGreen( @color_params.boxWithOuterRect.normal.outer.green)
+        @get('outerRect').fillBlue(  @color_params.boxWithOuterRect.normal.outer.blue)
+        @get('outerRect').fillAlpha( @color_params.boxWithOuterRect.normal.outer.alpha)
+        @get('outerRect').strokeRed(   @color_params.boxWithOuterRect.normal.outer.stroke.red)
+        @get('outerRect').strokeGreen( @color_params.boxWithOuterRect.normal.outer.stroke.green)
+        @get('outerRect').strokeBlue(  @color_params.boxWithOuterRect.normal.outer.stroke.blue)
+        @get('outerRect').strokeAlpha( @color_params.boxWithOuterRect.normal.outer.stroke.alpha)
+      else
+        @get('rect').fillRed(   @color_params.boxOnlyInnerRect.normal.red)
+        @get('rect').fillGreen( @color_params.boxOnlyInnerRect.normal.green)
+        @get('rect').fillBlue(  @color_params.boxOnlyInnerRect.normal.blue)
+        @get('rect').fillAlpha( @color_params.boxOnlyInnerRect.normal.alpha)
 
   printPoints: ->
     Logger.debug("PointA(x:#{@getPointA().x},y:#{@getPointA().y}) " +
@@ -200,13 +234,14 @@ class @Box extends Backbone.Model
                 "PointC(x:#{@getPointC().x},y:#{@getPointC().y}) " +
                 "PointD(x:#{@getPointD().x},y:#{@getPointD().y}) ")
 
-
 class @Boxes extends Backbone.Collection
   model: Box
   initialize: (params)->
     @layer = params.layer
     @zone = params.zone
-    @box_params = params.box
+    @box_params = 
+      box:    params.box
+      color:  params.color
 
     @on('add', @showCurrentBoxPanel)
     @on('all', @draw) 
@@ -229,8 +264,8 @@ class @Boxes extends Backbone.Collection
     @collisionUtil.testCollisionBetween(boxA, boxB, {collisionType: 'outer-outer'})
   addNewBox: =>
     newBox  = new Box(@box_params)
-    newBox.setXPosition(Math.min(newBox.getXPosition() + @availableNewBoxId * newBox.getMoveOffset(), @zone.width - newBox.getWidth() ))
-    newBox.setYPosition(Math.min(newBox.getYPosition() + @availableNewBoxId * newBox.getMoveOffset(), @zone.height - newBox.getHeight()))
+    newBox.setXPosition(Math.min(@zone.bound.left + @availableNewBoxId * newBox.getMoveOffset(), @zone.bound.right))
+    newBox.setYPosition(Math.min(@zone.bound.top + @availableNewBoxId * newBox.getMoveOffset(), @zone.bound.bottom))
     newBox.setTitleName(@availableNewBoxId)
     newBox.set('boxId', @availableNewBoxId)
     newBox.box().on "click", =>
@@ -304,7 +339,7 @@ class @Boxes extends Backbone.Collection
     Logger.debug("@currentBox:\t" + @currentBox.getTitleName())
     @currentBox.setYPosition(@currentBox.getYPosition() - @currentBox.getMoveOffset())
     unless @validateZone(@currentBox)
-      @currentBox.setYPosition(0)
+      @currentBox.setYPosition(@zone.bound.top)
       @flash = "Box#{@currentBox.getTitleName()} cannot be moved UP!"
     else
       @flash =  "box#{@currentBox.getTitleName()} selected!"
@@ -314,7 +349,7 @@ class @Boxes extends Backbone.Collection
     Logger.debug("@currentBox:\t" + @currentBox.getTitleName())
     @currentBox.setYPosition(@currentBox.getYPosition() + @currentBox.getMoveOffset())
     unless @validateZone(@currentBox)
-      @currentBox.setYPosition(@zone.height - @currentBox.getHeight())
+      @currentBox.setYPosition(@zone.bound.bottom - @currentBox.getHeight())
       @flash = "Box#{@currentBox.getTitleName()} cannot be moved DOWN!"
     else
       @flash =  "box#{@currentBox.getTitleName()} selected!"
@@ -324,7 +359,7 @@ class @Boxes extends Backbone.Collection
     Logger.debug("@currentBox:\t" + @currentBox.getTitleName())
     @currentBox.setXPosition(@currentBox.getXPosition() - @currentBox.getMoveOffset())
     unless @validateZone(@currentBox)
-      @currentBox.setXPosition(0)
+      @currentBox.setXPosition(@zone.bound.left)
       @flash = "Box#{@currentBox.getTitleName()} cannot be moved LEFT!"
     else
       @flash =  "box#{@currentBox.getTitleName()} selected!"
@@ -335,7 +370,7 @@ class @Boxes extends Backbone.Collection
     Logger.debug("@currentBox:\t" + @currentBox.getXPosition())
     @currentBox.setXPosition(@currentBox.getXPosition() + @currentBox.getMoveOffset())
     unless @validateZone(@currentBox)
-      @currentBox.setXPosition(@zone.width - @currentBox.getWidth())
+      @currentBox.setXPosition(@zone.bound.right - @currentBox.getWidth())
       @flash = "Box#{@currentBox.getTitleName()} cannot be moved RIGHT!"
     else
       @flash =  "box#{@currentBox.getTitleName()} selected!"
@@ -350,10 +385,10 @@ class @Boxes extends Backbone.Collection
     result
   validateZoneX: (point) ->
     Logger.debug("validateZoneX: point.x #{point.x}, @zone.width #{@zone.width}")
-    0<= point.x <= @zone.width
+    @zone.bound.left <= point.x <= @zone.bound.right
   validateZoneY: (point) ->
     Logger.debug("validateZoneY: point.y #{point.y}, @zone.width #{@zone.height}")
-    0<= point.y <= @zone.height
+    @zone.bound.top <= point.y <= @zone.bound.bottom
 
 
 class CollisionPair extends Backbone.Model
@@ -573,7 +608,6 @@ class CollisionUtil extends Backbone.Collection
 
 class @StackBoard
   constructor:(params) ->
-    @zone = params.zone
     #background_color: rgb(255,​ 228,​ 196)
     
     longerEdge = Math.max(pallet.width, pallet.height)
@@ -585,41 +619,54 @@ class @StackBoard
       overhangOffset.x = overhangOffset.y = box.minDistance - pallet.overhang
       overhangOffset.edge = pallet.overhang - box.minDistance
 
-    @ratio = @zone.height / (longerEdge + 2 * margin)
+    @ratio = params.stage.height / (longerEdge + 2 * margin)
 
     stageBackground = new Kinetic.Rect(
         x:            0
         y:            0
-        width:        @zone.width
-        height:       @zone.height
-        fill:         'white'
+        width:        params.stage.width
+        height:       params.stage.height
+        fillRed:      params.color.stage.red
+        fillGreen:    params.color.stage.green
+        fillBlue:     params.color.stage.blue
       )
     palletBackground = new Kinetic.Rect(
         x:            margin * @ratio
         y:            margin * @ratio
         width:        shorterEdge * @ratio
         height:       longerEdge * @ratio
-        fillRed:      251
-        fillGreen:    209
-        fillBlue:     175
-      )
-    overhangBackground = new Kinetic.Rect(
-        x:            overhangOffset.x * @ratio
-        y:            overhangOffset.y * @ratio
-        width:        (shorterEdge + pallet.overhang * 2) * @ratio 
-        height:       (longerEdge + pallet.overhang * 2) * @ratio
-        strokeRed:      238
-        strokeGreen:    49
-        strokeBlue:     109
-        strokeAlpha:    0.5
+        fillRed:      params.color.pallet.red
+        fillGreen:    params.color.pallet.green
+        fillBlue:     params.color.pallet.blue
       )
 
+    @zone = 
+        x: overhangOffset.x * @ratio
+        y: overhangOffset.y * @ratio 
+        width: (shorterEdge + pallet.overhang * 2) * @ratio
+        height:(longerEdge + pallet.overhang * 2) * @ratio
+        bound:
+          top:      overhangOffset.y * @ratio  # y
+          bottom:   overhangOffset.y * @ratio + (longerEdge + pallet.overhang * 2) * @ratio # y + height
+          left:     overhangOffset.x * @ratio # x
+          right:    overhangOffset.x * @ratio + (shorterEdge + pallet.overhang * 2) * @ratio # x + width 
+
+    overhangBackground = new Kinetic.Rect(
+        x:              @zone.x
+        y:              @zone.y
+        width:          @zone.width
+        height:         @zone.height
+        strokeRed:      params.color.overhang.stroke.red
+        strokeGreen:    params.color.overhang.stroke.green
+        strokeBlue:     params.color.overhang.stroke.blue
+        strokeAlpha:    params.color.overhang.stroke.alpha
+      )
     overhangBackground.dash(([4, 5]))
 
     @stage = new Kinetic.Stage(
       container: "canvas_container"
-      width:  @zone.width * @zone.stage_zoom
-      height: @zone.height * @zone.stage_zoom
+      width:  params.stage.width * params.stage.stage_zoom
+      height: params.stage.height * params.stage.stage_zoom
     )
 
     @layer = new Kinetic.Layer()
@@ -628,13 +675,15 @@ class @StackBoard
     @layer.add stageBackground
     @layer.add palletBackground
     @layer.add overhangBackground
+
+    #### flip context
     # @layer.getContext().translate(0, @zone.height)
     # @layer.getContext().scale(1, -1);
 
 
     Logger.debug("StackBoard: Stage Initialized!")
     Logger.info("StackBoard: Initialized!")
-    boxes_params = {layer: @layer, zone: @zone, box: params.box}
+    boxes_params = {layer: @layer, zone: @zone, box: params.box, color: params.color}
     @boxes = new Boxes(boxes_params)
     @boxes.shift()
     rivets.bind $('.boxes'),{boxes: @boxes}
@@ -643,13 +692,126 @@ class @StackBoard
 #### Params ####
 
 # unit: cm
-pallet =      {width:250, height:400, overhang: -10}  
-box    =      {x:0, y: 0, width:60,  height:30,  minDistance: 10}
+pallet =  
+  width:    250
+  height:   400 
+  overhang: 10 
+box  =      
+  x:      0 
+  y:      0
+  width:  60  
+  height: 30  
+  minDistance: 10
 # unit: pixal
 # canvas available paiting zone
-canvasZone =  {width:260, height:320, stage_zoom: 1.5}
+canvasStage =  
+  width:      260
+  height:     320 
+  stage_zoom: 1.5
 
-params = {pallet: pallet, box: box, zone: canvasZone}
+# color: RGB
+color = 
+    stage:   
+        red:    255
+        green:  255
+        blue:   255
+    pallet: 
+        red:    251
+        green:  209
+        blue:   175
+    overhang: 
+        stroke:
+          red:    238
+          green:  49
+          blue:   109
+          alpha:  0.5
+    boxWithOuterRect:
+      collision:
+        outer:
+          red:    255
+          green:  0
+          blue:   0
+          alpha:  0.5
+          stroke:
+            red:    255
+            green:  0
+            blue:   0
+            alpha:  0.5           
+        inner:
+          red:    255
+          green:  0
+          blue:   0
+          alpha:  1
+      overhang: 
+        outer:
+          stroke:
+            red:    147
+            green:  218
+            blue:   87
+            alpha:  0.5           
+        inner:
+          red:    108
+          green:  153
+          blue:   57
+          alpha:  1
+      normal:
+        outer:
+          red:    255
+          green:  0
+          blue:   0
+          alpha:  0
+          stroke:
+            red:    147
+            green:  218
+            blue:   87
+            alpha:  0.5           
+        inner:
+          red:    108
+          green:  153
+          blue:   57
+          alpha:  1
+          stroke:
+            red:    147
+            green:  218
+            blue:   87
+            alpha:  0.5
+    boxOnlyInnerRect: 
+      collision:
+        red:    255
+        green:  0
+        blue:   0
+        alpha:  0.5
+        stroke:
+          red:    147
+          green:  218
+          blue:   87
+          alpha:  0.5
+      overhang: 
+        red:    121
+        green:  205
+        blue:   255
+        stroke:
+          red:    147
+          green:  218
+          blue:   87
+          alpha:  0.5
+      normal:
+        red:    121
+        green:  205
+        blue:   255
+        alpha:  1
+        stroke:
+          red:    147
+          green:  218
+          blue:   87
+          alpha:  0.5
+
+    
+params = 
+  pallet: pallet
+  box: box
+  stage: canvasStage
+  color: color
 
 ################
 

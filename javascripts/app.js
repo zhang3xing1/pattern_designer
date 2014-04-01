@@ -1,5 +1,5 @@
 (function() {
-  var CollisionPair, CollisionUtil, box, canvasZone, pallet, params,
+  var CollisionPair, CollisionUtil, box, canvasStage, color, pallet, params,
     __hasProp = {}.hasOwnProperty,
     __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
     __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
@@ -90,18 +90,22 @@
     Box.prototype.defaults = {
       boxId: 'nullID',
       collisionStatus: false,
+      overhangStatus: false,
       moveOffset: 4,
       rotate: 0
     };
 
     Box.prototype.initialize = function(params) {
+      var box_params, _ref;
       this.on('change:rect', this.rectChanged);
+      _ref = [params.box, params.color], box_params = _ref[0], this.color_params = _ref[1];
+      console.log(this.color_params);
       this.set({
         innerBox: {
-          x: params.x,
-          y: params.y,
-          width: params.width,
-          height: params.height
+          x: box_params.x,
+          y: box_params.y,
+          width: box_params.width,
+          height: box_params.height
         }
       });
       this.set({
@@ -131,17 +135,17 @@
       });
       this.get('group').add(this.get('rect'));
       this.get('group').add(this.get('title'));
-      params.minDistance = $("#minDistance").val();
-      if (params.minDistance > 0) {
+      box_params.minDistance = $("input:checked", "#minDistanceRadio").val();
+      if (box_params.minDistance > 0) {
         this.set({
-          minDistance: params.minDistance
+          minDistance: box_params.minDistance
         });
         this.set({
           outerBox: {
-            x: this.get('innerBox').x - params.minDistance,
-            y: this.get('innerBox').y - params.minDistance,
-            width: this.get('innerBox').width + 2 * params.minDistance,
-            height: this.get('innerBox').height + 2 * params.minDistance
+            x: this.get('innerBox').x - box_params.minDistance,
+            y: this.get('innerBox').y - box_params.minDistance,
+            width: this.get('innerBox').width + 2 * box_params.minDistance,
+            height: this.get('innerBox').height + 2 * box_params.minDistance
           }
         });
         this.set({
@@ -150,10 +154,10 @@
             y: this.get('outerBox').y,
             width: this.get('outerBox').width,
             height: this.get('outerBox').height,
-            strokeRed: 38,
-            strokeGreen: 49,
-            strokeBlue: 9,
-            strokeAlpha: 0.5
+            strokeRed: this.color_params.boxWithOuterRect.normal.outer.stroke.red,
+            strokeGreen: this.color_params.boxWithOuterRect.normal.outer.stroke.green,
+            strokeBlue: this.color_params.boxWithOuterRect.normal.outer.stroke.blue,
+            strokeAlpha: this.color_params.boxWithOuterRect.normal.outer.stroke.alpha
           })
         });
         this.get('outerRect').dash([4, 5]);
@@ -313,13 +317,45 @@
 
     Box.prototype.changeFillColor = function() {
       if (this.get('collisionStatus')) {
-        this.get('rect').fillRed(82);
-        this.get('rect').fillGreen(1);
-        return this.get('rect').fillBlue(246);
+        if (this.hasOuterRect()) {
+          this.get('rect').fillRed(this.color_params.boxWithOuterRect.collision.inner.red);
+          this.get('rect').fillGreen(this.color_params.boxWithOuterRect.collision.inner.green);
+          this.get('rect').fillBlue(this.color_params.boxWithOuterRect.collision.inner.blue);
+          this.get('rect').fillAlpha(this.color_params.boxWithOuterRect.collision.inner.alpha);
+          this.get('outerRect').fillRed(this.color_params.boxWithOuterRect.collision.outer.red);
+          this.get('outerRect').fillGreen(this.color_params.boxWithOuterRect.collision.outer.green);
+          this.get('outerRect').fillBlue(this.color_params.boxWithOuterRect.collision.outer.blue);
+          this.get('outerRect').fillAlpha(this.color_params.boxWithOuterRect.collision.outer.alpha);
+          this.get('outerRect').strokeRed(this.color_params.boxWithOuterRect.collision.outer.stroke.red);
+          this.get('outerRect').strokeGreen(this.color_params.boxWithOuterRect.collision.outer.stroke.green);
+          this.get('outerRect').strokeBlue(this.color_params.boxWithOuterRect.collision.outer.stroke.blue);
+          return this.get('outerRect').strokeAlpha(this.color_params.boxWithOuterRect.collision.outer.stroke.alpha);
+        } else {
+          this.get('rect').fillRed(this.color_params.boxOnlyInnerRect.collision.red);
+          this.get('rect').fillGreen(this.color_params.boxOnlyInnerRect.collision.green);
+          this.get('rect').fillBlue(this.color_params.boxOnlyInnerRect.collision.blue);
+          return this.get('rect').fillAlpha(this.color_params.boxOnlyInnerRect.collision.alpha);
+        }
       } else {
-        this.get('rect').fillRed(82);
-        this.get('rect').fillGreen(221);
-        return this.get('rect').fillBlue(246);
+        if (this.hasOuterRect()) {
+          this.get('rect').fillRed(this.color_params.boxWithOuterRect.normal.inner.red);
+          this.get('rect').fillGreen(this.color_params.boxWithOuterRect.normal.inner.green);
+          this.get('rect').fillBlue(this.color_params.boxWithOuterRect.normal.inner.blue);
+          this.get('rect').fillAlpha(this.color_params.boxWithOuterRect.normal.inner.alpha);
+          this.get('outerRect').fillRed(this.color_params.boxWithOuterRect.normal.outer.red);
+          this.get('outerRect').fillGreen(this.color_params.boxWithOuterRect.normal.outer.green);
+          this.get('outerRect').fillBlue(this.color_params.boxWithOuterRect.normal.outer.blue);
+          this.get('outerRect').fillAlpha(this.color_params.boxWithOuterRect.normal.outer.alpha);
+          this.get('outerRect').strokeRed(this.color_params.boxWithOuterRect.normal.outer.stroke.red);
+          this.get('outerRect').strokeGreen(this.color_params.boxWithOuterRect.normal.outer.stroke.green);
+          this.get('outerRect').strokeBlue(this.color_params.boxWithOuterRect.normal.outer.stroke.blue);
+          return this.get('outerRect').strokeAlpha(this.color_params.boxWithOuterRect.normal.outer.stroke.alpha);
+        } else {
+          this.get('rect').fillRed(this.color_params.boxOnlyInnerRect.normal.red);
+          this.get('rect').fillGreen(this.color_params.boxOnlyInnerRect.normal.green);
+          this.get('rect').fillBlue(this.color_params.boxOnlyInnerRect.normal.blue);
+          return this.get('rect').fillAlpha(this.color_params.boxOnlyInnerRect.normal.alpha);
+        }
       }
     };
 
@@ -349,7 +385,10 @@
     Boxes.prototype.initialize = function(params) {
       this.layer = params.layer;
       this.zone = params.zone;
-      this.box_params = params.box;
+      this.box_params = {
+        box: params.box,
+        color: params.color
+      };
       this.on('add', this.showCurrentBoxPanel);
       this.on('all', this.draw);
       this.collisionUtil = new CollisionUtil;
@@ -384,8 +423,8 @@
     Boxes.prototype.addNewBox = function() {
       var newBox;
       newBox = new Box(this.box_params);
-      newBox.setXPosition(Math.min(newBox.getXPosition() + this.availableNewBoxId * newBox.getMoveOffset(), this.zone.width - newBox.getWidth()));
-      newBox.setYPosition(Math.min(newBox.getYPosition() + this.availableNewBoxId * newBox.getMoveOffset(), this.zone.height - newBox.getHeight()));
+      newBox.setXPosition(Math.min(this.zone.bound.left + this.availableNewBoxId * newBox.getMoveOffset(), this.zone.bound.right));
+      newBox.setYPosition(Math.min(this.zone.bound.top + this.availableNewBoxId * newBox.getMoveOffset(), this.zone.bound.bottom));
       newBox.setTitleName(this.availableNewBoxId);
       newBox.set('boxId', this.availableNewBoxId);
       newBox.box().on("click", (function(_this) {
@@ -480,7 +519,7 @@
       Logger.debug("@currentBox:\t" + this.currentBox.getTitleName());
       this.currentBox.setYPosition(this.currentBox.getYPosition() - this.currentBox.getMoveOffset());
       if (!this.validateZone(this.currentBox)) {
-        this.currentBox.setYPosition(0);
+        this.currentBox.setYPosition(this.zone.bound.top);
         this.flash = "Box" + (this.currentBox.getTitleName()) + " cannot be moved UP!";
       } else {
         this.flash = "box" + (this.currentBox.getTitleName()) + " selected!";
@@ -493,7 +532,7 @@
       Logger.debug("@currentBox:\t" + this.currentBox.getTitleName());
       this.currentBox.setYPosition(this.currentBox.getYPosition() + this.currentBox.getMoveOffset());
       if (!this.validateZone(this.currentBox)) {
-        this.currentBox.setYPosition(this.zone.height - this.currentBox.getHeight());
+        this.currentBox.setYPosition(this.zone.bound.bottom - this.currentBox.getHeight());
         this.flash = "Box" + (this.currentBox.getTitleName()) + " cannot be moved DOWN!";
       } else {
         this.flash = "box" + (this.currentBox.getTitleName()) + " selected!";
@@ -506,7 +545,7 @@
       Logger.debug("@currentBox:\t" + this.currentBox.getTitleName());
       this.currentBox.setXPosition(this.currentBox.getXPosition() - this.currentBox.getMoveOffset());
       if (!this.validateZone(this.currentBox)) {
-        this.currentBox.setXPosition(0);
+        this.currentBox.setXPosition(this.zone.bound.left);
         this.flash = "Box" + (this.currentBox.getTitleName()) + " cannot be moved LEFT!";
       } else {
         this.flash = "box" + (this.currentBox.getTitleName()) + " selected!";
@@ -520,7 +559,7 @@
       Logger.debug("@currentBox:\t" + this.currentBox.getXPosition());
       this.currentBox.setXPosition(this.currentBox.getXPosition() + this.currentBox.getMoveOffset());
       if (!this.validateZone(this.currentBox)) {
-        this.currentBox.setXPosition(this.zone.width - this.currentBox.getWidth());
+        this.currentBox.setXPosition(this.zone.bound.right - this.currentBox.getWidth());
         this.flash = "Box" + (this.currentBox.getTitleName()) + " cannot be moved RIGHT!";
       } else {
         this.flash = "box" + (this.currentBox.getTitleName()) + " selected!";
@@ -541,13 +580,13 @@
     Boxes.prototype.validateZoneX = function(point) {
       var _ref;
       Logger.debug("validateZoneX: point.x " + point.x + ", @zone.width " + this.zone.width);
-      return (0 <= (_ref = point.x) && _ref <= this.zone.width);
+      return (this.zone.bound.left <= (_ref = point.x) && _ref <= this.zone.bound.right);
     };
 
     Boxes.prototype.validateZoneY = function(point) {
       var _ref;
       Logger.debug("validateZoneY: point.y " + point.y + ", @zone.width " + this.zone.height);
-      return (0 <= (_ref = point.y) && _ref <= this.zone.height);
+      return (this.zone.bound.top <= (_ref = point.y) && _ref <= this.zone.bound.bottom);
     };
 
     return Boxes;
@@ -903,7 +942,6 @@
   this.StackBoard = (function() {
     function StackBoard(params) {
       var boxes_params, longerEdge, margin, overhangBackground, overhangOffset, palletBackground, shorterEdge, stageBackground;
-      this.zone = params.zone;
       longerEdge = Math.max(pallet.width, pallet.height);
       shorterEdge = Math.min(pallet.width, pallet.height);
       margin = Math.max(pallet.overhang, box.minDistance);
@@ -916,38 +954,52 @@
         overhangOffset.x = overhangOffset.y = box.minDistance - pallet.overhang;
         overhangOffset.edge = pallet.overhang - box.minDistance;
       }
-      this.ratio = this.zone.height / (longerEdge + 2 * margin);
+      this.ratio = params.stage.height / (longerEdge + 2 * margin);
       stageBackground = new Kinetic.Rect({
         x: 0,
         y: 0,
-        width: this.zone.width,
-        height: this.zone.height,
-        fill: 'white'
+        width: params.stage.width,
+        height: params.stage.height,
+        fillRed: params.color.stage.red,
+        fillGreen: params.color.stage.green,
+        fillBlue: params.color.stage.blue
       });
       palletBackground = new Kinetic.Rect({
         x: margin * this.ratio,
         y: margin * this.ratio,
         width: shorterEdge * this.ratio,
         height: longerEdge * this.ratio,
-        fillRed: 251,
-        fillGreen: 209,
-        fillBlue: 175
+        fillRed: params.color.pallet.red,
+        fillGreen: params.color.pallet.green,
+        fillBlue: params.color.pallet.blue
       });
-      overhangBackground = new Kinetic.Rect({
+      this.zone = {
         x: overhangOffset.x * this.ratio,
         y: overhangOffset.y * this.ratio,
         width: (shorterEdge + pallet.overhang * 2) * this.ratio,
         height: (longerEdge + pallet.overhang * 2) * this.ratio,
-        strokeRed: 238,
-        strokeGreen: 49,
-        strokeBlue: 109,
-        strokeAlpha: 0.5
+        bound: {
+          top: overhangOffset.y * this.ratio,
+          bottom: overhangOffset.y * this.ratio + (longerEdge + pallet.overhang * 2) * this.ratio,
+          left: overhangOffset.x * this.ratio,
+          right: overhangOffset.x * this.ratio + (shorterEdge + pallet.overhang * 2) * this.ratio
+        }
+      };
+      overhangBackground = new Kinetic.Rect({
+        x: this.zone.x,
+        y: this.zone.y,
+        width: this.zone.width,
+        height: this.zone.height,
+        strokeRed: params.color.overhang.stroke.red,
+        strokeGreen: params.color.overhang.stroke.green,
+        strokeBlue: params.color.overhang.stroke.blue,
+        strokeAlpha: params.color.overhang.stroke.alpha
       });
       overhangBackground.dash([4, 5]);
       this.stage = new Kinetic.Stage({
         container: "canvas_container",
-        width: this.zone.width * this.zone.stage_zoom,
-        height: this.zone.height * this.zone.stage_zoom
+        width: params.stage.width * params.stage.stage_zoom,
+        height: params.stage.height * params.stage.stage_zoom
       });
       this.layer = new Kinetic.Layer();
       this.stage.add(this.layer);
@@ -959,7 +1011,8 @@
       boxes_params = {
         layer: this.layer,
         zone: this.zone,
-        box: params.box
+        box: params.box,
+        color: params.color
       };
       this.boxes = new Boxes(boxes_params);
       this.boxes.shift();
@@ -977,7 +1030,7 @@
   pallet = {
     width: 250,
     height: 400,
-    overhang: -10
+    overhang: 10
   };
 
   box = {
@@ -988,16 +1041,139 @@
     minDistance: 10
   };
 
-  canvasZone = {
+  canvasStage = {
     width: 260,
     height: 320,
     stage_zoom: 1.5
   };
 
+  color = {
+    stage: {
+      red: 255,
+      green: 255,
+      blue: 255
+    },
+    pallet: {
+      red: 251,
+      green: 209,
+      blue: 175
+    },
+    overhang: {
+      stroke: {
+        red: 238,
+        green: 49,
+        blue: 109,
+        alpha: 0.5
+      }
+    },
+    boxWithOuterRect: {
+      collision: {
+        outer: {
+          red: 255,
+          green: 0,
+          blue: 0,
+          alpha: 0.5,
+          stroke: {
+            red: 255,
+            green: 0,
+            blue: 0,
+            alpha: 0.5
+          }
+        },
+        inner: {
+          red: 255,
+          green: 0,
+          blue: 0,
+          alpha: 1
+        }
+      },
+      overhang: {
+        outer: {
+          stroke: {
+            red: 147,
+            green: 218,
+            blue: 87,
+            alpha: 0.5
+          }
+        },
+        inner: {
+          red: 108,
+          green: 153,
+          blue: 57,
+          alpha: 1
+        }
+      },
+      normal: {
+        outer: {
+          red: 255,
+          green: 0,
+          blue: 0,
+          alpha: 0,
+          stroke: {
+            red: 147,
+            green: 218,
+            blue: 87,
+            alpha: 0.5
+          }
+        },
+        inner: {
+          red: 108,
+          green: 153,
+          blue: 57,
+          alpha: 1,
+          stroke: {
+            red: 147,
+            green: 218,
+            blue: 87,
+            alpha: 0.5
+          }
+        }
+      }
+    },
+    boxOnlyInnerRect: {
+      collision: {
+        red: 255,
+        green: 0,
+        blue: 0,
+        alpha: 0.5,
+        stroke: {
+          red: 147,
+          green: 218,
+          blue: 87,
+          alpha: 0.5
+        }
+      },
+      overhang: {
+        red: 121,
+        green: 205,
+        blue: 255,
+        stroke: {
+          red: 147,
+          green: 218,
+          blue: 87,
+          alpha: 0.5
+        }
+      },
+      normal: {
+        red: 121,
+        green: 205,
+        blue: 255,
+        alpha: 1,
+        stroke: {
+          red: 147,
+          green: 218,
+          blue: 87,
+          alpha: 0.5
+        }
+      }
+    }
+  };
+
   params = {
     pallet: pallet,
     box: box,
-    zone: canvasZone
+    stage: canvasStage,
+    color: color
   };
 
   this.board = new StackBoard(params);
