@@ -7,14 +7,15 @@ body {
   font-size: 30px;
   margin: 0 auto;
   width: 530px; 
-  background-color: #caccce;
+  background-color: #e0e0e0;
+  border: 1px solid; 
 }
 #other_container {
   margin: 0 auto;
   background-color: white;
   width: 530px;
   height: 380px;
-  background-color: red;
+  background-color: #f3f3f3;
 }
 
 .column {
@@ -34,8 +35,9 @@ body {
 }
 
 #dashboard{
-  width: 400px;
-    margin-left: -5%;
+  width: 220px;
+  margin-top: 1%;
+  margin-left: -8.5%;
 }
 
 .label-info {
@@ -54,7 +56,6 @@ body {
 
 .flash-info{
     margin-left: 10%;
-    color: greenyellow;
 }
 
 

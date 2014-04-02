@@ -66,10 +66,10 @@ class @Box extends Backbone.Model
     
     [box_params, @color_params, @ratio, @zone] = [params.box, params.color, params.ratio, params.zone]
 
-    console.log params.ratio
+    Logger.debug params.ratio
     
     @set innerBox: 
-      x:      box_params.x 
+      x:      box_params.x
       y:      box_params.y
       width:  box_params.width
       height: box_params.height
@@ -93,11 +93,12 @@ class @Box extends Backbone.Model
                                   x: 0
                                   y: 0
                                 )
+    @get('rect').dash(([4, 5]))
     @get('group').add(@get('rect'))
     @get('group').add(@get('title'))
 
     ###### Box has an outer Rect ######
-    box_params.minDistance = $("input:checked","#minDistanceRadio").val()
+    # box_params.minDistance = $("input:checked","#minDistanceRadio").val()
     if box_params.minDistance > 0
       @set minDistance: box_params.minDistance
       @set outerBox: 
@@ -223,6 +224,10 @@ class @Box extends Backbone.Model
         @get('rect').fillGreen( @color_params.boxOnlyInnerRect.collision.green)
         @get('rect').fillBlue(  @color_params.boxOnlyInnerRect.collision.blue)
         @get('rect').fillAlpha( @color_params.boxOnlyInnerRect.collision.alpha)
+        @get('rect').strokeRed(   @color_params.boxOnlyInnerRect.collision.stroke.red)
+        @get('rect').strokeGreen( @color_params.boxOnlyInnerRect.collision.stroke.green)
+        @get('rect').strokeBlue(  @color_params.boxOnlyInnerRect.collision.stroke.blue)
+        @get('rect').strokeAlpha( @color_params.boxOnlyInnerRect.collision.stroke.alpha)
     else
       if @hasOuterRect()
         @get('rect').fillRed(   @color_params.boxWithOuterRect.normal.inner.red)
@@ -242,6 +247,10 @@ class @Box extends Backbone.Model
         @get('rect').fillGreen( @color_params.boxOnlyInnerRect.normal.green)
         @get('rect').fillBlue(  @color_params.boxOnlyInnerRect.normal.blue)
         @get('rect').fillAlpha( @color_params.boxOnlyInnerRect.normal.alpha)
+        @get('rect').strokeRed(   @color_params.boxOnlyInnerRect.collision.stroke.red)
+        @get('rect').strokeGreen( @color_params.boxOnlyInnerRect.collision.stroke.green)
+        @get('rect').strokeBlue(  @color_params.boxOnlyInnerRect.collision.stroke.blue)
+        @get('rect').strokeAlpha( @color_params.boxOnlyInnerRect.collision.stroke.alpha)
 
   printPoints: ->
     Logger.debug( "PointA(x:#{@getPointA().x},y:#{@getPointA().y}) " +
@@ -259,11 +268,22 @@ class @Boxes extends Backbone.Collection
       color:  params.color
       ratio:  params.ratio
       zone:   params.zone
+    @CurrentBox = Backbone.Model.extend(
+      initialize: (box_params)->
+        @set box:       new Box(box_params)
+        @set title:     @get('box').getTitleName()
 
-    @on('add', @showCurrentBoxPanel)
+        @on('change:box', @updateBoxTitle)
+      updateBoxTitle: ->
+        @set title: @get('box').getTitleName()
+    )
+    # @on('add', @showCurrentBoxPanel)
     @on('all', @draw) 
     @collisionUtil = new CollisionUtil
+
     @currentBox = new Box(@box_params)
+    @otherCurrentBox = new @CurrentBox(@box_params)
+
     @availableNewBoxId = 1
     @flash = "Initialized completed!"
 
@@ -281,6 +301,7 @@ class @Boxes extends Backbone.Collection
     @collisionUtil.testCollisionBetween(boxA, boxB, {collisionType: 'outer-outer'})
   addNewBox: =>
     newBox  = new Box(@box_params)
+
     newBox.setXPosition(Math.min(@zone.bound.left + @availableNewBoxId * newBox.getMoveOffset(), @zone.bound.right))
     newBox.setYPosition(Math.min(@zone.bound.top + @availableNewBoxId * newBox.getMoveOffset(), @zone.bound.bottom))
     newBox.setTitleName(@availableNewBoxId)
@@ -305,9 +326,11 @@ class @Boxes extends Backbone.Collection
       @remove(@currentBox)
       if @length == 0
         @currentBox = new Box(@box_params) # for alert from rivetsjs
+        @updateCurrentBox(new Box(@box_params))
         @flash = 'There is no box.'
       else
-        @currentBox = @last()
+        # @currentBox = @last()
+        @updateCurrentBox(@last())
     @draw()
     @showCurrentBoxPanel()
     @flash =  "box#{@currentBox.getTitleName()} selected!"
@@ -342,16 +365,17 @@ class @Boxes extends Backbone.Collection
 
   updateCurrentBox: (newBox = @currentBox) ->
     @currentBox = newBox
+    @otherCurrentBox.set('box', newBox)
     rivets.bind $('.box'),{box: newBox}
   showCurrentBoxPanel: () ->
     rivets.bind $('.box'),{box: @currentBox}
     Logger.debug("showCurrentBoxPanel: Box number: #{@length}; ")
     Logger.debug("In Boxes: #{@pprint()}; ")
     @pprint()
-    if(@length == 0)
-      $('.panel').css('display','none')
-    else
-      $('.panel').css('display','block')
+    # if(@length == 0)
+    #   $('.panel').css('display','none')
+    # else
+    #   $('.panel').css('display','block')
   up: () =>
     Logger.debug("@currentBox:\t" + @currentBox.getTitleName())
     @currentBox.setYPosition(@currentBox.getYPosition() - @currentBox.getMoveOffset())
@@ -641,7 +665,7 @@ class @StackBoard
       overhangOffset.x = overhangOffset.y = box.minDistance - pallet.overhang
       overhangOffset.edge = pallet.overhang - box.minDistance
 
-    @ratio = params.stage.height / (longerEdge + 2 * margin)
+    @ratio = Math.min(params.stage.height / (longerEdge + 2 * margin), params.stage.width / (shorterEdge + 2 * margin))
 
     stageBackground = new Kinetic.Rect(
         x:            0
@@ -706,30 +730,28 @@ class @StackBoard
 
     Logger.debug("StackBoard: Stage Initialized!")
     Logger.info("StackBoard: Initialized!")
-    boxes_params = {layer: @layer, zone: @zone, box: params.box, color: params.color, ratio: @ratio}
+
+    boxByRatio = 
+        x:      params.box.x
+        y:      params.box.y
+        width:  params.box.width * @ratio 
+        height: params.box.height * @ratio
+        minDistance: params.box.minDistance * @ratio
+
+    boxes_params = {layer: @layer, zone: @zone, box: boxByRatio, color: params.color, ratio: @ratio}
     @boxes = new Boxes(boxes_params)
+    @currentBox = @boxes.otherCurrentBox
     @boxes.shift()
+
+    rivets.bind $('.currentBox'),{currentBox: @currentBox}
     rivets.bind $('.boxes'),{boxes: @boxes}
-  calculateOriginPoint:() ->
 
 #### Params ####
-
-# unit: cm
-pallet =  
-  width:    250
-  height:   400 
-  overhang: 0 
-box  =      
-  x:      0 
-  y:      0
-  width:  60  
-  height: 30  
-  minDistance: 10
 # unit: pixal
 # canvas available paiting zone
 canvasStage =  
-  width:      260
-  height:     320 
+  width:      280
+  height:     360 
   stage_zoom: 1.5
 
 # color: RGB
@@ -829,6 +851,18 @@ color =
           blue:   87
           alpha:  0.5
 
+
+# unit: cm
+pallet =  
+  width:    390
+  height:   500 
+  overhang: 0 
+box  =      
+  x:      0 
+  y:      0
+  width:  60  
+  height: 30  
+  minDistance: 20
     
 params = 
   pallet: pallet
@@ -842,11 +876,12 @@ params =
 @board = new StackBoard(params)
 
 rivets.formatters.suffix_cm = (value) ->
-   "#{value.toFixed(2)} cm"
+   "#{value.toFixed(2)}"
 
 $("input").prop "readonly", true
 
-$(".offset").prop "readonly", false
+
+# $(".currentBox").prop "readonly", false
 $("#minDistance").prop "readonly", false
 
 $("#ex8").slider()

@@ -99,7 +99,7 @@
       var box_params, _ref;
       this.on('change:rect', this.rectChanged);
       _ref = [params.box, params.color, params.ratio, params.zone], box_params = _ref[0], this.color_params = _ref[1], this.ratio = _ref[2], this.zone = _ref[3];
-      console.log(params.ratio);
+      Logger.debug(params.ratio);
       this.set({
         innerBox: {
           x: box_params.x,
@@ -132,9 +132,9 @@
           y: 0
         })
       });
+      this.get('rect').dash([4, 5]);
       this.get('group').add(this.get('rect'));
       this.get('group').add(this.get('title'));
-      box_params.minDistance = $("input:checked", "#minDistanceRadio").val();
       if (box_params.minDistance > 0) {
         this.set({
           minDistance: box_params.minDistance
@@ -349,7 +349,11 @@
           this.get('rect').fillRed(this.color_params.boxOnlyInnerRect.collision.red);
           this.get('rect').fillGreen(this.color_params.boxOnlyInnerRect.collision.green);
           this.get('rect').fillBlue(this.color_params.boxOnlyInnerRect.collision.blue);
-          return this.get('rect').fillAlpha(this.color_params.boxOnlyInnerRect.collision.alpha);
+          this.get('rect').fillAlpha(this.color_params.boxOnlyInnerRect.collision.alpha);
+          this.get('rect').strokeRed(this.color_params.boxOnlyInnerRect.collision.stroke.red);
+          this.get('rect').strokeGreen(this.color_params.boxOnlyInnerRect.collision.stroke.green);
+          this.get('rect').strokeBlue(this.color_params.boxOnlyInnerRect.collision.stroke.blue);
+          return this.get('rect').strokeAlpha(this.color_params.boxOnlyInnerRect.collision.stroke.alpha);
         }
       } else {
         if (this.hasOuterRect()) {
@@ -369,7 +373,11 @@
           this.get('rect').fillRed(this.color_params.boxOnlyInnerRect.normal.red);
           this.get('rect').fillGreen(this.color_params.boxOnlyInnerRect.normal.green);
           this.get('rect').fillBlue(this.color_params.boxOnlyInnerRect.normal.blue);
-          return this.get('rect').fillAlpha(this.color_params.boxOnlyInnerRect.normal.alpha);
+          this.get('rect').fillAlpha(this.color_params.boxOnlyInnerRect.normal.alpha);
+          this.get('rect').strokeRed(this.color_params.boxOnlyInnerRect.collision.stroke.red);
+          this.get('rect').strokeGreen(this.color_params.boxOnlyInnerRect.collision.stroke.green);
+          this.get('rect').strokeBlue(this.color_params.boxOnlyInnerRect.collision.stroke.blue);
+          return this.get('rect').strokeAlpha(this.color_params.boxOnlyInnerRect.collision.stroke.alpha);
         }
       }
     };
@@ -406,10 +414,26 @@
         ratio: params.ratio,
         zone: params.zone
       };
-      this.on('add', this.showCurrentBoxPanel);
+      this.CurrentBox = Backbone.Model.extend({
+        initialize: function(box_params) {
+          this.set({
+            box: new Box(box_params)
+          });
+          this.set({
+            title: this.get('box').getTitleName()
+          });
+          return this.on('change:box', this.updateBoxTitle);
+        },
+        updateBoxTitle: function() {
+          return this.set({
+            title: this.get('box').getTitleName()
+          });
+        }
+      });
       this.on('all', this.draw);
       this.collisionUtil = new CollisionUtil;
       this.currentBox = new Box(this.box_params);
+      this.otherCurrentBox = new this.CurrentBox(this.box_params);
       this.availableNewBoxId = 1;
       return this.flash = "Initialized completed!";
     };
@@ -467,9 +491,10 @@
         this.remove(this.currentBox);
         if (this.length === 0) {
           this.currentBox = new Box(this.box_params);
+          this.updateCurrentBox(new Box(this.box_params));
           this.flash = 'There is no box.';
         } else {
-          this.currentBox = this.last();
+          this.updateCurrentBox(this.last());
         }
       }
       this.draw();
@@ -513,6 +538,7 @@
         newBox = this.currentBox;
       }
       this.currentBox = newBox;
+      this.otherCurrentBox.set('box', newBox);
       return rivets.bind($('.box'), {
         box: newBox
       });
@@ -524,12 +550,7 @@
       });
       Logger.debug("showCurrentBoxPanel: Box number: " + this.length + "; ");
       Logger.debug("In Boxes: " + (this.pprint()) + "; ");
-      this.pprint();
-      if (this.length === 0) {
-        return $('.panel').css('display', 'none');
-      } else {
-        return $('.panel').css('display', 'block');
-      }
+      return this.pprint();
     };
 
     Boxes.prototype.up = function() {
@@ -961,7 +982,7 @@
 
   this.StackBoard = (function() {
     function StackBoard(params) {
-      var boxes_params, longerEdge, margin, overhangBackground, overhangOffset, palletBackground, shorterEdge, stageBackground;
+      var boxByRatio, boxes_params, longerEdge, margin, overhangBackground, overhangOffset, palletBackground, shorterEdge, stageBackground;
       longerEdge = Math.max(pallet.width, pallet.height);
       shorterEdge = Math.min(pallet.width, pallet.height);
       margin = Math.max(pallet.overhang, box.minDistance);
@@ -974,7 +995,7 @@
         overhangOffset.x = overhangOffset.y = box.minDistance - pallet.overhang;
         overhangOffset.edge = pallet.overhang - box.minDistance;
       }
-      this.ratio = params.stage.height / (longerEdge + 2 * margin);
+      this.ratio = Math.min(params.stage.height / (longerEdge + 2 * margin), params.stage.width / (shorterEdge + 2 * margin));
       stageBackground = new Kinetic.Rect({
         x: 0,
         y: 0,
@@ -1028,43 +1049,38 @@
       this.layer.add(overhangBackground);
       Logger.debug("StackBoard: Stage Initialized!");
       Logger.info("StackBoard: Initialized!");
+      boxByRatio = {
+        x: params.box.x,
+        y: params.box.y,
+        width: params.box.width * this.ratio,
+        height: params.box.height * this.ratio,
+        minDistance: params.box.minDistance * this.ratio
+      };
       boxes_params = {
         layer: this.layer,
         zone: this.zone,
-        box: params.box,
+        box: boxByRatio,
         color: params.color,
         ratio: this.ratio
       };
       this.boxes = new Boxes(boxes_params);
+      this.currentBox = this.boxes.otherCurrentBox;
       this.boxes.shift();
+      rivets.bind($('.currentBox'), {
+        currentBox: this.currentBox
+      });
       rivets.bind($('.boxes'), {
         boxes: this.boxes
       });
     }
 
-    StackBoard.prototype.calculateOriginPoint = function() {};
-
     return StackBoard;
 
   })();
 
-  pallet = {
-    width: 250,
-    height: 400,
-    overhang: 0
-  };
-
-  box = {
-    x: 0,
-    y: 0,
-    width: 60,
-    height: 30,
-    minDistance: 10
-  };
-
   canvasStage = {
-    width: 260,
-    height: 320,
+    width: 280,
+    height: 360,
     stage_zoom: 1.5
   };
 
@@ -1190,6 +1206,20 @@
     }
   };
 
+  pallet = {
+    width: 390,
+    height: 500,
+    overhang: 0
+  };
+
+  box = {
+    x: 0,
+    y: 0,
+    width: 60,
+    height: 30,
+    minDistance: 20
+  };
+
   params = {
     pallet: pallet,
     box: box,
@@ -1200,12 +1230,10 @@
   this.board = new StackBoard(params);
 
   rivets.formatters.suffix_cm = function(value) {
-    return "" + (value.toFixed(2)) + " cm";
+    return "" + (value.toFixed(2));
   };
 
   $("input").prop("readonly", true);
-
-  $(".offset").prop("readonly", false);
 
   $("#minDistance").prop("readonly", false);
 

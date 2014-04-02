@@ -13,122 +13,94 @@
   <body>
     <div>
       <div id='nav_bar'>
-        Pattern Designer
+        <span>Pattern Designer</span>
+        <div class="col-md-2" style="float: right;" >
+            <button type="button" class="btn btn-primary boxes" rv-on-click="boxes.removeCurrentBox">Save</button>
+        </div>
       </div>
 
       <div id ='other_container'>
         <div id="container" class="container">
       <div class='row'>
         <div id="canvas_container" class='col-md-4'></div>
-        <div id="dashboard" class='col-md-4'>
+        <div id="dashboard" class='col-md-5'>
           <div class="input-group row column">
               <span class="input-group-addon label-info colomn-label-info">Layer :</span>
               <input type="text" class="form-control" placeholder="layer name">
           </div>
           <div id="new_box" class="boxes input-group row column">
               <span class="input-group-addon label-info">New Box :</span>
-              <input type="text" name="new_box" class="form-control" placeholder="name" readonly="readOnly" rv-value="boxes.availableNewBoxId">
+              <input type="text" name="new_box" class="form-control" placeholder="name" readonly="readOnly" rv-value="boxes.length">
               <span class="input-group-btn">
                 <button class="btn btn-primary" rv-on-click="boxes.addNewBox">Add</button>
               </span> 
           </div>
-          <div class="panel panel-default row" style="display: none">
-                <div class="panel-heading panel-heading-info ">
-                    <span>Current Box</span>
-                    <span class="flash-info boxes">{ boxes.flash }</span>
-                </div>
-                <div class="panel-body">
-                        <div class="row column box">
-                            <div class="col-md-6" >
-                                <div class="input-group" >
-                                    <span class="input-group-addon label-info">X :</span>
-                                    <input type="text" class="form-control" rv-value="box.getXPositionByRatio | suffix_cm">
-                                </div>
-                            </div>
-                            <div class="col-md-6" >
-                                <div class="input-group ">
-                                    <span class="input-group-addon label-info">Y :</span>
-                                    <input type="text" class="form-control" rv-value="box.getYPositionByRatio | suffix_cm">
-                                </div>
-                            </div>
-                        </div>
-<!--                     <div class="row column box">
-                        <div class="col-md-6" >
-                            <div class="input-group ">
-                                <span class="input-group-addon label-info">Width :</span>
-                                <input type="text" class="form-control box" rv-value="box.getWidthByRatio | suffix_cm">
-                            </div>
-                        </div>
-                        <div class="col-md-6" >
-                            <div class="input-group">
-                                <span class="input-group-addon label-info">Height :</span>
-                                <input type="text" class="form-control" rv-value="box.getHeightByRatio | suffix_cm">
-                            </div>
-                        </div>
-                    </div> -->
-                    <div class="row column">
-                        <div class="col-md-3" >
-                            <button type="button" class="btn btn-info boxes">Move :</button>
-                        </div>
-                        <div class="col-md-9 boxes" >
-                            <div class="btn-group" style="float: right">
-                                <button type="button" class="btn btn-primary" rv-on-click="boxes.left">LEFT</button>
-                                <button type="button" class="btn btn-primary" rv-on-click="boxes.right">RIGHT</button>
-                                <button type="button" class="btn btn-primary" rv-on-click="boxes.up">UP</button>
-                                <button type="button" class="btn btn-primary" rv-on-click="boxes.down">DOWN</button>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <!-- <div class="col-md-4" >
-                            <div class="input-group box">
-                                <span class="input-group-addon label-info">Title :</span>
-                                <input type="text" class="form-control" rv-value="box.getTitleName">
-                            </div>
-                        </div> -->
-                        <div class="col-md-4">
-                            <div class="input-group box">
-                                <span class="input-group-addon label-info">Offset</span>
-                                <input type="text" style="width: 110%" class="form-control" id="box-move-offset" rv-value="box:moveOffset">
-                            </div>
-                        </div>
-                        <div class="col-md-4">
-                          <input id="ex8" data-slider-id='offsetSlider' type="text" data-slider-min="1" data-slider-max="20" data-slider-step="1" data-slider-value="4"/>
-                            <!-- <div class="input-group box">
-                                <span class="input-group-addon label-info">Move offset :</span>
-                                <input type="text" class="form-control offset" rv-value="box:moveOffset | offset">
-                            </div> -->
-                        </div>
-                        <!-- <div class="col-md-4">
-                            <button type="button" class="btn btn-primary boxes">Rotate Box</button>
-                        </div> -->
-                        <div class="col-md-4" style="float: right;" >
-                            <button type="button" class="btn btn-danger boxes" rv-on-click="boxes.removeCurrentBox">Delete Box</button>
-                        </div>
-                    </div>
-                </div>
+          <div id="new_box" class="currentBox input-group row column">
+              <span class="input-group-addon label-info">Curr Box :</span>
+              <input type="text" name="new_box" class="form-control currentBox" placeholder="name" rv-value="currentBox:title">
+              <span class="input-group-btn">
+                <button class="btn btn-primary" >OK</button>
+              </span> 
           </div>
-          <div class="row">
-              <div class="col-md-5" style="margin-left: -3%" >
-                <div class="debug" style="background-color: white">
-                  <div id="minDistanceRadio">
-                    <input type="radio" name="minDistance"  value="5" checked="checked">
-                        5
-                    <input type="radio" name="minDistance"  value="0" >
-                        0           
-                  </div>
-                </div>
-              </div>
-              <div>
-                  <div class="col-md-2" style="float: right; margin-right: 2%" >
-                      <button type="button" class="btn btn-primary boxes" rv-on-click="boxes.removeCurrentBox">Save</button>
-                  </div>
-                  <div class="col-md-2" style="float: right; margin-right: 6%" >
-                      <button type="button" class="btn btn-primary boxes" rv-on-click="boxes.removeCurrentBox">Mirror</button>
-                  </div>
-              </div>
+<!--           <div class="panel-heading panel-heading-info ">
+              <span>Current Box</span>
+              <span class="flash-info boxes">{ boxes.flash }</span>
+          </div> -->
+        
+          <div class="box input-group row column" >
+            <div class="input-group col-md-6" style="float: left">
+                <span class="input-group-addon label-info">X</span>
+                <input type="text" class="form-control" rv-value="box.getXPositionByRatio | suffix_cm">
+            </div>
+    
+            <div class="input-group col-md-6" style="float: left">
+                <span class="input-group-addon label-info">Y</span>
+                <input type="text" class="form-control" rv-value="box.getYPositionByRatio | suffix_cm">
+            </div>
+          
+          </div>
 
+              
+<!--                     <div class="row column box">
+              <div class="col-md-6" >
+                  <div class="input-group ">
+                      <span class="input-group-addon label-info">Width :</span>
+                      <input type="text" class="form-control box" rv-value="box.getWidthByRatio | suffix_cm">
+                  </div>
+              </div>
+              <div class="col-md-6" >
+                  <div class="input-group">
+                      <span class="input-group-addon label-info">Height :</span>
+                      <input type="text" class="form-control" rv-value="box.getHeightByRatio | suffix_cm">
+                  </div>
+              </div>
+          </div> -->
+          <div class="input-group row column" style="width: 220px" >
+            <div class="input-group col-md-3"  style="float: left">
+              <button type="button" class="btn btn-info boxes">Move :</button>
+            </div>
+    
+            <div class="btn-group boxes" style="float: right">
+                <button type="button" class="btn btn-primary" rv-on-click="boxes.left">←</button>
+                <button type="button" class="btn btn-primary" rv-on-click="boxes.right">→</button>
+                <button type="button" class="btn btn-primary" rv-on-click="boxes.up">↑</button>
+                <button type="button" class="btn btn-primary" rv-on-click="boxes.down">↓</button>
+            </div> 
           </div>
+
+          <div class="input-group row column"  >
+            <div class="box input-group col-md-6" style="float: left">
+                <span class="input-group-addon label-info">Offset</span>
+                <input type="text" style="width: 110%" class="form-control" id="box-move-offset" rv-value="box:moveOffset">
+            </div>
+
+            <div class="col-md-3" style="float: left" >
+                  <button type="button" class="btn btn-danger boxes" rv-on-click="boxes.removeCurrentBox">Delete Box</button>
+            </div>
+          </div>
+
+          <span class="flash-info boxes col-md-9">{ boxes.flash }</span>
+
         </div>
       </div>
 
@@ -143,7 +115,7 @@
 
 
 
-        
+
       </div>
     </div>
     
