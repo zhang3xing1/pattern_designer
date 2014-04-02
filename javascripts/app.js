@@ -28,7 +28,7 @@
 
     statuses = ['info', 'debug', "dev"];
 
-    statuses = [];
+    statuses = ['dev'];
 
     Horn = (function() {
       function Horn() {}
@@ -321,12 +321,12 @@
     };
 
     Box.prototype.makeCollisionStatus = function() {
-      Logger.dev("box" + (this.getTitleName()) + ": makeCollisionStatus");
+      Logger.debug("box" + (this.getTitleName()) + ": makeCollisionStatus");
       return this.set('collisionStatus', true);
     };
 
     Box.prototype.makeUnCollisionStatus = function() {
-      Logger.dev("box" + (this.getTitleName()) + ": makeUnCollisionStatus");
+      Logger.debug("box" + (this.getTitleName()) + ": makeUnCollisionStatus");
       return this.set('collisionStatus', false);
     };
 
@@ -475,7 +475,7 @@
       this.draw();
       this.showCurrentBoxPanel();
       this.flash = "box" + (this.currentBox.getTitleName()) + " selected!";
-      return Logger.dev("remove button clicked!");
+      return Logger.debug("remove button clicked!");
     };
 
     Boxes.prototype.testCollision = function() {
@@ -499,7 +499,7 @@
       index = 0;
       while (index < this.models.length) {
         box = this.models[index];
-        Logger.dev("In draw: Box" + (box.getTitleName()) + ".collision=" + (box.get('collisionStatus')));
+        Logger.debug("In draw: Box" + (box.getTitleName()) + ".collision=" + (box.get('collisionStatus')));
         box.changeFillColor();
         box.updateTitle(index + 1);
         this.layer.add(box.box());
@@ -522,8 +522,8 @@
       rivets.bind($('.box'), {
         box: this.currentBox
       });
-      Logger.dev("showCurrentBoxPanel: Box number: " + this.length + "; ");
-      Logger.dev("In Boxes: " + (this.pprint()) + "; ");
+      Logger.debug("showCurrentBoxPanel: Box number: " + this.length + "; ");
+      Logger.debug("In Boxes: " + (this.pprint()) + "; ");
       this.pprint();
       if (this.length === 0) {
         return $('.panel').css('display', 'none');
@@ -739,7 +739,7 @@
       if (relations !== void 0) {
         return _.each(relations.models, (function(aRelation) {
           aRelation.set('status', false);
-          return Logger.dev("In makeUnCollisionRelationAll: Pair" + this.boxId + ", withBox" + (aRelation.get('boxId')) + " " + (aRelation.get('status')));
+          return Logger.debug("In makeUnCollisionRelationAll: Pair" + this.boxId + ", withBox" + (aRelation.get('boxId')) + " " + (aRelation.get('status')));
         }), this);
       }
     };
@@ -761,7 +761,7 @@
 
     CollisionUtil.prototype.pprint = function() {
       return _.each(this.models, function(pair) {
-        return Logger.dev("In CollisionUtil: pair." + (pair.pprint()));
+        return Logger.debug("In CollisionUtil: pair." + (pair.pprint()));
       });
     };
 
@@ -774,13 +774,13 @@
     };
 
     CollisionUtil.prototype.removeCollisionPair = function(boxA, boxB) {
-      Logger.dev("removeCollisionPair: box" + (boxA.getBoxId()) + ", box" + (boxB.getBoxId()));
+      Logger.debug("removeCollisionPair: box" + (boxA.getBoxId()) + ", box" + (boxB.getBoxId()));
       this.updateCollisionRelationBetween({
         action: 'remove',
         boxAId: boxA.getBoxId(),
         boxBId: boxB.getBoxId()
       });
-      Logger.dev("@isCollisionInclude(boxA) " + (this.isCollisionInclude(boxA)) + "  isCollisionInclude(boxB) " + (this.isCollisionInclude(boxB)));
+      Logger.debug("@isCollisionInclude(boxA) " + (this.isCollisionInclude(boxA)) + "  isCollisionInclude(boxB) " + (this.isCollisionInclude(boxB)));
       if (!this.isCollisionInclude(boxA)) {
         boxA.makeUnCollisionStatus();
       }
@@ -790,7 +790,7 @@
     };
 
     CollisionUtil.prototype.addCollisionPair = function(boxA, boxB) {
-      Logger.dev("addCollisionPair: box" + (boxA.getBoxId()) + ", box" + (boxB.getBoxId()));
+      Logger.debug("addCollisionPair: box" + (boxA.getBoxId()) + ", box" + (boxB.getBoxId()));
       this.updateCollisionRelationBetween({
         action: 'add',
         boxAId: boxA.getBoxId(),
@@ -832,7 +832,7 @@
           boxBPair = new CollisionPair(boxBId);
           this.add(boxBPair);
         }
-        Logger.dev("CollisionUtil:\t addPair:  box" + boxAPair.boxId + " box" + boxBPair.boxId);
+        Logger.debug("CollisionUtil:\t addPair:  box" + boxAPair.boxId + " box" + boxBPair.boxId);
         boxAPair.makeCollisionRelationWith(boxBId);
         boxBPair.makeCollisionRelationWith(boxAId);
       } else if (options.action === 'remove') {
@@ -846,7 +846,7 @@
           boxBPair = new CollisionPair(boxBId);
           this.add(boxBPair);
         }
-        Logger.dev("CollisionUtil:\t removePair:  box" + boxAPair.boxId + " box" + boxBPair.boxId);
+        Logger.debug("CollisionUtil:\t removePair:  box" + boxAPair.boxId + " box" + boxBPair.boxId);
         boxAPair.makeUnCollisionRelationWith(boxBId);
         boxBPair.makeUnCollisionRelationWith(boxAId);
       } else if (options.action === 'delete') {
@@ -857,16 +857,16 @@
           } else {
             pair.makeUnCollisionRelationWith(toDeletedBoxId);
           }
-          Logger.dev("In delete: toDeletedBoxId: " + toDeletedBoxId);
-          Logger.dev("In delete: pair Relation: " + (pair.pprint()));
-          return Logger.dev("In delete: toDeletedBoxPair Relation: " + (toDeletedBoxPair.pprint()));
+          Logger.debug("In delete: toDeletedBoxId: " + toDeletedBoxId);
+          Logger.debug("In delete: pair Relation: " + (pair.pprint()));
+          return Logger.debug("In delete: toDeletedBoxPair Relation: " + (toDeletedBoxPair.pprint()));
         }), this);
       } else if (options.action === 'changeID') {
-        Logger.dev("CollisionUtil:\t changeID box");
+        Logger.debug("CollisionUtil:\t changeID box");
       }
-      Logger.dev("---->Show pair status: ");
+      Logger.debug("---->Show pair status: ");
       this.pprint();
-      return Logger.dev("<----Show pair status: ");
+      return Logger.debug("<----Show pair status: ");
     };
 
     CollisionUtil.prototype.isCollisionInclude = function(boxA) {
@@ -887,6 +887,7 @@
       }
       status = false;
       if (options.collisionType === 'inner-inner') {
+        Logger.debug("testCollision -> inner-inner");
         boxATop = boxA.getYPosition();
         boxABottom = boxA.getYPosition() + boxA.getHeight();
         boxALeft = boxA.getXPosition();
@@ -896,7 +897,8 @@
         boxBLeft = boxB.getXPosition();
         boxBRight = boxB.getXPosition() + boxB.getWidth();
       } else if (options.collisionType === 'outer-outer') {
-        if (boxA.hasOuterRect) {
+        if (boxA.hasOuterRect()) {
+          Logger.debug("testCollision -> inner-inner  boxA:" + (boxA.getTitleName()) + " outer");
           boxATop = boxA.getYPosition({
             innerOrOuter: 'outer'
           });
@@ -918,6 +920,7 @@
           boxBLeft = boxB.getXPosition();
           boxBRight = boxB.getXPosition() + boxB.getWidth();
         } else {
+          Logger.debug("testCollision -> inner-inner  boxB:" + (boxB.getTitleName()) + " outer");
           boxATop = boxA.getYPosition();
           boxABottom = boxA.getYPosition() + boxA.getHeight();
           boxALeft = boxA.getXPosition();
@@ -943,7 +946,7 @@
       if (!(boxABottom < boxBTop || boxATop > boxBBottom || boxALeft > boxBRight || boxARight < boxBLeft)) {
         status = true;
       }
-      Logger.dev("testCollisionBetween: box" + (boxA.getBoxId()) + " box" + (boxB.getBoxId()) + " " + status);
+      Logger.debug("testCollisionBetween: box" + (boxA.getBoxId()) + " box" + (boxB.getBoxId()) + " " + status);
       if (status) {
         this.addCollisionPair(boxA, boxB);
       } else {
@@ -1019,11 +1022,6 @@
         height: params.stage.height * params.stage.stage_zoom
       });
       this.layer = new Kinetic.Layer();
-      this.layer.on("click", function(evt) {
-        var shape;
-        shape = evt.target;
-        alert("you clicked on \"" + shape.getName() + "\"");
-      });
       this.stage.add(this.layer);
       this.layer.add(stageBackground);
       this.layer.add(palletBackground);

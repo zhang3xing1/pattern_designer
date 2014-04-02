@@ -1,12 +1,28 @@
 body {
   background-color: #373C38;
 }
+
+#nav_bar{
+  text-align: center;
+  font-size: 30px;
+  margin: 0 auto;
+  width: 530px; 
+  background-color: #caccce;
+}
+#other_container {
+  margin: 0 auto;
+  background-color: white;
+  width: 530px;
+  height: 380px;
+  background-color: red;
+}
+
 .column {
     padding-bottom: 10px;
 }
 
 #container {
-    margin-top: 5%;
+    /*margin-top: 5%;*/
     /*margin: auto;*/
 }
 

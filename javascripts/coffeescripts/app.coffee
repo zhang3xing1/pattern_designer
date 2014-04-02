@@ -31,7 +31,7 @@ class @Logger
   instance = null
   statuses = ['info', 'debug', "dev"]
   # statuses = ['info']
-  statuses = []
+  statuses = ['dev']
   class Horn
     info: (message) -> 
       'INFO:\t' + message
@@ -198,10 +198,10 @@ class @Box extends Backbone.Model
   box: ->
     @get('group')
   makeCollisionStatus: ->
-    Logger.dev("box#{@getTitleName()}: makeCollisionStatus")
+    Logger.debug("box#{@getTitleName()}: makeCollisionStatus")
     @set('collisionStatus', true)
   makeUnCollisionStatus: ->
-    Logger.dev("box#{@getTitleName()}: makeUnCollisionStatus")
+    Logger.debug("box#{@getTitleName()}: makeUnCollisionStatus")
     @set('collisionStatus', false)
   changeFillColor: ->
     if @get('collisionStatus')
@@ -244,10 +244,10 @@ class @Box extends Backbone.Model
         @get('rect').fillAlpha( @color_params.boxOnlyInnerRect.normal.alpha)
 
   printPoints: ->
-    Logger.debug("PointA(x:#{@getPointA().x},y:#{@getPointA().y}) " +
-                "PointB(x:#{@getPointB().x},y:#{@getPointB().y}) " +
-                "PointC(x:#{@getPointC().x},y:#{@getPointC().y}) " +
-                "PointD(x:#{@getPointD().x},y:#{@getPointD().y}) ")
+    Logger.debug( "PointA(x:#{@getPointA().x},y:#{@getPointA().y}) " +
+                  "PointB(x:#{@getPointB().x},y:#{@getPointB().y}) " +
+                  "PointC(x:#{@getPointC().x},y:#{@getPointC().y}) " +
+                  "PointD(x:#{@getPointD().x},y:#{@getPointD().y}) " )
 
 class @Boxes extends Backbone.Collection
   model: Box
@@ -311,7 +311,7 @@ class @Boxes extends Backbone.Collection
     @draw()
     @showCurrentBoxPanel()
     @flash =  "box#{@currentBox.getTitleName()} selected!"
-    Logger.dev("remove button clicked!")
+    Logger.debug("remove button clicked!")
   testCollision:()->
     Logger.debug("...Collision start...")
     result = false
@@ -333,7 +333,7 @@ class @Boxes extends Backbone.Collection
     index = 0
     while index < @models.length
       box = @models[index]
-      Logger.dev("In draw: Box#{box.getTitleName()}.collision=#{box.get('collisionStatus')}")
+      Logger.debug("In draw: Box#{box.getTitleName()}.collision=#{box.get('collisionStatus')}")
       box.changeFillColor()
       box.updateTitle(index + 1) # keep box name as number sequence.
       @layer.add(box.box())
@@ -345,8 +345,8 @@ class @Boxes extends Backbone.Collection
     rivets.bind $('.box'),{box: newBox}
   showCurrentBoxPanel: () ->
     rivets.bind $('.box'),{box: @currentBox}
-    Logger.dev("showCurrentBoxPanel: Box number: #{@length}; ")
-    Logger.dev("In Boxes: #{@pprint()}; ")
+    Logger.debug("showCurrentBoxPanel: Box number: #{@length}; ")
+    Logger.debug("In Boxes: #{@pprint()}; ")
     @pprint()
     if(@length == 0)
       $('.panel').css('display','none')
@@ -482,7 +482,7 @@ class CollisionPair extends Backbone.Model
     if relations != undefined 
       _.each(relations.models,((aRelation) ->
         aRelation.set('status', false)
-        Logger.dev "In makeUnCollisionRelationAll: Pair#{this.boxId}, withBox#{aRelation.get('boxId')} #{aRelation.get('status')}"
+        Logger.debug "In makeUnCollisionRelationAll: Pair#{this.boxId}, withBox#{aRelation.get('boxId')} #{aRelation.get('status')}"
         ),this)
 class CollisionUtil extends Backbone.Collection
   model: CollisionPair
@@ -492,7 +492,7 @@ class CollisionUtil extends Backbone.Collection
 
   pprint: () ->
     _.each(@models, (pair) ->
-      Logger.dev "In CollisionUtil: pair.#{pair.pprint()}")
+      Logger.debug "In CollisionUtil: pair.#{pair.pprint()}")
   findPair:(boxId) ->
     aPair = _.find @models, (pair) ->
           pair.boxId == boxId
@@ -501,16 +501,16 @@ class CollisionUtil extends Backbone.Collection
     #   @add(aPair)
     aPair
   removeCollisionPair:(boxA, boxB) ->
-    Logger.dev("removeCollisionPair: box#{boxA.getBoxId()}, box#{boxB.getBoxId()}")
+    Logger.debug("removeCollisionPair: box#{boxA.getBoxId()}, box#{boxB.getBoxId()}")
     @updateCollisionRelationBetween(action: 'remove', boxAId: boxA.getBoxId(), boxBId: boxB.getBoxId())
-    Logger.dev("@isCollisionInclude(boxA) #{@isCollisionInclude(boxA)}  isCollisionInclude(boxB) #{ @isCollisionInclude(boxB)}")
+    Logger.debug("@isCollisionInclude(boxA) #{@isCollisionInclude(boxA)}  isCollisionInclude(boxB) #{ @isCollisionInclude(boxB)}")
     unless @isCollisionInclude(boxA)
       boxA.makeUnCollisionStatus()
     unless @isCollisionInclude(boxB)
       boxB.makeUnCollisionStatus()
 
   addCollisionPair:(boxA, boxB) ->
-    Logger.dev("addCollisionPair: box#{boxA.getBoxId()}, box#{boxB.getBoxId()}")
+    Logger.debug("addCollisionPair: box#{boxA.getBoxId()}, box#{boxB.getBoxId()}")
     @updateCollisionRelationBetween(action: 'add', boxAId: boxA.getBoxId(), boxBId: boxB.getBoxId())
     boxA.makeCollisionStatus()
     boxB.makeCollisionStatus()
@@ -540,7 +540,7 @@ class CollisionUtil extends Backbone.Collection
       if boxBPair == undefined
         boxBPair = new CollisionPair(boxBId)
         @add(boxBPair)
-      Logger.dev("CollisionUtil:\t addPair:  box#{boxAPair.boxId} box#{boxBPair.boxId}")
+      Logger.debug("CollisionUtil:\t addPair:  box#{boxAPair.boxId} box#{boxBPair.boxId}")
       boxAPair.makeCollisionRelationWith(boxBId)
       boxBPair.makeCollisionRelationWith(boxAId)
 
@@ -553,7 +553,7 @@ class CollisionUtil extends Backbone.Collection
       if boxBPair == undefined
         boxBPair = new CollisionPair(boxBId)
         @add(boxBPair)
-      Logger.dev("CollisionUtil:\t removePair:  box#{boxAPair.boxId} box#{boxBPair.boxId}")
+      Logger.debug("CollisionUtil:\t removePair:  box#{boxAPair.boxId} box#{boxBPair.boxId}")
       boxAPair.makeUnCollisionRelationWith(boxBId)
       boxBPair.makeUnCollisionRelationWith(boxAId)
     else if options.action == 'delete'
@@ -565,15 +565,15 @@ class CollisionUtil extends Backbone.Collection
           else 
             pair.makeUnCollisionRelationWith(toDeletedBoxId)
 
-          Logger.dev("In delete: toDeletedBoxId: #{toDeletedBoxId}")
-          Logger.dev("In delete: pair Relation: #{pair.pprint()}")
-          Logger.dev("In delete: toDeletedBoxPair Relation: #{toDeletedBoxPair.pprint()}")
+          Logger.debug("In delete: toDeletedBoxId: #{toDeletedBoxId}")
+          Logger.debug("In delete: pair Relation: #{pair.pprint()}")
+          Logger.debug("In delete: toDeletedBoxPair Relation: #{toDeletedBoxPair.pprint()}")
         ),this)
     else if options.action == 'changeID'
-      Logger.dev("CollisionUtil:\t changeID box")
-    Logger.dev("---->Show pair status: ")
+      Logger.debug("CollisionUtil:\t changeID box")
+    Logger.debug("---->Show pair status: ")
     @pprint()
-    Logger.dev("<----Show pair status: ")
+    Logger.debug("<----Show pair status: ")
   isCollisionInclude:(boxA) ->
     boxAId = boxA.getBoxId()
     result= _.filter @models, (pair) ->
@@ -585,6 +585,9 @@ class CollisionUtil extends Backbone.Collection
   testCollisionBetween:(boxA,boxB,options = {collisionType: 'inner-inner'}) ->
     status  =     false
     if options.collisionType == 'inner-inner'
+
+      Logger.debug("testCollision -> inner-inner")
+
       boxATop =     boxA.getYPosition()
       boxABottom =  boxA.getYPosition() + boxA.getHeight()
       boxALeft   =  boxA.getXPosition()
@@ -594,7 +597,8 @@ class CollisionUtil extends Backbone.Collection
       boxBLeft   =  boxB.getXPosition()
       boxBRight  =  boxB.getXPosition() + boxB.getWidth()
     else if options.collisionType == 'outer-outer'
-      if boxA.hasOuterRect
+      if boxA.hasOuterRect()
+        Logger.debug("testCollision -> inner-inner  boxA:#{boxA.getTitleName()} outer")
         boxATop =     boxA.getYPosition({innerOrOuter: 'outer'})
         boxABottom =  boxA.getYPosition({innerOrOuter: 'outer'}) + boxA.getHeight({innerOrOuter: 'outer'})
         boxALeft   =  boxA.getXPosition({innerOrOuter: 'outer'})
@@ -605,6 +609,7 @@ class CollisionUtil extends Backbone.Collection
         boxBLeft   =  boxB.getXPosition()
         boxBRight  =  boxB.getXPosition() + boxB.getWidth()
       else
+        Logger.debug("testCollision -> inner-inner  boxB:#{boxB.getTitleName()} outer")
         boxATop =     boxA.getYPosition()
         boxABottom =  boxA.getYPosition() + boxA.getHeight()
         boxALeft   =  boxA.getXPosition()
@@ -616,7 +621,7 @@ class CollisionUtil extends Backbone.Collection
         boxBRight  =  boxB.getXPosition({innerOrOuter: 'outer'}) + boxB.getWidth({innerOrOuter: 'outer'})
     
     status = true  unless boxABottom < boxBTop or boxATop > boxBBottom or boxALeft > boxBRight or boxARight < boxBLeft
-    Logger.dev("testCollisionBetween: box#{boxA.getBoxId()} box#{boxB.getBoxId()} #{status}")     
+    Logger.debug("testCollisionBetween: box#{boxA.getBoxId()} box#{boxB.getBoxId()} #{status}")     
     if status
       @addCollisionPair(boxA, boxB)
     else
@@ -687,13 +692,6 @@ class @StackBoard
     )
 
     @layer = new Kinetic.Layer()
-
-    @layer.on "click", (evt) ->
-  
-      # get the shape that was clicked on
-      shape = evt.target
-      alert "you clicked on \"" + shape.getName() + "\""
-      return
 
     @stage.add @layer
 
