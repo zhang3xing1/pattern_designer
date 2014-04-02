@@ -99,7 +99,9 @@
       var box_params, _ref;
       this.on('change:rect', this.rectChanged);
       _ref = [params.box, params.color, params.ratio, params.zone], box_params = _ref[0], this.color_params = _ref[1], this.ratio = _ref[2], this.zone = _ref[3];
-      Logger.debug(params.ratio);
+      this.set({
+        ratio: params.ratio
+      });
       this.set({
         innerBox: {
           x: box_params.x,
@@ -174,14 +176,8 @@
     };
 
     Box.prototype.getMoveOffset = function() {
-      var offset;
-      offset = Number($("#ex8").val()) % 99;
-      if (offset % 99 > 0) {
-        this.set('moveOffset', offset % 99);
-        return offset % 99;
-      } else {
-        return 4;
-      }
+      Logger.dev("getMoveOffset " + (this.get('moveOffset')));
+      return Number(this.get('moveOffset'));
     };
 
     Box.prototype.setTitleName = function(newTitle) {
@@ -280,7 +276,8 @@
       var pointX;
       return pointX = {
         x: this.getXPosition(),
-        y: this.getYPosition()
+        y: this.getYPosition(),
+        flag: 'A'
       };
     };
 
@@ -288,15 +285,18 @@
       var pointB;
       return pointB = {
         x: this.getXPosition() + this.get('rect').getWidth(),
-        y: this.getYPosition()
+        y: this.getYPosition(),
+        flag: 'B'
       };
     };
 
     Box.prototype.getPointC = function() {
       var pointC;
+      Logger.dev("@getYPosition() " + (this.getYPosition()) + ", @get('rect').getHeight(): " + (this.get('rect').getHeight()));
       return pointC = {
         x: this.getXPosition(),
-        y: this.getYPosition() + this.get('rect').getHeight()
+        y: this.getYPosition() + this.get('rect').getHeight(),
+        flag: 'C'
       };
     };
 
@@ -304,7 +304,8 @@
       var pointC;
       return pointC = {
         x: this.getXPosition() + this.get('rect').getWidth(),
-        y: this.getYPosition() + this.get('rect').getHeight()
+        y: this.getYPosition() + this.get('rect').getHeight(),
+        flag: 'D'
       };
     };
 
@@ -398,6 +399,7 @@
       this.left = __bind(this.left, this);
       this.down = __bind(this.down, this);
       this.up = __bind(this.up, this);
+      this.rotate90 = __bind(this.rotate90, this);
       this.removeCurrentBox = __bind(this.removeCurrentBox, this);
       this.addNewBox = __bind(this.addNewBox, this);
       return Boxes.__super__.constructor.apply(this, arguments);
@@ -539,6 +541,7 @@
       }
       this.currentBox = newBox;
       this.otherCurrentBox.set('box', newBox);
+      $('#moveOffset').checked = true;
       return rivets.bind($('.box'), {
         box: newBox
       });
@@ -552,6 +555,8 @@
       Logger.debug("In Boxes: " + (this.pprint()) + "; ");
       return this.pprint();
     };
+
+    Boxes.prototype.rotate90 = function() {};
 
     Boxes.prototype.up = function() {
       Logger.debug("@currentBox:\t" + this.currentBox.getTitleName());
@@ -567,7 +572,6 @@
     };
 
     Boxes.prototype.down = function() {
-      Logger.debug("@currentBox:\t" + this.currentBox.getTitleName());
       this.currentBox.setYPosition(this.currentBox.getYPosition() + this.currentBox.getMoveOffset());
       if (!this.validateZone(this.currentBox)) {
         this.currentBox.setYPosition(this.zone.bound.bottom - this.currentBox.getHeight());
@@ -617,13 +621,13 @@
 
     Boxes.prototype.validateZoneX = function(point) {
       var _ref;
-      Logger.debug("validateZoneX: point.x " + point.x + ", @zone.width " + this.zone.width);
+      Logger.dev("validateZoneX: @zone.bound.left " + this.zone.bound.left + " point (" + point.x + "," + point.y + "," + point.flag + "), @zone.bound.right " + this.zone.bound.right);
       return (this.zone.bound.left <= (_ref = point.x) && _ref <= this.zone.bound.right);
     };
 
     Boxes.prototype.validateZoneY = function(point) {
       var _ref;
-      Logger.debug("validateZoneY: point.y " + point.y + ", @zone.width " + this.zone.height);
+      Logger.dev("validateZoneY: @zone.bound.top " + this.zone.bound.top + " point (" + point.x + "," + point.y + "," + point.flag + "), @zone.bound.bottom " + this.zone.bound.bottom);
       return (this.zone.bound.top <= (_ref = point.y) && _ref <= this.zone.bound.bottom);
     };
 
@@ -1235,7 +1239,7 @@
 
   $("input").prop("readonly", true);
 
-  $("#minDistance").prop("readonly", false);
+  $(".offset").prop("readonly", false);
 
   $("#ex8").slider();
 

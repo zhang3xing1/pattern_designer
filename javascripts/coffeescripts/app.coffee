@@ -66,8 +66,8 @@ class @Box extends Backbone.Model
     
     [box_params, @color_params, @ratio, @zone] = [params.box, params.color, params.ratio, params.zone]
 
-    Logger.debug params.ratio
-    
+    @set ratio: params.ratio
+
     @set innerBox: 
       x:      box_params.x
       y:      box_params.y
@@ -125,12 +125,14 @@ class @Box extends Backbone.Model
   getBoxId: () ->
     @get('boxId') 
   getMoveOffset: () ->
-    offset = Number($("#ex8").val()) % 99
-    if offset % 99 > 0
-      @set('moveOffset', offset % 99)
-      offset % 99
-    else
-      4
+    # offset = Number($("#ex8").val()) % 99
+    # if offset % 99 > 0
+    #   @set('moveOffset', offset % 99)
+    #   offset % 99
+    # else
+    #   4
+    Logger.dev "getMoveOffset #{@get('moveOffset')}"
+    Number(@get('moveOffset'))
   setTitleName: (newTitle) ->
     @get('title').setText(newTitle) 
   getTitleName: () ->
@@ -176,18 +178,23 @@ class @Box extends Backbone.Model
     pointX = 
       x: @getXPosition()
       y: @getYPosition()
+      flag: 'A'
   getPointB: () ->
     pointB = 
       x: @getXPosition() + @get('rect').getWidth()
       y: @getYPosition()
+      flag: 'B'
   getPointC: () ->
+    Logger.dev "@getYPosition() #{@getYPosition()}, @get('rect').getHeight(): #{@get('rect').getHeight()}"
     pointC = 
       x: @getXPosition()
       y: @getYPosition() + @get('rect').getHeight()
+      flag: 'C'
   getPointD: () ->
     pointC = 
       x: @getXPosition() + @get('rect').getWidth()
       y: @getYPosition() + @get('rect').getHeight()
+      flag: 'D'
   # updateRectStyle: (options) ->
   #   Logger.debug("updateRectStyle: #{@getTitleName()}")
   #   @get('rect').setFill(options.color)
@@ -270,9 +277,8 @@ class @Boxes extends Backbone.Collection
       zone:   params.zone
     @CurrentBox = Backbone.Model.extend(
       initialize: (box_params)->
-        @set box:       new Box(box_params)
-        @set title:     @get('box').getTitleName()
-
+        @set box:         new Box(box_params)
+        @set title:       @get('box').getTitleName()
         @on('change:box', @updateBoxTitle)
       updateBoxTitle: ->
         @set title: @get('box').getTitleName()
@@ -366,6 +372,8 @@ class @Boxes extends Backbone.Collection
   updateCurrentBox: (newBox = @currentBox) ->
     @currentBox = newBox
     @otherCurrentBox.set('box', newBox)
+    $('#moveOffset').checked = true
+
     rivets.bind $('.box'),{box: newBox}
   showCurrentBoxPanel: () ->
     rivets.bind $('.box'),{box: @currentBox}
@@ -376,6 +384,8 @@ class @Boxes extends Backbone.Collection
     #   $('.panel').css('display','none')
     # else
     #   $('.panel').css('display','block')
+  rotate90: () =>
+    ;
   up: () =>
     Logger.debug("@currentBox:\t" + @currentBox.getTitleName())
     @currentBox.setYPosition(@currentBox.getYPosition() - @currentBox.getMoveOffset())
@@ -387,7 +397,6 @@ class @Boxes extends Backbone.Collection
     @testCollision()
     @updateCurrentBox()
   down: () =>
-    Logger.debug("@currentBox:\t" + @currentBox.getTitleName())
     @currentBox.setYPosition(@currentBox.getYPosition() + @currentBox.getMoveOffset())
     unless @validateZone(@currentBox)
       @currentBox.setYPosition(@zone.bound.bottom - @currentBox.getHeight())
@@ -425,10 +434,10 @@ class @Boxes extends Backbone.Collection
     Logger.debug("validresult:\t #{result}")
     result
   validateZoneX: (point) ->
-    Logger.debug("validateZoneX: point.x #{point.x}, @zone.width #{@zone.width}")
+    Logger.dev("validateZoneX: @zone.bound.left #{@zone.bound.left} point (#{point.x},#{point.y},#{point.flag}), @zone.bound.right #{@zone.bound.right}")
     @zone.bound.left <= point.x <= @zone.bound.right
   validateZoneY: (point) ->
-    Logger.debug("validateZoneY: point.y #{point.y}, @zone.width #{@zone.height}")
+    Logger.dev("validateZoneY: @zone.bound.top #{@zone.bound.top} point (#{point.x},#{point.y},#{point.flag}), @zone.bound.bottom #{@zone.bound.bottom}")
     @zone.bound.top <= point.y <= @zone.bound.bottom
 
 
@@ -882,7 +891,7 @@ $("input").prop "readonly", true
 
 
 # $(".currentBox").prop "readonly", false
-$("#minDistance").prop "readonly", false
+$(".offset").prop "readonly", false
 
 $("#ex8").slider()
 

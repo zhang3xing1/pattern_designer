@@ -42,10 +42,6 @@
                 <button class="btn btn-primary" >OK</button>
               </span> 
           </div>
-<!--           <div class="panel-heading panel-heading-info ">
-              <span>Current Box</span>
-              <span class="flash-info boxes">{ boxes.flash }</span>
-          </div> -->
         
           <div class="box input-group row column" >
             <div class="input-group col-md-6" style="float: left">
@@ -60,21 +56,6 @@
           
           </div>
 
-              
-<!--                     <div class="row column box">
-              <div class="col-md-6" >
-                  <div class="input-group ">
-                      <span class="input-group-addon label-info">Width :</span>
-                      <input type="text" class="form-control box" rv-value="box.getWidthByRatio | suffix_cm">
-                  </div>
-              </div>
-              <div class="col-md-6" >
-                  <div class="input-group">
-                      <span class="input-group-addon label-info">Height :</span>
-                      <input type="text" class="form-control" rv-value="box.getHeightByRatio | suffix_cm">
-                  </div>
-              </div>
-          </div> -->
           <div class="input-group row column" style="width: 220px" >
             <div class="input-group col-md-3"  style="float: left">
               <button type="button" class="btn btn-info boxes">Move :</button>
@@ -89,13 +70,27 @@
           </div>
 
           <div class="input-group row column"  >
-            <div class="box input-group col-md-6" style="float: left">
+            <div class="box input-group col-md-20" style="float: left">
                 <span class="input-group-addon label-info">Offset</span>
-                <input type="text" style="width: 110%" class="form-control" id="box-move-offset" rv-value="box:moveOffset">
-            </div>
+                <input type="radio" name = 'moveOffset' style="margin-left: 4px" rv-checked="box:moveOffset"  value="1" >1
+                <input type="radio" name = 'moveOffset' style="margin-left: 4px" rv-checked="box:moveOffset"  value="2" >2
+                <input type="radio" name = 'moveOffset' style="margin-left: 4px" rv-checked="box:moveOffset"  value="5" checked="checked">5
+                <input type="radio" name = 'moveOffset' style="margin-left: 4px" rv-checked="box:moveOffset"  value="10" >10
+            </div>      
+          </div>
 
-            <div class="col-md-3" style="float: left" >
-                  <button type="button" class="btn btn-danger boxes" rv-on-click="boxes.removeCurrentBox">Delete Box</button>
+          <div class="input-group row column"  >
+            <div class="box input-group col-md-5" style="float: left">
+                <span class="input-group-addon label-info">Rot</span>
+                <input type="text" style="width: 110%" class="offset form-control" id="box-move-offset" rv-value="box:rotate">
+            </div> 
+            <div class="boxes col-md-2" style="float: left" >
+                  <button type="button" class="btn btn-primary boxes" rv-on-click="boxes.rotate90">
+                    +90
+                  </button>
+            </div>              
+            <div class="boxes col-md-2" style="margin-left: 18px; float: left" >
+                  <button type="button" class="btn btn-danger boxes" rv-on-click="boxes.removeCurrentBox">Delete</button>
             </div>
           </div>
 
@@ -103,6 +98,7 @@
 
         </div>
       </div>
+
 
 
         <!-- test -->
