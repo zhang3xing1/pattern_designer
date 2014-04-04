@@ -13,3 +13,7 @@ then  prohibit user from adding another box?
 ## Future
 
 1. line: approach, same position with the other box and unvisible(placed), currentbox(visible)
+
+
+ horizontal line
+ vertical line
