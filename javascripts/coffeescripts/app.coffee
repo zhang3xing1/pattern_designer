@@ -54,9 +54,9 @@ class @Logger
 
 class @Box extends Backbone.Model
   defaults: {
-    boxId:            'nullID'
+    boxId:            '0'
     collisionStatus:  false
-    settledStatus:    false
+    settledStatus:    false   # false: unsettled | true: settled(placed)
     moveOffset:       4
     rotate:           0
 
@@ -105,13 +105,13 @@ class @Box extends Backbone.Model
 
     ###### Box has an outer Rect ######
     # box_params.minDistance = $("input:checked","#minDistanceRadio").val()
+    @set outerBox: 
+      x:      @get('innerBox').x - box_params.minDistance
+      y:      @get('innerBox').y - box_params.minDistance
+      width:  @get('innerBox').width + 2 * box_params.minDistance
+      height: @get('innerBox').height + 2 * box_params.minDistance
     if box_params.minDistance > 0
       @set minDistance: box_params.minDistance
-      @set outerBox: 
-          x:      @get('innerBox').x - box_params.minDistance
-          y:      @get('innerBox').y - box_params.minDistance
-          width:  @get('innerBox').width + 2 * box_params.minDistance
-          height: @get('innerBox').height + 2 * box_params.minDistance
       @set outerRect: new Kinetic.Rect(
                               x:              @get('outerBox').x
                               y:              @get('outerBox').y
@@ -120,6 +120,15 @@ class @Box extends Backbone.Model
                             )
       @get('outerRect').dash(([4, 5]))
       @get('group').add(@get('outerRect'))
+    else
+      @set outerRect: new Kinetic.Rect(
+                              x:              @get('outerBox').x
+                              y:              @get('outerBox').y
+                              width:          @get('outerBox').width
+                              height:         @get('outerBox').height
+                              fillAlpha:      0
+                            )
+
     Logger.debug('Box: Generate a new box.')
 
   hasOuterRect: () ->
@@ -223,10 +232,7 @@ class @Box extends Backbone.Model
     @get('outerRect').setHeight(oldBoxFrame.outerWidth)
     @get('title').setX(@get('rect').x() + @get('rect').width()/2  - 5)
     @get('title').setY(@get('rect').y() + @get('rect').height()/2 - 5)
-
     @set('rotate',(@get('rotate') + angle) % 180)
-
-
 
     Logger.debug "[rotateWithAngle] width: #{@get('rect').getWidth()}, height: #{@get('rect').getHeight()}"
 
@@ -294,6 +300,7 @@ class @Box extends Backbone.Model
                   "PointC(x:#{@getPointC().x},y:#{@getPointC().y}) " +
                   "PointD(x:#{@getPointD().x},y:#{@getPointD().y}) " )
 
+
 class @Boxes extends Backbone.Collection
   model: Box
   initialize: (params)->
@@ -314,6 +321,8 @@ class @Boxes extends Backbone.Collection
     )
     # @on('add', @showCurrentBoxPanel)
     @on('all', @draw) 
+    @on('all', @updateDashboardStatus)
+
     @collisionUtil = new CollisionUtil
 
     @currentBox = new Box(@box_params)
@@ -337,8 +346,10 @@ class @Boxes extends Backbone.Collection
   createNewBox: =>
     newBox  = new Box(@box_params)
 
-    newBox.setXPosition(Math.min(@zone.bound.left + @availableNewBoxId * newBox.getMoveOffset(), @zone.bound.right))
-    newBox.setYPosition(Math.min(@zone.bound.top + @availableNewBoxId * newBox.getMoveOffset(), @zone.bound.bottom))
+    # newBox.setXPosition(Math.min(@zone.bound.left + @availableNewBoxId * newBox.getMoveOffset(), @zone.bound.right))
+    # newBox.setYPosition(Math.min(@zone.bound.top + @availableNewBoxId * newBox.getMoveOffset(), @zone.bound.bottom))
+    newBox.setXPosition((@zone.bound.left + @zone.bound.right - newBox.get('rect').getWidth())/2)
+    newBox.setYPosition((@zone.bound.top + @zone.bound.bottom - newBox.get('rect').getHeight())/2)
     newBox.setTitleName(@availableNewBoxId)
     newBox.set('boxId', @availableNewBoxId)
     newBox.box().on "click", =>
@@ -353,8 +364,11 @@ class @Boxes extends Backbone.Collection
 
     @testCollision()
   settleCurrentBox: =>
-    @currentBox.set('settledStatus', true)
-    @draw()
+    if @currentBox.get('collisionStatus')
+      @flash = "Box#{@currentBox.getTitleName()} cannot be placed in collision status!"
+    else
+      @currentBox.set('settledStatus', true)
+      @draw()
   removeCurrentBox: =>
     Logger.debug "#{@length}"
     if @length == 0
@@ -379,7 +393,7 @@ class @Boxes extends Backbone.Collection
     result = false
     result =_.reduce(@models,
                     ((status, box) ->
-                      if @currentBox.getBoxId() != box.getBoxId() && @currentBox.getBoxId() != 'nullID'
+                      if @currentBox.getBoxId() != box.getBoxId() && @currentBox.getBoxId() != '0'
                         @testCollisionBetween(@currentBox, box) || status
                       else
                         status), 
@@ -406,7 +420,7 @@ class @Boxes extends Backbone.Collection
     @currentBox = newBox
     Logger.debug "[updateCurrentBox] width: #{@currentBox.get('rect').getWidth()}, height: #{@currentBox.get('rect').getHeight()}"
     @otherCurrentBox.set('box', newBox)
-    $('#moveOffset').checked = true
+    # $('#moveOffset').checked = true
 
     rivets.bind $('.box'),{box: newBox}
   showCurrentBoxPanel: () ->
@@ -477,6 +491,22 @@ class @Boxes extends Backbone.Collection
     @zone.bound.top <= point.y <= @zone.bound.bottom
 
 
+  ## view controller
+  ## should be a controller alone
+  updateDashboardStatus: () ->
+    settledStatuses = 
+      _.reduce @models, ((status, aBox) ->
+        Logger.dev "[updateDashboardStatus]: Box#{aBox.getTitleName()} settledStatus #{aBox.get('settledStatus') }" 
+        status && aBox.get('settledStatus') 
+        ), true
+    if settledStatuses
+      # all box are settled
+      # create button is enabled
+      $('#createNewBox').prop "disabled", false
+      $('#placeCurrentBox').prop "disabled", true
+    else
+      $('#createNewBox').prop "disabled", true
+      $('#placeCurrentBox').prop "disabled", false
 class CollisionPair extends Backbone.Model
   ## attributes:
   ##  boxId
@@ -889,7 +919,7 @@ box  =
   y:      0
   width:  60  
   height: 30  
-  minDistance: 20
+  minDistance: 0
     
 params = 
   pallet: pallet
@@ -905,13 +935,15 @@ params =
 rivets.formatters.suffix_cm = (value) ->
    "#{value.toFixed(2)}"
 
+rivets.formatters.availableNewTitle = (value) ->
+  "#{value + 100}"
+
 $("input").prop "readonly", true
 
 
 # $(".currentBox").prop "readonly", false
 $(".offset").prop "readonly", false
 
-$("#ex8").slider()
 
 $("#ex8").on "slide", (slideEvt) ->
   $("#box-move-offset").val($("#ex8").val())

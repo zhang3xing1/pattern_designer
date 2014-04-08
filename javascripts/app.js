@@ -88,7 +88,7 @@
     }
 
     Box.prototype.defaults = {
-      boxId: 'nullID',
+      boxId: '0',
       collisionStatus: false,
       settledStatus: false,
       moveOffset: 4,
@@ -137,17 +137,17 @@
       this.get('rect').dash([4, 5]);
       this.get('group').add(this.get('rect'));
       this.get('group').add(this.get('title'));
+      this.set({
+        outerBox: {
+          x: this.get('innerBox').x - box_params.minDistance,
+          y: this.get('innerBox').y - box_params.minDistance,
+          width: this.get('innerBox').width + 2 * box_params.minDistance,
+          height: this.get('innerBox').height + 2 * box_params.minDistance
+        }
+      });
       if (box_params.minDistance > 0) {
         this.set({
           minDistance: box_params.minDistance
-        });
-        this.set({
-          outerBox: {
-            x: this.get('innerBox').x - box_params.minDistance,
-            y: this.get('innerBox').y - box_params.minDistance,
-            width: this.get('innerBox').width + 2 * box_params.minDistance,
-            height: this.get('innerBox').height + 2 * box_params.minDistance
-          }
         });
         this.set({
           outerRect: new Kinetic.Rect({
@@ -159,6 +159,16 @@
         });
         this.get('outerRect').dash([4, 5]);
         this.get('group').add(this.get('outerRect'));
+      } else {
+        this.set({
+          outerRect: new Kinetic.Rect({
+            x: this.get('outerBox').x,
+            y: this.get('outerBox').y,
+            width: this.get('outerBox').width,
+            height: this.get('outerBox').height,
+            fillAlpha: 0
+          })
+        });
       }
       return Logger.debug('Box: Generate a new box.');
     };
@@ -461,6 +471,7 @@
         }
       });
       this.on('all', this.draw);
+      this.on('all', this.updateDashboardStatus);
       this.collisionUtil = new CollisionUtil;
       this.currentBox = new Box(this.box_params);
       this.otherCurrentBox = new this.CurrentBox(this.box_params);
@@ -494,8 +505,8 @@
     Boxes.prototype.createNewBox = function() {
       var newBox;
       newBox = new Box(this.box_params);
-      newBox.setXPosition(Math.min(this.zone.bound.left + this.availableNewBoxId * newBox.getMoveOffset(), this.zone.bound.right));
-      newBox.setYPosition(Math.min(this.zone.bound.top + this.availableNewBoxId * newBox.getMoveOffset(), this.zone.bound.bottom));
+      newBox.setXPosition((this.zone.bound.left + this.zone.bound.right - newBox.get('rect').getWidth()) / 2);
+      newBox.setYPosition((this.zone.bound.top + this.zone.bound.bottom - newBox.get('rect').getHeight()) / 2);
       newBox.setTitleName(this.availableNewBoxId);
       newBox.set('boxId', this.availableNewBoxId);
       newBox.box().on("click", (function(_this) {
@@ -513,8 +524,12 @@
     };
 
     Boxes.prototype.settleCurrentBox = function() {
-      this.currentBox.set('settledStatus', true);
-      return this.draw();
+      if (this.currentBox.get('collisionStatus')) {
+        return this.flash = "Box" + (this.currentBox.getTitleName()) + " cannot be placed in collision status!";
+      } else {
+        this.currentBox.set('settledStatus', true);
+        return this.draw();
+      }
     };
 
     Boxes.prototype.removeCurrentBox = function() {
@@ -544,7 +559,7 @@
       Logger.debug("...Collision start...");
       result = false;
       result = _.reduce(this.models, (function(status, box) {
-        if (this.currentBox.getBoxId() !== box.getBoxId() && this.currentBox.getBoxId() !== 'nullID') {
+        if (this.currentBox.getBoxId() !== box.getBoxId() && this.currentBox.getBoxId() !== '0') {
           return this.testCollisionBetween(this.currentBox, box) || status;
         } else {
           return status;
@@ -580,7 +595,6 @@
       this.currentBox = newBox;
       Logger.debug("[updateCurrentBox] width: " + (this.currentBox.get('rect').getWidth()) + ", height: " + (this.currentBox.get('rect').getHeight()));
       this.otherCurrentBox.set('box', newBox);
-      $('#moveOffset').checked = true;
       return rivets.bind($('.box'), {
         box: newBox
       });
@@ -672,6 +686,21 @@
       var _ref;
       Logger.debug("validateZoneY: @zone.bound.top " + this.zone.bound.top + " point (" + point.x + "," + point.y + "," + point.flag + "), @zone.bound.bottom " + this.zone.bound.bottom);
       return (this.zone.bound.top <= (_ref = point.y) && _ref <= this.zone.bound.bottom);
+    };
+
+    Boxes.prototype.updateDashboardStatus = function() {
+      var settledStatuses;
+      settledStatuses = _.reduce(this.models, (function(status, aBox) {
+        Logger.dev("[updateDashboardStatus]: Box" + (aBox.getTitleName()) + " settledStatus " + (aBox.get('settledStatus')));
+        return status && aBox.get('settledStatus');
+      }), true);
+      if (settledStatuses) {
+        $('#createNewBox').prop("disabled", false);
+        return $('#placeCurrentBox').prop("disabled", true);
+      } else {
+        $('#createNewBox').prop("disabled", true);
+        return $('#placeCurrentBox').prop("disabled", false);
+      }
     };
 
     return Boxes;
@@ -1243,7 +1272,7 @@
     y: 0,
     width: 60,
     height: 30,
-    minDistance: 20
+    minDistance: 0
   };
 
   params = {
@@ -1259,11 +1288,13 @@
     return "" + (value.toFixed(2));
   };
 
+  rivets.formatters.availableNewTitle = function(value) {
+    return "" + (value + 100);
+  };
+
   $("input").prop("readonly", true);
 
   $(".offset").prop("readonly", false);
-
-  $("#ex8").slider();
 
   $("#ex8").on("slide", function(slideEvt) {
     $("#box-move-offset").val($("#ex8").val());

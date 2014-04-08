@@ -28,18 +28,18 @@
               <span class="input-group-addon label-info colomn-label-info">Layer :</span>
               <input type="text" class="form-control" placeholder="layer name">
           </div>
-          <div id="new_box" class="boxes input-group row column">
+          <div id="new_box" class="input-group row column">
               <span class="input-group-addon label-info">New Box :</span>
-              <input type="text" name="new_box" class="form-control" placeholder="name" readonly="readOnly" rv-value="boxes.length">
+              <input type="text" name="new_box" class="form-control currentBox" placeholder="name" readonly="readOnly" rv-value="currentBox:title">
               <span class="input-group-btn">
-                <button class="btn btn-primary" rv-on-click="boxes.createNewBox">Create</button>
+                <button class="btn btn-primary boxes" id= "createNewBox" rv-on-click="boxes.createNewBox">Create</button>
               </span> 
           </div>
           <div id="new_box" class="input-group row column">
               <span class="input-group-addon label-info">Curr Box :</span>
               <input type="text" name="new_box" class="form-control currentBox" placeholder="name" rv-value="currentBox:title">
               <span class="input-group-btn">
-                <button class="btn btn-primary boxes" rv-on-click="boxes.settleCurrentBox">Place</button>
+                <button class="btn btn-primary boxes"  id= "placeCurrentBox" rv-on-click="boxes.settleCurrentBox">Place</button>
               </span> 
           </div>
         
@@ -94,7 +94,7 @@
             </div>
           </div>
 
-          <span class="flash-info boxes col-md-9">{ boxes.flash }</span>
+          <span class="flash-info boxes ">{ boxes.flash }</span>
 
         </div>
       </div>

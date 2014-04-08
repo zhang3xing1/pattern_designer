@@ -55,15 +55,10 @@ body {
 }
 
 .flash-info{
-    margin-left: 10%;
+    margin: auto;
 }
 
 
-
-#offsetSlider {
-  margin-top: 5%;
-  width: 120px;
-}
 /*body {
         margin:   28px;
         padding:  0px;
