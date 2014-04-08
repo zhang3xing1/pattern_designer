@@ -746,10 +746,14 @@
       }), true);
       if (settledStatuses) {
         $('#createNewBox').prop("disabled", false);
-        return $('#placeCurrentBox').prop("disabled", true);
+        return $("button.placeCurrentBox").each(function() {
+          return $(this).prop("disabled", true);
+        });
       } else {
         $('#createNewBox').prop("disabled", true);
-        return $('#placeCurrentBox').prop("disabled", false);
+        return $("button.placeCurrentBox").each(function() {
+          return $(this).prop("disabled", false);
+        });
       }
     };
 

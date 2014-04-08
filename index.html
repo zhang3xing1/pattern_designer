@@ -39,7 +39,7 @@
                   <span class="input-group-addon label-info">Curr Box :</span>
                   <input type="text" name="new_box" class="form-control currentBox" placeholder="name" rv-value="currentBox:title">
                   <span class="input-group-btn">
-                    <button class="btn btn-primary boxes"  id= "placeCurrentBox" rv-on-click="boxes.settleCurrentBox">Place</button>
+                    <button class="btn btn-primary boxes placeCurrentBox"  id= "placeCurrentBox" rv-on-click="boxes.settleCurrentBox">Place</button>
                   </span> 
               </div>
             
@@ -62,10 +62,10 @@
                 </div>
         
                 <div class="btn-group boxes" style="float: right">
-                    <button type="button" class="btn btn-primary" rv-on-click="boxes.left">←</button>
-                    <button type="button" class="btn btn-primary" rv-on-click="boxes.right">→</button>
-                    <button type="button" class="btn btn-primary" rv-on-click="boxes.up">↑</button>
-                    <button type="button" class="btn btn-primary" rv-on-click="boxes.down">↓</button>
+                    <button type="button" class="btn btn-primary placeCurrentBox" rv-on-click="boxes.left">←</button>
+                    <button type="button" class="btn btn-primary placeCurrentBox" rv-on-click="boxes.right">→</button>
+                    <button type="button" class="btn btn-primary placeCurrentBox" rv-on-click="boxes.up">↑</button>
+                    <button type="button" class="btn btn-primary placeCurrentBox" rv-on-click="boxes.down">↓</button>
                 </div> 
               </div>
 
@@ -85,12 +85,12 @@
                     <input type="text" style="width: 110%" class="offset form-control" id="box-move-offset" rv-value="box:rotate">
                 </div> 
                 <div class="col-md-2" style="float: left" >
-                      <button type="button" class="btn btn-primary boxes" rv-on-click="boxes.rotate90">
+                      <button type="button" class="btn btn-primary boxes placeCurrentBox" id="rotateButton" rv-on-click="boxes.rotate90">
                         +90
                       </button>
                 </div>              
                 <div class="col-md-2" style="margin-left: 18px; float: left" >
-                      <button type="button" class="btn btn-danger boxes" rv-on-click="boxes.removeCurrentBox">Delete</button>
+                      <button type="button" class="btn btn-danger boxes placeCurrentBox" rv-on-click="boxes.removeCurrentBox">Delete</button>
                 </div>
               </div>
 

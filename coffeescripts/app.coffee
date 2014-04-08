@@ -547,10 +547,15 @@ class @Boxes extends Backbone.Collection
       # all box are settled
       # create button is enabled
       $('#createNewBox').prop "disabled", false
-      $('#placeCurrentBox').prop "disabled", true
+      # $('.placeCurrentBox').prop "disabled", true
+      $("button.placeCurrentBox").each ->
+        $(this).prop "disabled", true
+      # $("button").css("class","boxes").each(function(aa) {alert($(this).html());})
     else
       $('#createNewBox').prop "disabled", true
-      $('#placeCurrentBox').prop "disabled", false
+      # $('#placeCurrentBox').prop "disabled", false
+      $("button.placeCurrentBox").each ->
+        $(this).prop "disabled", false
 class CollisionPair extends Backbone.Model
   ## attributes:
   ##  boxId
