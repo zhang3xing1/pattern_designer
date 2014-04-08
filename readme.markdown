@@ -17,3 +17,8 @@ then  prohibit user from adding another box?
 
  horizontal line
  vertical line
+
+
+note:
+
+	rotate clockwise crossover pallet happend left and bottom

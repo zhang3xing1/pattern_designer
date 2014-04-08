@@ -92,7 +92,11 @@
       collisionStatus: false,
       settledStatus: false,
       moveOffset: 4,
-      rotate: 0
+      rotate: 0,
+      crossZoneLeft: false,
+      crossZoneRight: false,
+      crossZoneTop: false,
+      crossZoneBottom: false
     };
 
     Box.prototype.initialize = function(params) {
@@ -353,7 +357,7 @@
       this.get('title').setX(this.get('rect').x() + this.get('rect').width() / 2 - 5);
       this.get('title').setY(this.get('rect').y() + this.get('rect').height() / 2 - 5);
       this.set('rotate', (this.get('rotate') + angle) % 180);
-      return Logger.debug("[rotateWithAngle] width: " + (this.get('rect').getWidth()) + ", height: " + (this.get('rect').getHeight()));
+      return Logger.dev("[rotateWithAngle] width: " + (this.get('rect').getWidth()) + ", height: " + (this.get('rect').getHeight()));
     };
 
     Box.prototype.changeFillColor = function() {
@@ -420,8 +424,8 @@
       }
     };
 
-    Box.prototype.printPoints = function() {
-      return Logger.debug(("PointA(x:" + (this.getPointA().x) + ",y:" + (this.getPointA().y) + ") ") + ("PointB(x:" + (this.getPointB().x) + ",y:" + (this.getPointB().y) + ") ") + ("PointC(x:" + (this.getPointC().x) + ",y:" + (this.getPointC().y) + ") ") + ("PointD(x:" + (this.getPointD().x) + ",y:" + (this.getPointD().y) + ") "));
+    Box.prototype.printPoints = function(prefix) {
+      return Logger.dev(("\n[" + prefix + "]: PointA(x:" + (this.getPointA().x) + ",y:" + (this.getPointA().y) + ")\n ") + ("[" + prefix + "]: PointB(x:" + (this.getPointB().x) + ",y:" + (this.getPointB().y) + ")\n ") + ("[" + prefix + "]: PointC(x:" + (this.getPointC().x) + ",y:" + (this.getPointC().y) + ")\n ") + ("[" + prefix + "]: PointD(x:" + (this.getPointD().x) + ",y:" + (this.getPointD().y) + ")\n "));
     };
 
     return Box;
@@ -611,15 +615,19 @@
 
     Boxes.prototype.rotate90 = function() {
       this.currentBox.rotateWithAngle(90);
+      if (!this.validateZone(this.currentBox)) {
+        this.repairCrossZone(this.currentBox);
+      }
+      this.testCollision();
       this.updateCurrentBox();
-      return Logger.debug("[rotate90] width: " + (this.currentBox.get('rect').getWidth()) + ", height: " + (this.currentBox.get('rect').getHeight()));
+      return Logger.dev("[rotate90] width: " + (this.currentBox.get('rect').getWidth()) + ", height: " + (this.currentBox.get('rect').getHeight()));
     };
 
     Boxes.prototype.up = function() {
       Logger.debug("@currentBox:\t" + this.currentBox.getTitleName());
       this.currentBox.setYPosition(this.currentBox.getYPosition() - this.currentBox.getMoveOffset());
       if (!this.validateZone(this.currentBox)) {
-        this.currentBox.setYPosition(this.zone.bound.top);
+        this.repairCrossZone(this.currentBox);
         this.flash = "Box" + (this.currentBox.getTitleName()) + " cannot be moved UP!";
       } else {
         this.flash = "box" + (this.currentBox.getTitleName()) + " selected!";
@@ -631,7 +639,7 @@
     Boxes.prototype.down = function() {
       this.currentBox.setYPosition(this.currentBox.getYPosition() + this.currentBox.getMoveOffset());
       if (!this.validateZone(this.currentBox)) {
-        this.currentBox.setYPosition(this.zone.bound.bottom - this.currentBox.getHeight());
+        this.repairCrossZone(this.currentBox);
         this.flash = "Box" + (this.currentBox.getTitleName()) + " cannot be moved DOWN!";
       } else {
         this.flash = "box" + (this.currentBox.getTitleName()) + " selected!";
@@ -643,8 +651,9 @@
     Boxes.prototype.left = function() {
       Logger.debug("@currentBox:\t" + this.currentBox.getTitleName());
       this.currentBox.setXPosition(this.currentBox.getXPosition() - this.currentBox.getMoveOffset());
+      this.currentBox.set('crossZoneLeft', false);
       if (!this.validateZone(this.currentBox)) {
-        this.currentBox.setXPosition(this.zone.bound.left);
+        this.repairCrossZone(this.currentBox);
         this.flash = "Box" + (this.currentBox.getTitleName()) + " cannot be moved LEFT!";
       } else {
         this.flash = "box" + (this.currentBox.getTitleName()) + " selected!";
@@ -658,7 +667,7 @@
       Logger.debug("@currentBox:\t" + this.currentBox.getXPosition());
       this.currentBox.setXPosition(this.currentBox.getXPosition() + this.currentBox.getMoveOffset());
       if (!this.validateZone(this.currentBox)) {
-        this.currentBox.setXPosition(this.zone.bound.right - this.currentBox.getWidth());
+        this.repairCrossZone(this.currentBox);
         this.flash = "Box" + (this.currentBox.getTitleName()) + " cannot be moved RIGHT!";
       } else {
         this.flash = "box" + (this.currentBox.getTitleName()) + " selected!";
@@ -670,28 +679,69 @@
     Boxes.prototype.validateZone = function(box) {
       var result;
       result = _.reduce([box.getPointA(), box.getPointB(), box.getPointC(), box.getPointD()], (function(status, point) {
-        return status && this.validateZoneX(point) && this.validateZoneY(point);
+        return status && this.validateZoneX(point, box) && this.validateZoneY(point, box);
       }), true, this);
       Logger.debug("validresult:\t " + result);
       return result;
     };
 
-    Boxes.prototype.validateZoneX = function(point) {
-      var _ref;
+    Boxes.prototype.validateZoneX = function(point, box) {
       Logger.debug("validateZoneX: @zone.bound.left " + this.zone.bound.left + " point (" + point.x + "," + point.y + "," + point.flag + "), @zone.bound.right " + this.zone.bound.right);
-      return (this.zone.bound.left <= (_ref = point.x) && _ref <= this.zone.bound.right);
+      if (this.zone.bound.left > point.x) {
+        box.set('crossZoneLeft', true);
+        return false;
+      } else if (point.x > this.zone.bound.right) {
+        box.set('crossZoneRight', true);
+        return false;
+      } else {
+        return true;
+      }
     };
 
-    Boxes.prototype.validateZoneY = function(point) {
-      var _ref;
+    Boxes.prototype.validateZoneY = function(point, box) {
       Logger.debug("validateZoneY: @zone.bound.top " + this.zone.bound.top + " point (" + point.x + "," + point.y + "," + point.flag + "), @zone.bound.bottom " + this.zone.bound.bottom);
-      return (this.zone.bound.top <= (_ref = point.y) && _ref <= this.zone.bound.bottom);
+      if (this.zone.bound.top > point.y) {
+        box.set('crossZoneTop', true);
+        return false;
+      } else if (point.y > this.zone.bound.bottom) {
+        box.set('crossZoneBottom', true);
+        return false;
+      } else {
+        return true;
+      }
+    };
+
+    Boxes.prototype.repairCrossZone = function(box) {
+      Logger.dev("[repairCrossZone before]: crossZoneLeft: " + (box.get('crossZoneLeft')) + " crossZoneRight: " + (box.get('crossZoneRight')));
+      Logger.dev("[repairCrossZone before]: crossZoneTop: " + (box.get('crossZoneTop')) + " crossZoneBottom: " + (box.get('crossZoneBottom')));
+      Logger.dev("[repairCrossZone before]: x: " + (box.getXPosition()) + " y: " + (box.getYPosition()));
+      if (box.get('crossZoneLeft')) {
+        box.setXPosition(this.zone.bound.left);
+      }
+      if (box.get('crossZoneRight')) {
+        box.setXPosition(this.zone.bound.right - box.getWidth());
+      }
+      if (box.get('crossZoneTop')) {
+        box.setYPosition(this.zone.bound.top);
+      }
+      if (box.get('crossZoneBottom')) {
+        box.setYPosition(this.zone.bound.bottom - box.getHeight());
+      }
+      box.set({
+        crossZoneLeft: false,
+        crossZoneRight: false,
+        crossZoneTop: false,
+        crossZoneBottom: false
+      });
+      Logger.dev("[repairCrossZone after]: x: " + (box.getXPosition()) + " y: " + (box.getYPosition()));
+      Logger.dev("[repairCrossZone after]: crossZoneLeft: " + (box.get('crossZoneLeft')) + " crossZoneRight: " + (box.get('crossZoneRight')));
+      return Logger.dev("[repairCrossZone after]: crossZoneTop: " + (box.get('crossZoneTop')) + " crossZoneBottom: " + (box.get('crossZoneBottom')));
     };
 
     Boxes.prototype.updateDashboardStatus = function() {
       var settledStatuses;
       settledStatuses = _.reduce(this.models, (function(status, aBox) {
-        Logger.dev("[updateDashboardStatus]: Box" + (aBox.getTitleName()) + " settledStatus " + (aBox.get('settledStatus')));
+        Logger.debug("[updateDashboardStatus]: Box" + (aBox.getTitleName()) + " settledStatus " + (aBox.get('settledStatus')));
         return status && aBox.get('settledStatus');
       }), true);
       if (settledStatuses) {
@@ -1270,9 +1320,9 @@
   box = {
     x: 0,
     y: 0,
-    width: 60,
-    height: 30,
-    minDistance: 0
+    width: 120,
+    height: 60,
+    minDistance: 20
   };
 
   params = {

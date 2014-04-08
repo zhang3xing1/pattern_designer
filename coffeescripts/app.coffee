@@ -58,7 +58,11 @@ class @Box extends Backbone.Model
     collisionStatus:  false
     settledStatus:    false   # false: unsettled | true: settled(placed)
     moveOffset:       4
-    rotate:           0
+    rotate:           0   
+    crossZoneLeft:    false
+    crossZoneRight:   false
+    crossZoneTop:     false
+    crossZoneBottom:  false
 
   }
   initialize: (params) ->
@@ -97,11 +101,6 @@ class @Box extends Backbone.Model
     @get('rect').dash(([4, 5]))
     @get('group').add(@get('rect'))
     @get('group').add(@get('title'))
-
-    # @get('group').on 'dblclick', =>
-    #   @rotateWithAngle('90')
-    #   Logger.debug "hey dblclick"
-
 
     ###### Box has an outer Rect ######
     # box_params.minDistance = $("input:checked","#minDistanceRadio").val()
@@ -234,7 +233,7 @@ class @Box extends Backbone.Model
     @get('title').setY(@get('rect').y() + @get('rect').height()/2 - 5)
     @set('rotate',(@get('rotate') + angle) % 180)
 
-    Logger.debug "[rotateWithAngle] width: #{@get('rect').getWidth()}, height: #{@get('rect').getHeight()}"
+    Logger.dev "[rotateWithAngle] width: #{@get('rect').getWidth()}, height: #{@get('rect').getHeight()}"
 
   changeFillColor: ->
     Logger.debug "Box#{@getTitleName()} collisionStatus: #{@get('collisionStatus')}\t settledStatus: #{@get('settledStatus')}"
@@ -294,12 +293,11 @@ class @Box extends Backbone.Model
           @get('outerRect').strokeBlue(   @color_params.boxSelected.uncollision.outer.stroke.blue)
           @get('outerRect').strokeAlpha(  @color_params.boxSelected.uncollision.outer.stroke.alpha)
 
-  printPoints: ->
-    Logger.debug( "PointA(x:#{@getPointA().x},y:#{@getPointA().y}) " +
-                  "PointB(x:#{@getPointB().x},y:#{@getPointB().y}) " +
-                  "PointC(x:#{@getPointC().x},y:#{@getPointC().y}) " +
-                  "PointD(x:#{@getPointD().x},y:#{@getPointD().y}) " )
-
+  printPoints: (prefix) ->
+    Logger.dev(   "\n[#{prefix}]: PointA(x:#{@getPointA().x},y:#{@getPointA().y})\n " +
+                  "[#{prefix}]: PointB(x:#{@getPointB().x},y:#{@getPointB().y})\n " +
+                  "[#{prefix}]: PointC(x:#{@getPointC().x},y:#{@getPointC().y})\n " +
+                  "[#{prefix}]: PointD(x:#{@getPointD().x},y:#{@getPointD().y})\n " )
 
 class @Boxes extends Backbone.Collection
   model: Box
@@ -434,13 +432,17 @@ class @Boxes extends Backbone.Collection
     #   $('.panel').css('display','block')
   rotate90: () =>
     @currentBox.rotateWithAngle(90)
+    @repairCrossZone(@currentBox) unless @validateZone(@currentBox)  
+    @testCollision()
     @updateCurrentBox()
-    Logger.debug "[rotate90] width: #{@currentBox.get('rect').getWidth()}, height: #{@currentBox.get('rect').getHeight()}"
+    Logger.dev "[rotate90] width: #{@currentBox.get('rect').getWidth()}, height: #{@currentBox.get('rect').getHeight()}"
   up: () =>
     Logger.debug("@currentBox:\t" + @currentBox.getTitleName())
     @currentBox.setYPosition(@currentBox.getYPosition() - @currentBox.getMoveOffset())
     unless @validateZone(@currentBox)
-      @currentBox.setYPosition(@zone.bound.top)
+      # @currentBox.setYPosition(@zone.bound.top)
+      # @currentBox.set('crossZoneTop', false)
+      @repairCrossZone(@currentBox)
       @flash = "Box#{@currentBox.getTitleName()} cannot be moved UP!"
     else
       @flash =  "box#{@currentBox.getTitleName()} selected!"
@@ -449,7 +451,9 @@ class @Boxes extends Backbone.Collection
   down: () =>
     @currentBox.setYPosition(@currentBox.getYPosition() + @currentBox.getMoveOffset())
     unless @validateZone(@currentBox)
-      @currentBox.setYPosition(@zone.bound.bottom - @currentBox.getHeight())
+      # @currentBox.setYPosition(@zone.bound.bottom - @currentBox.getHeight())
+      # @currentBox.set('crossZoneBottom', false)
+      @repairCrossZone(@currentBox)
       @flash = "Box#{@currentBox.getTitleName()} cannot be moved DOWN!"
     else
       @flash =  "box#{@currentBox.getTitleName()} selected!"
@@ -458,8 +462,11 @@ class @Boxes extends Backbone.Collection
   left: () =>
     Logger.debug("@currentBox:\t" + @currentBox.getTitleName())
     @currentBox.setXPosition(@currentBox.getXPosition() - @currentBox.getMoveOffset())
+    @currentBox.set('crossZoneLeft', false)
     unless @validateZone(@currentBox)
-      @currentBox.setXPosition(@zone.bound.left)
+      # @currentBox.setXPosition(@zone.bound.left)
+      # @currentBox.set('crossZoneLeft', false)
+      @repairCrossZone(@currentBox)
       @flash = "Box#{@currentBox.getTitleName()} cannot be moved LEFT!"
     else
       @flash =  "box#{@currentBox.getTitleName()} selected!"
@@ -470,7 +477,9 @@ class @Boxes extends Backbone.Collection
     Logger.debug("@currentBox:\t" + @currentBox.getXPosition())
     @currentBox.setXPosition(@currentBox.getXPosition() + @currentBox.getMoveOffset())
     unless @validateZone(@currentBox)
-      @currentBox.setXPosition(@zone.bound.right - @currentBox.getWidth())
+      # @currentBox.setXPosition(@zone.bound.right - @currentBox.getWidth())
+      # @currentBox.set('crossZoneRight', false)
+      @repairCrossZone(@currentBox)
       @flash = "Box#{@currentBox.getTitleName()} cannot be moved RIGHT!"
     else
       @flash =  "box#{@currentBox.getTitleName()} selected!"
@@ -479,24 +488,59 @@ class @Boxes extends Backbone.Collection
   validateZone: (box) ->
     result = _.reduce([box.getPointA(),box.getPointB(),box.getPointC(),box.getPointD()], 
                 ((status, point) ->
-                  status && @validateZoneX(point) && @validateZoneY(point)), 
+                  status && @validateZoneX(point, box) && @validateZoneY(point, box)), 
                   true, this)
     Logger.debug("validresult:\t #{result}")
     result
-  validateZoneX: (point) ->
+  validateZoneX: (point, box) ->
     Logger.debug("validateZoneX: @zone.bound.left #{@zone.bound.left} point (#{point.x},#{point.y},#{point.flag}), @zone.bound.right #{@zone.bound.right}")
-    @zone.bound.left <= point.x <= @zone.bound.right
-  validateZoneY: (point) ->
+    if @zone.bound.left > point.x
+      box.set('crossZoneLeft', true)
+      false
+    else if  point.x > @zone.bound.right
+      box.set('crossZoneRight', true)
+      false
+    else
+      true
+  validateZoneY: (point, box) ->
     Logger.debug("validateZoneY: @zone.bound.top #{@zone.bound.top} point (#{point.x},#{point.y},#{point.flag}), @zone.bound.bottom #{@zone.bound.bottom}")
-    @zone.bound.top <= point.y <= @zone.bound.bottom
+    # @zone.bound.top <= point.y <= @zone.bound.bottom
+    if @zone.bound.top > point.y
+      box.set('crossZoneTop', true)
+      false
+    else if  point.y > @zone.bound.bottom
+      box.set('crossZoneBottom', true)
+      false
+    else
+      true
+  repairCrossZone: (box) ->
+    Logger.dev "[repairCrossZone before]: crossZoneLeft: #{box.get('crossZoneLeft')} crossZoneRight: #{box.get('crossZoneRight')}"
+    Logger.dev "[repairCrossZone before]: crossZoneTop: #{box.get('crossZoneTop')} crossZoneBottom: #{box.get('crossZoneBottom')}"
+    Logger.dev "[repairCrossZone before]: x: #{box.getXPosition()} y: #{box.getYPosition()}"
 
-
+    if box.get('crossZoneLeft') 
+      box.setXPosition(@zone.bound.left)
+    if box.get('crossZoneRight') 
+      box.setXPosition(@zone.bound.right - box.getWidth())
+    if box.get('crossZoneTop') 
+      box.setYPosition(@zone.bound.top)
+    if box.get('crossZoneBottom') 
+      box.setYPosition(@zone.bound.bottom - box.getHeight())
+    box.set
+      crossZoneLeft:    false
+      crossZoneRight:   false
+      crossZoneTop:     false
+      crossZoneBottom:  false
+    Logger.dev "[repairCrossZone after]: x: #{box.getXPosition()} y: #{box.getYPosition()}"
+    Logger.dev "[repairCrossZone after]: crossZoneLeft: #{box.get('crossZoneLeft')} crossZoneRight: #{box.get('crossZoneRight')}"
+    Logger.dev "[repairCrossZone after]: crossZoneTop: #{box.get('crossZoneTop')} crossZoneBottom: #{box.get('crossZoneBottom')}"
+    
   ## view controller
   ## should be a controller alone
   updateDashboardStatus: () ->
     settledStatuses = 
       _.reduce @models, ((status, aBox) ->
-        Logger.dev "[updateDashboardStatus]: Box#{aBox.getTitleName()} settledStatus #{aBox.get('settledStatus') }" 
+        Logger.debug "[updateDashboardStatus]: Box#{aBox.getTitleName()} settledStatus #{aBox.get('settledStatus') }" 
         status && aBox.get('settledStatus') 
         ), true
     if settledStatuses
@@ -917,9 +961,9 @@ pallet =
 box  =      
   x:      0 
   y:      0
-  width:  60  
-  height: 30  
-  minDistance: 0
+  width:  120  
+  height: 60  
+  minDistance: 20
     
 params = 
   pallet: pallet
