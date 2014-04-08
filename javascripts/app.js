@@ -72,7 +72,7 @@
         if (instance == null) {
           instance = new Horn;
         }
-        return console.log(instance.dev(message));
+        return console.log(instance.debug(message));
       }
     };
 
@@ -90,7 +90,7 @@
     Box.prototype.defaults = {
       boxId: 'nullID',
       collisionStatus: false,
-      overhangStatus: false,
+      settledStatus: false,
       moveOffset: 4,
       rotate: 0
     };
@@ -154,11 +154,7 @@
             x: this.get('outerBox').x,
             y: this.get('outerBox').y,
             width: this.get('outerBox').width,
-            height: this.get('outerBox').height,
-            strokeRed: this.color_params.boxWithOuterRect.normal.outer.stroke.red,
-            strokeGreen: this.color_params.boxWithOuterRect.normal.outer.stroke.green,
-            strokeBlue: this.color_params.boxWithOuterRect.normal.outer.stroke.blue,
-            strokeAlpha: this.color_params.boxWithOuterRect.normal.outer.stroke.alpha
+            height: this.get('outerBox').height
           })
         });
         this.get('outerRect').dash([4, 5]);
@@ -176,7 +172,7 @@
     };
 
     Box.prototype.getMoveOffset = function() {
-      Logger.dev("getMoveOffset " + (this.get('moveOffset')));
+      Logger.debug("getMoveOffset " + (this.get('moveOffset')));
       return Number(this.get('moveOffset'));
     };
 
@@ -292,7 +288,7 @@
 
     Box.prototype.getPointC = function() {
       var pointC;
-      Logger.dev("@getYPosition() " + (this.getYPosition()) + ", @get('rect').getHeight(): " + (this.get('rect').getHeight()));
+      Logger.debug("@getYPosition() " + (this.getYPosition()) + ", @get('rect').getHeight(): " + (this.get('rect').getHeight()));
       return pointC = {
         x: this.getXPosition(),
         y: this.getYPosition() + this.get('rect').getHeight(),
@@ -332,53 +328,59 @@
     };
 
     Box.prototype.changeFillColor = function() {
-      if (this.get('collisionStatus')) {
-        if (this.hasOuterRect()) {
-          this.get('rect').fillRed(this.color_params.boxWithOuterRect.collision.inner.red);
-          this.get('rect').fillGreen(this.color_params.boxWithOuterRect.collision.inner.green);
-          this.get('rect').fillBlue(this.color_params.boxWithOuterRect.collision.inner.blue);
-          this.get('rect').fillAlpha(this.color_params.boxWithOuterRect.collision.inner.alpha);
-          this.get('outerRect').fillRed(this.color_params.boxWithOuterRect.collision.outer.red);
-          this.get('outerRect').fillGreen(this.color_params.boxWithOuterRect.collision.outer.green);
-          this.get('outerRect').fillBlue(this.color_params.boxWithOuterRect.collision.outer.blue);
-          this.get('outerRect').fillAlpha(this.color_params.boxWithOuterRect.collision.outer.alpha);
-          this.get('outerRect').strokeRed(this.color_params.boxWithOuterRect.collision.outer.stroke.red);
-          this.get('outerRect').strokeGreen(this.color_params.boxWithOuterRect.collision.outer.stroke.green);
-          this.get('outerRect').strokeBlue(this.color_params.boxWithOuterRect.collision.outer.stroke.blue);
-          return this.get('outerRect').strokeAlpha(this.color_params.boxWithOuterRect.collision.outer.stroke.alpha);
-        } else {
-          this.get('rect').fillRed(this.color_params.boxOnlyInnerRect.collision.red);
-          this.get('rect').fillGreen(this.color_params.boxOnlyInnerRect.collision.green);
-          this.get('rect').fillBlue(this.color_params.boxOnlyInnerRect.collision.blue);
-          this.get('rect').fillAlpha(this.color_params.boxOnlyInnerRect.collision.alpha);
-          this.get('rect').strokeRed(this.color_params.boxOnlyInnerRect.collision.stroke.red);
-          this.get('rect').strokeGreen(this.color_params.boxOnlyInnerRect.collision.stroke.green);
-          this.get('rect').strokeBlue(this.color_params.boxOnlyInnerRect.collision.stroke.blue);
-          return this.get('rect').strokeAlpha(this.color_params.boxOnlyInnerRect.collision.stroke.alpha);
-        }
+      Logger.dev("Box" + (this.getTitleName()) + " collisionStatus: " + (this.get('collisionStatus')) + "\t settledStatus: " + (this.get('settledStatus')));
+      if (this.get('settledStatus')) {
+        this.get('rect').fillRed(this.color_params.boxPlaced.inner.red);
+        this.get('rect').fillGreen(this.color_params.boxPlaced.inner.green);
+        this.get('rect').fillBlue(this.color_params.boxPlaced.inner.blue);
+        this.get('rect').fillAlpha(this.color_params.boxPlaced.inner.alpha);
+        this.get('rect').strokeRed(this.color_params.boxPlaced.inner.stroke.red);
+        this.get('rect').strokeGreen(this.color_params.boxPlaced.inner.stroke.green);
+        this.get('rect').strokeBlue(this.color_params.boxPlaced.inner.stroke.blue);
+        this.get('rect').strokeAlpha(this.color_params.boxPlaced.inner.stroke.alpha);
+        this.get('outerRect').fillRed(this.color_params.boxPlaced.outer.red);
+        this.get('outerRect').fillGreen(this.color_params.boxPlaced.outer.green);
+        this.get('outerRect').fillBlue(this.color_params.boxPlaced.outer.blue);
+        this.get('outerRect').fillAlpha(this.color_params.boxPlaced.outer.alpha);
+        this.get('outerRect').strokeRed(this.color_params.boxPlaced.outer.stroke.red);
+        this.get('outerRect').strokeGreen(this.color_params.boxPlaced.outer.stroke.green);
+        this.get('outerRect').strokeBlue(this.color_params.boxPlaced.outer.stroke.blue);
+        return this.get('outerRect').strokeAlpha(this.color_params.boxPlaced.outer.stroke.alpha);
       } else {
-        if (this.hasOuterRect()) {
-          this.get('rect').fillRed(this.color_params.boxWithOuterRect.normal.inner.red);
-          this.get('rect').fillGreen(this.color_params.boxWithOuterRect.normal.inner.green);
-          this.get('rect').fillBlue(this.color_params.boxWithOuterRect.normal.inner.blue);
-          this.get('rect').fillAlpha(this.color_params.boxWithOuterRect.normal.inner.alpha);
-          this.get('outerRect').fillRed(this.color_params.boxWithOuterRect.normal.outer.red);
-          this.get('outerRect').fillGreen(this.color_params.boxWithOuterRect.normal.outer.green);
-          this.get('outerRect').fillBlue(this.color_params.boxWithOuterRect.normal.outer.blue);
-          this.get('outerRect').fillAlpha(this.color_params.boxWithOuterRect.normal.outer.alpha);
-          this.get('outerRect').strokeRed(this.color_params.boxWithOuterRect.normal.outer.stroke.red);
-          this.get('outerRect').strokeGreen(this.color_params.boxWithOuterRect.normal.outer.stroke.green);
-          this.get('outerRect').strokeBlue(this.color_params.boxWithOuterRect.normal.outer.stroke.blue);
-          return this.get('outerRect').strokeAlpha(this.color_params.boxWithOuterRect.normal.outer.stroke.alpha);
+        if (this.get('collisionStatus')) {
+          this.get('rect').fillRed(this.color_params.boxSelected.collision.inner.red);
+          this.get('rect').fillGreen(this.color_params.boxSelected.collision.inner.green);
+          this.get('rect').fillBlue(this.color_params.boxSelected.collision.inner.blue);
+          this.get('rect').fillAlpha(this.color_params.boxSelected.collision.inner.alpha);
+          this.get('rect').strokeRed(this.color_params.boxSelected.collision.inner.stroke.red);
+          this.get('rect').strokeGreen(this.color_params.boxSelected.collision.inner.stroke.green);
+          this.get('rect').strokeBlue(this.color_params.boxSelected.collision.inner.stroke.blue);
+          this.get('rect').strokeAlpha(this.color_params.boxSelected.collision.inner.stroke.alpha);
+          this.get('outerRect').fillRed(this.color_params.boxSelected.collision.outer.red);
+          this.get('outerRect').fillGreen(this.color_params.boxSelected.collision.outer.green);
+          this.get('outerRect').fillBlue(this.color_params.boxSelected.collision.outer.blue);
+          this.get('outerRect').fillAlpha(this.color_params.boxSelected.collision.outer.alpha);
+          this.get('outerRect').strokeRed(this.color_params.boxSelected.collision.outer.stroke.red);
+          this.get('outerRect').strokeGreen(this.color_params.boxSelected.collision.outer.stroke.green);
+          this.get('outerRect').strokeBlue(this.color_params.boxSelected.collision.outer.stroke.blue);
+          return this.get('outerRect').strokeAlpha(this.color_params.boxSelected.collision.outer.stroke.alpha);
         } else {
-          this.get('rect').fillRed(this.color_params.boxOnlyInnerRect.normal.red);
-          this.get('rect').fillGreen(this.color_params.boxOnlyInnerRect.normal.green);
-          this.get('rect').fillBlue(this.color_params.boxOnlyInnerRect.normal.blue);
-          this.get('rect').fillAlpha(this.color_params.boxOnlyInnerRect.normal.alpha);
-          this.get('rect').strokeRed(this.color_params.boxOnlyInnerRect.collision.stroke.red);
-          this.get('rect').strokeGreen(this.color_params.boxOnlyInnerRect.collision.stroke.green);
-          this.get('rect').strokeBlue(this.color_params.boxOnlyInnerRect.collision.stroke.blue);
-          return this.get('rect').strokeAlpha(this.color_params.boxOnlyInnerRect.collision.stroke.alpha);
+          this.get('rect').fillRed(this.color_params.boxSelected.uncollision.inner.red);
+          this.get('rect').fillGreen(this.color_params.boxSelected.uncollision.inner.green);
+          this.get('rect').fillBlue(this.color_params.boxSelected.uncollision.inner.blue);
+          this.get('rect').fillAlpha(this.color_params.boxSelected.uncollision.inner.alpha);
+          this.get('rect').strokeRed(this.color_params.boxSelected.uncollision.inner.stroke.red);
+          this.get('rect').strokeGreen(this.color_params.boxSelected.uncollision.inner.stroke.green);
+          this.get('rect').strokeBlue(this.color_params.boxSelected.uncollision.inner.stroke.blue);
+          this.get('rect').strokeAlpha(this.color_params.boxSelected.uncollision.inner.stroke.alpha);
+          this.get('outerRect').fillRed(this.color_params.boxSelected.uncollision.outer.red);
+          this.get('outerRect').fillGreen(this.color_params.boxSelected.uncollision.outer.green);
+          this.get('outerRect').fillBlue(this.color_params.boxSelected.uncollision.outer.blue);
+          this.get('outerRect').fillAlpha(this.color_params.boxSelected.uncollision.outer.alpha);
+          this.get('outerRect').strokeRed(this.color_params.boxSelected.uncollision.outer.stroke.red);
+          this.get('outerRect').strokeGreen(this.color_params.boxSelected.uncollision.outer.stroke.green);
+          this.get('outerRect').strokeBlue(this.color_params.boxSelected.uncollision.outer.stroke.blue);
+          return this.get('outerRect').strokeAlpha(this.color_params.boxSelected.uncollision.outer.stroke.alpha);
         }
       }
     };
@@ -401,7 +403,8 @@
       this.up = __bind(this.up, this);
       this.rotate90 = __bind(this.rotate90, this);
       this.removeCurrentBox = __bind(this.removeCurrentBox, this);
-      this.addNewBox = __bind(this.addNewBox, this);
+      this.settleCurrentBox = __bind(this.settleCurrentBox, this);
+      this.creatNewBox = __bind(this.creatNewBox, this);
       return Boxes.__super__.constructor.apply(this, arguments);
     }
 
@@ -463,7 +466,7 @@
       });
     };
 
-    Boxes.prototype.addNewBox = function() {
+    Boxes.prototype.creatNewBox = function() {
       var newBox;
       newBox = new Box(this.box_params);
       newBox.setXPosition(Math.min(this.zone.bound.left + this.availableNewBoxId * newBox.getMoveOffset(), this.zone.bound.right));
@@ -482,6 +485,12 @@
       this.flash = "box" + (this.currentBox.getTitleName()) + " selected!";
       this.availableNewBoxId += 1;
       return this.testCollision();
+    };
+
+    Boxes.prototype.settleCurrentBox = function() {
+      Logger.dev("hey , settle what?");
+      this.currentBox.set('settledStatus', true);
+      return this.draw();
     };
 
     Boxes.prototype.removeCurrentBox = function() {
@@ -523,6 +532,7 @@
 
     Boxes.prototype.draw = function() {
       var box, index;
+      Logger.dev("hey, draw");
       index = 0;
       while (index < this.models.length) {
         box = this.models[index];
@@ -539,6 +549,10 @@
       if (newBox == null) {
         newBox = this.currentBox;
       }
+      _.each(this.models, (function(aBox) {
+        return aBox.set('settledStatus', true);
+      }), this);
+      newBox.set('settledStatus', false);
       this.currentBox = newBox;
       this.otherCurrentBox.set('box', newBox);
       $('#moveOffset').checked = true;
@@ -621,13 +635,13 @@
 
     Boxes.prototype.validateZoneX = function(point) {
       var _ref;
-      Logger.dev("validateZoneX: @zone.bound.left " + this.zone.bound.left + " point (" + point.x + "," + point.y + "," + point.flag + "), @zone.bound.right " + this.zone.bound.right);
+      Logger.debug("validateZoneX: @zone.bound.left " + this.zone.bound.left + " point (" + point.x + "," + point.y + "," + point.flag + "), @zone.bound.right " + this.zone.bound.right);
       return (this.zone.bound.left <= (_ref = point.x) && _ref <= this.zone.bound.right);
     };
 
     Boxes.prototype.validateZoneY = function(point) {
       var _ref;
-      Logger.dev("validateZoneY: @zone.bound.top " + this.zone.bound.top + " point (" + point.x + "," + point.y + "," + point.flag + "), @zone.bound.bottom " + this.zone.bound.bottom);
+      Logger.debug("validateZoneY: @zone.bound.top " + this.zone.bound.top + " point (" + point.x + "," + point.y + "," + point.flag + "), @zone.bound.bottom " + this.zone.bound.bottom);
       return (this.zone.bound.top <= (_ref = point.y) && _ref <= this.zone.bound.bottom);
     };
 
@@ -1107,8 +1121,46 @@
         alpha: 0.5
       }
     },
-    boxWithOuterRect: {
+    boxPlaced: {
+      inner: {
+        red: 0,
+        green: 0,
+        blue: 255,
+        alpha: 1,
+        stroke: {
+          red: 147,
+          green: 218,
+          blue: 87,
+          alpha: 0.5
+        }
+      },
+      outer: {
+        red: 0,
+        green: 0,
+        blue: 0,
+        alpha: 0,
+        stroke: {
+          red: 0,
+          green: 0,
+          blue: 0,
+          alpha: 0
+        }
+      }
+    },
+    boxSelected: {
       collision: {
+        inner: {
+          red: 255,
+          green: 0,
+          blue: 0,
+          alpha: 1,
+          stroke: {
+            red: 147,
+            green: 218,
+            blue: 87,
+            alpha: 0.5
+          }
+        },
         outer: {
           red: 255,
           green: 0,
@@ -1120,47 +1172,13 @@
             blue: 0,
             alpha: 0.5
           }
-        },
-        inner: {
-          red: 255,
-          green: 0,
-          blue: 0,
-          alpha: 1
         }
       },
-      overhang: {
-        outer: {
-          stroke: {
-            red: 147,
-            green: 218,
-            blue: 87,
-            alpha: 0.5
-          }
-        },
+      uncollision: {
         inner: {
-          red: 108,
-          green: 153,
-          blue: 57,
-          alpha: 1
-        }
-      },
-      normal: {
-        outer: {
-          red: 255,
-          green: 0,
+          red: 0,
+          green: 255,
           blue: 0,
-          alpha: 0,
-          stroke: {
-            red: 147,
-            green: 218,
-            blue: 87,
-            alpha: 0.5
-          }
-        },
-        inner: {
-          red: 108,
-          green: 153,
-          blue: 57,
           alpha: 1,
           stroke: {
             red: 147,
@@ -1168,43 +1186,18 @@
             blue: 87,
             alpha: 0.5
           }
-        }
-      }
-    },
-    boxOnlyInnerRect: {
-      collision: {
-        red: 255,
-        green: 0,
-        blue: 0,
-        alpha: 0.5,
-        stroke: {
-          red: 147,
-          green: 218,
-          blue: 87,
-          alpha: 0.5
-        }
-      },
-      overhang: {
-        red: 121,
-        green: 205,
-        blue: 255,
-        stroke: {
-          red: 147,
-          green: 218,
-          blue: 87,
-          alpha: 0.5
-        }
-      },
-      normal: {
-        red: 121,
-        green: 205,
-        blue: 255,
-        alpha: 1,
-        stroke: {
-          red: 147,
-          green: 218,
-          blue: 87,
-          alpha: 0.5
+        },
+        outer: {
+          red: 0,
+          green: 0,
+          blue: 0,
+          alpha: 0,
+          stroke: {
+            red: 255,
+            green: 255,
+            blue: 0,
+            alpha: 0.5
+          }
         }
       }
     }
