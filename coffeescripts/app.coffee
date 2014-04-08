@@ -88,7 +88,7 @@ class @Box extends Backbone.Model
                                   fontFamily:   "Calibri"
                                   fill:         "white"
                                   text:         @get('boxId')
-                                  # scaleY:       -1
+                                  # scaleX:       -1
                                 )
     @set group: new Kinetic.Group(
                                   x: 0
@@ -97,6 +97,11 @@ class @Box extends Backbone.Model
     @get('rect').dash(([4, 5]))
     @get('group').add(@get('rect'))
     @get('group').add(@get('title'))
+
+    # @get('group').on 'dblclick', =>
+    #   @rotateWithAngle('90')
+    #   Logger.debug "hey dblclick"
+
 
     ###### Box has an outer Rect ######
     # box_params.minDistance = $("input:checked","#minDistanceRadio").val()
@@ -112,10 +117,6 @@ class @Box extends Backbone.Model
                               y:              @get('outerBox').y
                               width:          @get('outerBox').width
                               height:         @get('outerBox').height
-                              # strokeRed:      @color_params.boxWithOuterRect.boxSelected.outer.stroke.red
-                              # strokeGreen:    @color_params.boxWithOuterRect.boxSelected.outer.stroke.green
-                              # strokeBlue:     @color_params.boxWithOuterRect.boxSelected.outer.stroke.blue
-                              # strokeAlpha:    @color_params.boxWithOuterRect.boxSelected.outer.stroke.alpha
                             )
       @get('outerRect').dash(([4, 5]))
       @get('group').add(@get('outerRect'))
@@ -196,12 +197,8 @@ class @Box extends Backbone.Model
       x: @getXPosition() + @get('rect').getWidth()
       y: @getYPosition() + @get('rect').getHeight()
       flag: 'D'
-  # updateRectStyle: (options) ->
-  #   Logger.debug("updateRectStyle: #{@getTitleName()}")
-  #   @get('rect').setFill(options.color)
   updateTitle: (newTitle) ->
     @get('title').setText(newTitle)
-
   rectChanged:() ->
     Logger.debug('box model changed by rect.')
   box: ->
@@ -212,8 +209,29 @@ class @Box extends Backbone.Model
   makeUnCollisionStatus: ->
     Logger.debug("box#{@getTitleName()}: makeUnCollisionStatus")
     @set('collisionStatus', false)
+
+  rotateWithAngle: (angle) ->
+    newRotateAngle = (@get('rotate') + angle) / 360 
+    oldBoxFrame = 
+      innerWidth:    @get('rect').getWidth()
+      innerHeight:   @get('rect').getHeight()
+      outerWidth:    @get('outerRect').getWidth()
+      outerHeight:   @get('outerRect').getHeight()     
+    @get('rect').setWidth(oldBoxFrame.innerHeight)
+    @get('rect').setHeight(oldBoxFrame.innerWidth)
+    @get('outerRect').setWidth(oldBoxFrame.outerHeight)
+    @get('outerRect').setHeight(oldBoxFrame.outerWidth)
+    @get('title').setX(@get('rect').x() + @get('rect').width()/2  - 5)
+    @get('title').setY(@get('rect').y() + @get('rect').height()/2 - 5)
+
+    @set('rotate',(@get('rotate') + angle) % 180)
+
+
+
+    Logger.debug "[rotateWithAngle] width: #{@get('rect').getWidth()}, height: #{@get('rect').getHeight()}"
+
   changeFillColor: ->
-    Logger.dev "Box#{@getTitleName()} collisionStatus: #{@get('collisionStatus')}\t settledStatus: #{@get('settledStatus')}"
+    Logger.debug "Box#{@getTitleName()} collisionStatus: #{@get('collisionStatus')}\t settledStatus: #{@get('settledStatus')}"
     if @get('settledStatus') 
       @get('rect').fillRed(           @color_params.boxPlaced.inner.red)
       @get('rect').fillGreen(         @color_params.boxPlaced.inner.green)
@@ -223,14 +241,15 @@ class @Box extends Backbone.Model
       @get('rect').strokeGreen(       @color_params.boxPlaced.inner.stroke.green)
       @get('rect').strokeBlue(        @color_params.boxPlaced.inner.stroke.blue)
       @get('rect').strokeAlpha(       @color_params.boxPlaced.inner.stroke.alpha)
-      @get('outerRect').fillRed(      @color_params.boxPlaced.outer.red)
-      @get('outerRect').fillGreen(    @color_params.boxPlaced.outer.green)
-      @get('outerRect').fillBlue(     @color_params.boxPlaced.outer.blue)
-      @get('outerRect').fillAlpha(    @color_params.boxPlaced.outer.alpha)
-      @get('outerRect').strokeRed(    @color_params.boxPlaced.outer.stroke.red)
-      @get('outerRect').strokeGreen(  @color_params.boxPlaced.outer.stroke.green)
-      @get('outerRect').strokeBlue(   @color_params.boxPlaced.outer.stroke.blue)
-      @get('outerRect').strokeAlpha(  @color_params.boxPlaced.outer.stroke.alpha)
+      if @hasOuterRect()
+        @get('outerRect').fillRed(      @color_params.boxPlaced.outer.red)
+        @get('outerRect').fillGreen(    @color_params.boxPlaced.outer.green)
+        @get('outerRect').fillBlue(     @color_params.boxPlaced.outer.blue)
+        @get('outerRect').fillAlpha(    @color_params.boxPlaced.outer.alpha)
+        @get('outerRect').strokeRed(    @color_params.boxPlaced.outer.stroke.red)
+        @get('outerRect').strokeGreen(  @color_params.boxPlaced.outer.stroke.green)
+        @get('outerRect').strokeBlue(   @color_params.boxPlaced.outer.stroke.blue)
+        @get('outerRect').strokeAlpha(  @color_params.boxPlaced.outer.stroke.alpha)
     else
       if @get('collisionStatus')
         @get('rect').fillRed(           @color_params.boxSelected.collision.inner.red)
@@ -242,13 +261,14 @@ class @Box extends Backbone.Model
         @get('rect').strokeBlue(        @color_params.boxSelected.collision.inner.stroke.blue)
         @get('rect').strokeAlpha(       @color_params.boxSelected.collision.inner.stroke.alpha)
         @get('outerRect').fillRed(      @color_params.boxSelected.collision.outer.red)
-        @get('outerRect').fillGreen(    @color_params.boxSelected.collision.outer.green)
-        @get('outerRect').fillBlue(     @color_params.boxSelected.collision.outer.blue)
-        @get('outerRect').fillAlpha(    @color_params.boxSelected.collision.outer.alpha)
-        @get('outerRect').strokeRed(    @color_params.boxSelected.collision.outer.stroke.red)
-        @get('outerRect').strokeGreen(  @color_params.boxSelected.collision.outer.stroke.green)
-        @get('outerRect').strokeBlue(   @color_params.boxSelected.collision.outer.stroke.blue)
-        @get('outerRect').strokeAlpha(  @color_params.boxSelected.collision.outer.stroke.alpha)
+        if @hasOuterRect()
+          @get('outerRect').fillGreen(    @color_params.boxSelected.collision.outer.green)
+          @get('outerRect').fillBlue(     @color_params.boxSelected.collision.outer.blue)
+          @get('outerRect').fillAlpha(    @color_params.boxSelected.collision.outer.alpha)
+          @get('outerRect').strokeRed(    @color_params.boxSelected.collision.outer.stroke.red)
+          @get('outerRect').strokeGreen(  @color_params.boxSelected.collision.outer.stroke.green)
+          @get('outerRect').strokeBlue(   @color_params.boxSelected.collision.outer.stroke.blue)
+          @get('outerRect').strokeAlpha(  @color_params.boxSelected.collision.outer.stroke.alpha)
       else
         @get('rect').fillRed(           @color_params.boxSelected.uncollision.inner.red)
         @get('rect').fillGreen(         @color_params.boxSelected.uncollision.inner.green)
@@ -258,14 +278,15 @@ class @Box extends Backbone.Model
         @get('rect').strokeGreen(       @color_params.boxSelected.uncollision.inner.stroke.green)
         @get('rect').strokeBlue(        @color_params.boxSelected.uncollision.inner.stroke.blue)
         @get('rect').strokeAlpha(       @color_params.boxSelected.uncollision.inner.stroke.alpha)
-        @get('outerRect').fillRed(      @color_params.boxSelected.uncollision.outer.red)
-        @get('outerRect').fillGreen(    @color_params.boxSelected.uncollision.outer.green)
-        @get('outerRect').fillBlue(     @color_params.boxSelected.uncollision.outer.blue)
-        @get('outerRect').fillAlpha(    @color_params.boxSelected.uncollision.outer.alpha)
-        @get('outerRect').strokeRed(    @color_params.boxSelected.uncollision.outer.stroke.red)
-        @get('outerRect').strokeGreen(  @color_params.boxSelected.uncollision.outer.stroke.green)
-        @get('outerRect').strokeBlue(   @color_params.boxSelected.uncollision.outer.stroke.blue)
-        @get('outerRect').strokeAlpha(  @color_params.boxSelected.uncollision.outer.stroke.alpha)
+        if @hasOuterRect()
+          @get('outerRect').fillRed(      @color_params.boxSelected.uncollision.outer.red)
+          @get('outerRect').fillGreen(    @color_params.boxSelected.uncollision.outer.green)
+          @get('outerRect').fillBlue(     @color_params.boxSelected.uncollision.outer.blue)
+          @get('outerRect').fillAlpha(    @color_params.boxSelected.uncollision.outer.alpha)
+          @get('outerRect').strokeRed(    @color_params.boxSelected.uncollision.outer.stroke.red)
+          @get('outerRect').strokeGreen(  @color_params.boxSelected.uncollision.outer.stroke.green)
+          @get('outerRect').strokeBlue(   @color_params.boxSelected.uncollision.outer.stroke.blue)
+          @get('outerRect').strokeAlpha(  @color_params.boxSelected.uncollision.outer.stroke.alpha)
 
   printPoints: ->
     Logger.debug( "PointA(x:#{@getPointA().x},y:#{@getPointA().y}) " +
@@ -313,7 +334,7 @@ class @Boxes extends Backbone.Collection
 
   testCollisionBetween: (boxA, boxB) ->
     @collisionUtil.testCollisionBetween(boxA, boxB, {collisionType: 'outer-outer'})
-  creatNewBox: =>
+  createNewBox: =>
     newBox  = new Box(@box_params)
 
     newBox.setXPosition(Math.min(@zone.bound.left + @availableNewBoxId * newBox.getMoveOffset(), @zone.bound.right))
@@ -332,10 +353,10 @@ class @Boxes extends Backbone.Collection
 
     @testCollision()
   settleCurrentBox: =>
-    Logger.dev ("hey , settle what?")
     @currentBox.set('settledStatus', true)
     @draw()
   removeCurrentBox: =>
+    Logger.debug "#{@length}"
     if @length == 0
       @flash = 'There is no box.'
     else
@@ -367,7 +388,6 @@ class @Boxes extends Backbone.Collection
     Logger.debug("...Collision result: #{result}")
     @draw()
   draw: () ->
-    Logger.dev "hey, draw"
     index = 0
     while index < @models.length
       box = @models[index]
@@ -384,6 +404,7 @@ class @Boxes extends Backbone.Collection
           ),this)
     newBox.set('settledStatus', false)
     @currentBox = newBox
+    Logger.debug "[updateCurrentBox] width: #{@currentBox.get('rect').getWidth()}, height: #{@currentBox.get('rect').getHeight()}"
     @otherCurrentBox.set('box', newBox)
     $('#moveOffset').checked = true
 
@@ -398,7 +419,9 @@ class @Boxes extends Backbone.Collection
     # else
     #   $('.panel').css('display','block')
   rotate90: () =>
-    ;
+    @currentBox.rotateWithAngle(90)
+    @updateCurrentBox()
+    Logger.debug "[rotate90] width: #{@currentBox.get('rect').getWidth()}, height: #{@currentBox.get('rect').getHeight()}"
   up: () =>
     Logger.debug("@currentBox:\t" + @currentBox.getTitleName())
     @currentBox.setYPosition(@currentBox.getYPosition() - @currentBox.getMoveOffset())
@@ -749,7 +772,6 @@ class @StackBoard
     # @layer.getContext().translate(0, @zone.height + @zone.y * 2)
     # @layer.getContext().scale(1, -1);
 
-
     Logger.debug("StackBoard: Stage Initialized!")
     Logger.info("StackBoard: Initialized!")
 
@@ -856,87 +878,6 @@ color =
             green:  255
             blue:   0
             alpha:  0.5          
-    # boxWithOuterRect:
-    #   collision:
-    #     outer:
-    #       red:    255
-    #       green:  0
-    #       blue:   0
-    #       alpha:  0.5
-    #       stroke:
-    #         red:    255
-    #         green:  0
-    #         blue:   0
-    #         alpha:  0.5           
-    #     inner:
-    #       red:    255
-    #       green:  0
-    #       blue:   0
-    #       alpha:  1
-    #   overhang: 
-    #     outer:
-    #       stroke:
-    #         red:    147
-    #         green:  218
-    #         blue:   87
-    #         alpha:  0.5           
-        # inner:
-        #   red:    108
-        #   green:  153
-        #   blue:   57
-        #   alpha:  1
-    #   boxSelected:
-    #     outer:
-    #       red:    255
-    #       green:  0
-    #       blue:   0
-    #       alpha:  0
-    #       stroke:
-    #         red:    147
-    #         green:  218
-    #         blue:   87
-    #         alpha:  0.5           
-    #     inner:
-    #       red:    108
-    #       green:  153
-    #       blue:   57
-    #       alpha:  1
-    #       stroke:
-    #         red:    147
-    #         green:  218
-    #         blue:   87
-    #         alpha:  0.5
-    # boxOnlyInnerRect: 
-    #   collision:
-    #     red:    255
-    #     green:  0
-    #     blue:   0
-    #     alpha:  0.5
-    #     stroke:
-    #       red:    147
-    #       green:  218
-    #       blue:   87
-    #       alpha:  0.5
-    #   overhang: 
-    #     red:    121
-    #     green:  205
-    #     blue:   255
-    #     stroke:
-    #       red:    147
-    #       green:  218
-    #       blue:   87
-    #       alpha:  0.5
-    #   boxSelected:
-    #     red:    121
-    #     green:  205
-    #     blue:   255
-    #     alpha:  1
-    #     stroke:
-    #       red:    147
-    #       green:  218
-    #       blue:   87
-    #       alpha:  0.5
-
 
 # unit: cm
 pallet =  

@@ -327,8 +327,27 @@
       return this.set('collisionStatus', false);
     };
 
+    Box.prototype.rotateWithAngle = function(angle) {
+      var newRotateAngle, oldBoxFrame;
+      newRotateAngle = (this.get('rotate') + angle) / 360;
+      oldBoxFrame = {
+        innerWidth: this.get('rect').getWidth(),
+        innerHeight: this.get('rect').getHeight(),
+        outerWidth: this.get('outerRect').getWidth(),
+        outerHeight: this.get('outerRect').getHeight()
+      };
+      this.get('rect').setWidth(oldBoxFrame.innerHeight);
+      this.get('rect').setHeight(oldBoxFrame.innerWidth);
+      this.get('outerRect').setWidth(oldBoxFrame.outerHeight);
+      this.get('outerRect').setHeight(oldBoxFrame.outerWidth);
+      this.get('title').setX(this.get('rect').x() + this.get('rect').width() / 2 - 5);
+      this.get('title').setY(this.get('rect').y() + this.get('rect').height() / 2 - 5);
+      this.set('rotate', (this.get('rotate') + angle) % 180);
+      return Logger.debug("[rotateWithAngle] width: " + (this.get('rect').getWidth()) + ", height: " + (this.get('rect').getHeight()));
+    };
+
     Box.prototype.changeFillColor = function() {
-      Logger.dev("Box" + (this.getTitleName()) + " collisionStatus: " + (this.get('collisionStatus')) + "\t settledStatus: " + (this.get('settledStatus')));
+      Logger.debug("Box" + (this.getTitleName()) + " collisionStatus: " + (this.get('collisionStatus')) + "\t settledStatus: " + (this.get('settledStatus')));
       if (this.get('settledStatus')) {
         this.get('rect').fillRed(this.color_params.boxPlaced.inner.red);
         this.get('rect').fillGreen(this.color_params.boxPlaced.inner.green);
@@ -338,14 +357,16 @@
         this.get('rect').strokeGreen(this.color_params.boxPlaced.inner.stroke.green);
         this.get('rect').strokeBlue(this.color_params.boxPlaced.inner.stroke.blue);
         this.get('rect').strokeAlpha(this.color_params.boxPlaced.inner.stroke.alpha);
-        this.get('outerRect').fillRed(this.color_params.boxPlaced.outer.red);
-        this.get('outerRect').fillGreen(this.color_params.boxPlaced.outer.green);
-        this.get('outerRect').fillBlue(this.color_params.boxPlaced.outer.blue);
-        this.get('outerRect').fillAlpha(this.color_params.boxPlaced.outer.alpha);
-        this.get('outerRect').strokeRed(this.color_params.boxPlaced.outer.stroke.red);
-        this.get('outerRect').strokeGreen(this.color_params.boxPlaced.outer.stroke.green);
-        this.get('outerRect').strokeBlue(this.color_params.boxPlaced.outer.stroke.blue);
-        return this.get('outerRect').strokeAlpha(this.color_params.boxPlaced.outer.stroke.alpha);
+        if (this.hasOuterRect()) {
+          this.get('outerRect').fillRed(this.color_params.boxPlaced.outer.red);
+          this.get('outerRect').fillGreen(this.color_params.boxPlaced.outer.green);
+          this.get('outerRect').fillBlue(this.color_params.boxPlaced.outer.blue);
+          this.get('outerRect').fillAlpha(this.color_params.boxPlaced.outer.alpha);
+          this.get('outerRect').strokeRed(this.color_params.boxPlaced.outer.stroke.red);
+          this.get('outerRect').strokeGreen(this.color_params.boxPlaced.outer.stroke.green);
+          this.get('outerRect').strokeBlue(this.color_params.boxPlaced.outer.stroke.blue);
+          return this.get('outerRect').strokeAlpha(this.color_params.boxPlaced.outer.stroke.alpha);
+        }
       } else {
         if (this.get('collisionStatus')) {
           this.get('rect').fillRed(this.color_params.boxSelected.collision.inner.red);
@@ -357,13 +378,15 @@
           this.get('rect').strokeBlue(this.color_params.boxSelected.collision.inner.stroke.blue);
           this.get('rect').strokeAlpha(this.color_params.boxSelected.collision.inner.stroke.alpha);
           this.get('outerRect').fillRed(this.color_params.boxSelected.collision.outer.red);
-          this.get('outerRect').fillGreen(this.color_params.boxSelected.collision.outer.green);
-          this.get('outerRect').fillBlue(this.color_params.boxSelected.collision.outer.blue);
-          this.get('outerRect').fillAlpha(this.color_params.boxSelected.collision.outer.alpha);
-          this.get('outerRect').strokeRed(this.color_params.boxSelected.collision.outer.stroke.red);
-          this.get('outerRect').strokeGreen(this.color_params.boxSelected.collision.outer.stroke.green);
-          this.get('outerRect').strokeBlue(this.color_params.boxSelected.collision.outer.stroke.blue);
-          return this.get('outerRect').strokeAlpha(this.color_params.boxSelected.collision.outer.stroke.alpha);
+          if (this.hasOuterRect()) {
+            this.get('outerRect').fillGreen(this.color_params.boxSelected.collision.outer.green);
+            this.get('outerRect').fillBlue(this.color_params.boxSelected.collision.outer.blue);
+            this.get('outerRect').fillAlpha(this.color_params.boxSelected.collision.outer.alpha);
+            this.get('outerRect').strokeRed(this.color_params.boxSelected.collision.outer.stroke.red);
+            this.get('outerRect').strokeGreen(this.color_params.boxSelected.collision.outer.stroke.green);
+            this.get('outerRect').strokeBlue(this.color_params.boxSelected.collision.outer.stroke.blue);
+            return this.get('outerRect').strokeAlpha(this.color_params.boxSelected.collision.outer.stroke.alpha);
+          }
         } else {
           this.get('rect').fillRed(this.color_params.boxSelected.uncollision.inner.red);
           this.get('rect').fillGreen(this.color_params.boxSelected.uncollision.inner.green);
@@ -373,14 +396,16 @@
           this.get('rect').strokeGreen(this.color_params.boxSelected.uncollision.inner.stroke.green);
           this.get('rect').strokeBlue(this.color_params.boxSelected.uncollision.inner.stroke.blue);
           this.get('rect').strokeAlpha(this.color_params.boxSelected.uncollision.inner.stroke.alpha);
-          this.get('outerRect').fillRed(this.color_params.boxSelected.uncollision.outer.red);
-          this.get('outerRect').fillGreen(this.color_params.boxSelected.uncollision.outer.green);
-          this.get('outerRect').fillBlue(this.color_params.boxSelected.uncollision.outer.blue);
-          this.get('outerRect').fillAlpha(this.color_params.boxSelected.uncollision.outer.alpha);
-          this.get('outerRect').strokeRed(this.color_params.boxSelected.uncollision.outer.stroke.red);
-          this.get('outerRect').strokeGreen(this.color_params.boxSelected.uncollision.outer.stroke.green);
-          this.get('outerRect').strokeBlue(this.color_params.boxSelected.uncollision.outer.stroke.blue);
-          return this.get('outerRect').strokeAlpha(this.color_params.boxSelected.uncollision.outer.stroke.alpha);
+          if (this.hasOuterRect()) {
+            this.get('outerRect').fillRed(this.color_params.boxSelected.uncollision.outer.red);
+            this.get('outerRect').fillGreen(this.color_params.boxSelected.uncollision.outer.green);
+            this.get('outerRect').fillBlue(this.color_params.boxSelected.uncollision.outer.blue);
+            this.get('outerRect').fillAlpha(this.color_params.boxSelected.uncollision.outer.alpha);
+            this.get('outerRect').strokeRed(this.color_params.boxSelected.uncollision.outer.stroke.red);
+            this.get('outerRect').strokeGreen(this.color_params.boxSelected.uncollision.outer.stroke.green);
+            this.get('outerRect').strokeBlue(this.color_params.boxSelected.uncollision.outer.stroke.blue);
+            return this.get('outerRect').strokeAlpha(this.color_params.boxSelected.uncollision.outer.stroke.alpha);
+          }
         }
       }
     };
@@ -404,7 +429,7 @@
       this.rotate90 = __bind(this.rotate90, this);
       this.removeCurrentBox = __bind(this.removeCurrentBox, this);
       this.settleCurrentBox = __bind(this.settleCurrentBox, this);
-      this.creatNewBox = __bind(this.creatNewBox, this);
+      this.createNewBox = __bind(this.createNewBox, this);
       return Boxes.__super__.constructor.apply(this, arguments);
     }
 
@@ -466,7 +491,7 @@
       });
     };
 
-    Boxes.prototype.creatNewBox = function() {
+    Boxes.prototype.createNewBox = function() {
       var newBox;
       newBox = new Box(this.box_params);
       newBox.setXPosition(Math.min(this.zone.bound.left + this.availableNewBoxId * newBox.getMoveOffset(), this.zone.bound.right));
@@ -488,12 +513,12 @@
     };
 
     Boxes.prototype.settleCurrentBox = function() {
-      Logger.dev("hey , settle what?");
       this.currentBox.set('settledStatus', true);
       return this.draw();
     };
 
     Boxes.prototype.removeCurrentBox = function() {
+      Logger.debug("" + this.length);
       if (this.length === 0) {
         this.flash = 'There is no box.';
       } else {
@@ -532,7 +557,6 @@
 
     Boxes.prototype.draw = function() {
       var box, index;
-      Logger.dev("hey, draw");
       index = 0;
       while (index < this.models.length) {
         box = this.models[index];
@@ -554,6 +578,7 @@
       }), this);
       newBox.set('settledStatus', false);
       this.currentBox = newBox;
+      Logger.debug("[updateCurrentBox] width: " + (this.currentBox.get('rect').getWidth()) + ", height: " + (this.currentBox.get('rect').getHeight()));
       this.otherCurrentBox.set('box', newBox);
       $('#moveOffset').checked = true;
       return rivets.bind($('.box'), {
@@ -570,7 +595,11 @@
       return this.pprint();
     };
 
-    Boxes.prototype.rotate90 = function() {};
+    Boxes.prototype.rotate90 = function() {
+      this.currentBox.rotateWithAngle(90);
+      this.updateCurrentBox();
+      return Logger.debug("[rotate90] width: " + (this.currentBox.get('rect').getWidth()) + ", height: " + (this.currentBox.get('rect').getHeight()));
+    };
 
     Boxes.prototype.up = function() {
       Logger.debug("@currentBox:\t" + this.currentBox.getTitleName());
