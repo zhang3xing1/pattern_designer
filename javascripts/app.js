@@ -187,7 +187,7 @@
 
     Box.prototype.getMoveOffset = function() {
       Logger.debug("getMoveOffset " + (this.get('moveOffset')));
-      return Number(this.get('moveOffset'));
+      return Number(this.get('moveOffset') * this.ratio);
     };
 
     Box.prototype.setTitleName = function(newTitle) {
@@ -532,7 +532,6 @@
       this.flash = "box" + (this.currentBox.getTitleName()) + " selected!";
       this.availableNewBoxId += 1;
       this.testCollision();
-      this.updateBinders();
       return Logger.debug("create button clicked!");
     };
 
@@ -562,7 +561,6 @@
         }
       }
       this.draw();
-      this.updateBinders();
       this.flash = "box" + (this.currentBox.getTitleName()) + " selected!";
       return Logger.debug("remove button clicked!");
     };
@@ -608,6 +606,7 @@
       this.currentBox = newBox;
       Logger.debug("[updateCurrentBox] width: " + (this.currentBox.get('rect').getWidth()) + ", height: " + (this.currentBox.get('rect').getHeight()));
       this.otherCurrentBox.set('box', newBox);
+      this.updateBinders();
       return rivets.bind($('.box'), {
         box: newBox
       });
@@ -759,9 +758,14 @@
 
     Boxes.prototype.updateBinders = function() {
       this.rivetsBinder.unbind();
-      return this.rivetsBinder = rivets.bind($('.boxes'), {
+      this.rivetsBinder = rivets.bind($('.boxes'), {
         boxes: this
       });
+      return Logger.debug("[updateBinders]: " + this.flash);
+    };
+
+    Boxes.prototype.showFlash = function() {
+      return this.flash;
     };
 
     return Boxes;
@@ -1122,15 +1126,17 @@
       var boxByRatio, boxes_params, longerEdge, margin, overhangBackground, overhangOffset, palletBackground, shorterEdge, stageBackground;
       longerEdge = Math.max(pallet.width, pallet.height);
       shorterEdge = Math.min(pallet.width, pallet.height);
-      margin = Math.max(pallet.overhang, box.minDistance);
+      margin = pallet.overhang + box.minDistance;
+      Logger.debug("pallet.overhang: " + pallet.overhang + ", box.minDistance: " + box.minDistance + ", margin: " + margin);
       overhangOffset = {
         x: 0,
         y: 0,
         edge: margin
       };
-      if (box.minDistance > pallet.overhang) {
-        overhangOffset.x = overhangOffset.y = box.minDistance - pallet.overhang;
-        overhangOffset.edge = pallet.overhang - box.minDistance;
+      if (margin > 0) {
+        overhangOffset.x = overhangOffset.y = box.minDistance;
+      } else {
+        overhangOffset.x = overhangOffset.y = 0 - pallet.overhang;
       }
       this.ratio = Math.min(params.stage.height / (longerEdge + 2 * margin), params.stage.width / (shorterEdge + 2 * margin));
       stageBackground = new Kinetic.Rect({

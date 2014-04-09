@@ -135,15 +135,11 @@ class @Box extends Backbone.Model
   getBoxId: () ->
     @get('boxId') 
   getMoveOffset: () ->
-    # offset = Number($("#ex8").val()) % 99
-    # if offset % 99 > 0
-    #   @set('moveOffset', offset % 99)
-    #   offset % 99
-    # else
-    #   4
     Logger.debug "getMoveOffset #{@get('moveOffset')}"
-    Number(@get('moveOffset'))
-  
+    # moveoffset * ratio = unit mm, not unit px
+    Number(@get('moveOffset') * @ratio)
+
+
   setTitleName: (newTitle) ->
     @get('title').setText(newTitle) 
   getTitleName: () ->
@@ -367,7 +363,6 @@ class @Boxes extends Backbone.Collection
 
     @testCollision()
 
-    @updateBinders()
     Logger.debug("create button clicked!")
   settleCurrentBox: =>
     if @currentBox.get('collisionStatus')
@@ -392,7 +387,6 @@ class @Boxes extends Backbone.Collection
         @updateCurrentBox(@last())
 
     @draw()
-    @updateBinders()
     @flash =  "box#{@currentBox.getTitleName()} selected!"
     Logger.debug("remove button clicked!")
   testCollision:()->
@@ -428,7 +422,7 @@ class @Boxes extends Backbone.Collection
     Logger.debug "[updateCurrentBox] width: #{@currentBox.get('rect').getWidth()}, height: #{@currentBox.get('rect').getHeight()}"
     @otherCurrentBox.set('box', newBox)
     
-
+    @updateBinders()
     rivets.bind $('.box'),{box: newBox}
   rotate90: () =>
     @currentBox.rotateWithAngle(90)
@@ -440,8 +434,6 @@ class @Boxes extends Backbone.Collection
     Logger.debug("@currentBox:\t" + @currentBox.getTitleName())
     @currentBox.setYPosition(@currentBox.getYPosition() - @currentBox.getMoveOffset())
     unless @validateZone(@currentBox)
-      # @currentBox.setYPosition(@zone.bound.top)
-      # @currentBox.set('crossZoneTop', false)
       @repairCrossZone(@currentBox)
       @flash = "Box#{@currentBox.getTitleName()} cannot be moved UP!"
     else
@@ -464,8 +456,6 @@ class @Boxes extends Backbone.Collection
     @currentBox.setXPosition(@currentBox.getXPosition() - @currentBox.getMoveOffset())
     @currentBox.set('crossZoneLeft', false)
     unless @validateZone(@currentBox)
-      # @currentBox.setXPosition(@zone.bound.left)
-      # @currentBox.set('crossZoneLeft', false)
       @repairCrossZone(@currentBox)
       @flash = "Box#{@currentBox.getTitleName()} cannot be moved LEFT!"
     else
@@ -477,8 +467,6 @@ class @Boxes extends Backbone.Collection
     Logger.debug("@currentBox:\t" + @currentBox.getXPosition())
     @currentBox.setXPosition(@currentBox.getXPosition() + @currentBox.getMoveOffset())
     unless @validateZone(@currentBox)
-      # @currentBox.setXPosition(@zone.bound.right - @currentBox.getWidth())
-      # @currentBox.set('crossZoneRight', false)
       @repairCrossZone(@currentBox)
       @flash = "Box#{@currentBox.getTitleName()} cannot be moved RIGHT!"
     else
@@ -504,7 +492,6 @@ class @Boxes extends Backbone.Collection
       true
   validateZoneY: (point, box) ->
     Logger.debug("validateZoneY: @zone.bound.top #{@zone.bound.top} point (#{point.x},#{point.y},#{point.flag}), @zone.bound.bottom #{@zone.bound.bottom}")
-    # @zone.bound.top <= point.y <= @zone.bound.bottom
     if @zone.bound.top > point.y
       box.set('crossZoneTop', true)
       false
@@ -547,10 +534,8 @@ class @Boxes extends Backbone.Collection
       # all box are settled
       # create button is enabled
       $('#createNewBox').prop "disabled", false
-      # $('.placeCurrentBox').prop "disabled", true
       $("button.placeCurrentBox").each ->
         $(this).prop "disabled", true
-      # $("button").css("class","boxes").each(function(aa) {alert($(this).html());})
     else
       $('#createNewBox').prop "disabled", true
       # $('#placeCurrentBox').prop "disabled", false
@@ -560,6 +545,9 @@ class @Boxes extends Backbone.Collection
   updateBinders: () ->
     @rivetsBinder.unbind()
     @rivetsBinder = rivets.bind $('.boxes'),{boxes: this}
+    Logger.debug "[updateBinders]: #{@flash}"
+  showFlash: () ->
+    @flash
 class CollisionPair extends Backbone.Model
   ## attributes:
   ##  boxId
@@ -786,12 +774,14 @@ class @StackBoard
     
     longerEdge = Math.max(pallet.width, pallet.height)
     shorterEdge = Math.min(pallet.width, pallet.height)
-    margin = Math.max(pallet.overhang, box.minDistance)
+    margin = pallet.overhang + box.minDistance
+    Logger.debug "pallet.overhang: #{pallet.overhang}, box.minDistance: #{box.minDistance}, margin: #{margin}"
     overhangOffset = {x: 0 , y: 0, edge: margin}
 
-    if box.minDistance > pallet.overhang  
-      overhangOffset.x = overhangOffset.y = box.minDistance - pallet.overhang
-      overhangOffset.edge = pallet.overhang - box.minDistance
+    if margin > 0
+      overhangOffset.x = overhangOffset.y = box.minDistance
+    else
+      overhangOffset.x = overhangOffset.y = 0 - pallet.overhang
 
     @ratio = Math.min(params.stage.height / (longerEdge + 2 * margin), params.stage.width / (shorterEdge + 2 * margin))
 
@@ -871,7 +861,6 @@ class @StackBoard
     @boxes.shift()
 
     rivets.bind $('.currentBox'),{currentBox: @currentBox}
-    # rivets.bind $('.boxes'),{boxes: @boxes}
 
 #### Params ####
 # unit: pixal
