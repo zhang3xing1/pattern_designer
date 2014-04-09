@@ -774,18 +774,28 @@ class @StackBoard
     
     longerEdge = Math.max(pallet.width, pallet.height)
     shorterEdge = Math.min(pallet.width, pallet.height)
-    margin = pallet.overhang + box.minDistance
-    Logger.debug "pallet.overhang: #{pallet.overhang}, box.minDistance: #{box.minDistance}, margin: #{margin}"
-    overhangOffset = {x: 0 , y: 0, edge: margin}
+    # margin = pallet.overhang + box.minDistance
 
+    Logger.debug "pallet.overhang: #{pallet.overhang}, box.minDistance: #{box.minDistance}, margin: #{margin}"
+    # overhangOffset = {x: 0 , y: 0, edge: margin}
+
+    # if margin > 0
+    #   overhangOffset.x = overhangOffset.y = box.minDistance
+    #   @ratio = Math.min(params.stage.height / (longerEdge + 2 * margin), params.stage.width / (shorterEdge + 2 * margin))
+    # else
+    #   overhangOffset.x = overhangOffset.y = 0 - pallet.overhang
+    #   margin = 0
+    #   @ratio = Math.min(params.stage.height / (longerEdge + 2 * margin), params.stage.width / (shorterEdge + 2 * margin))
+
+    margin = pallet.overhang
+    overhangOffset = {x: 0 , y: 0}
     if margin > 0
-      overhangOffset.x = overhangOffset.y = box.minDistance
       @ratio = Math.min(params.stage.height / (longerEdge + 2 * margin), params.stage.width / (shorterEdge + 2 * margin))
     else
-      overhangOffset.x = overhangOffset.y = 0 - pallet.overhang
+      overhangOffset.x = overhangOffset.y = 0 - margin
       margin = 0
       @ratio = Math.min(params.stage.height / (longerEdge + 2 * margin), params.stage.width / (shorterEdge + 2 * margin))
-
+ 
     stageBackground = new Kinetic.Rect(
         x:            0
         y:            0
@@ -855,10 +865,6 @@ class @StackBoard
         width:  params.box.width * @ratio 
         height: params.box.height * @ratio
         minDistance: params.box.minDistance * @ratio
-
-    console.log @ratio
-    console.log params.box
-    console.log boxByRatio
 
     boxes_params = {layer: @layer, zone: @zone, box: boxByRatio, color: params.color, ratio: @ratio}
     @boxes = new Boxes(boxes_params)
@@ -960,13 +966,13 @@ color =
 pallet =  
   width:    390
   height:   500 
-  overhang: -10
+  overhang: -15
 box  =      
   x:      0 
   y:      0
   width:  120  
   height: 60  
-  minDistance: 10
+  minDistance: 30
     
 params = 
   pallet: pallet
