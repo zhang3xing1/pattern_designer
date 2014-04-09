@@ -1135,10 +1135,12 @@
       };
       if (margin > 0) {
         overhangOffset.x = overhangOffset.y = box.minDistance;
+        this.ratio = Math.min(params.stage.height / (longerEdge + 2 * margin), params.stage.width / (shorterEdge + 2 * margin));
       } else {
         overhangOffset.x = overhangOffset.y = 0 - pallet.overhang;
+        margin = 0;
+        this.ratio = Math.min(params.stage.height / (longerEdge + 2 * margin), params.stage.width / (shorterEdge + 2 * margin));
       }
-      this.ratio = Math.min(params.stage.height / (longerEdge + 2 * margin), params.stage.width / (shorterEdge + 2 * margin));
       stageBackground = new Kinetic.Rect({
         x: 0,
         y: 0,
@@ -1199,6 +1201,9 @@
         height: params.box.height * this.ratio,
         minDistance: params.box.minDistance * this.ratio
       };
+      console.log(this.ratio);
+      console.log(params.box);
+      console.log(boxByRatio);
       boxes_params = {
         layer: this.layer,
         zone: this.zone,
@@ -1328,7 +1333,7 @@
   pallet = {
     width: 390,
     height: 500,
-    overhang: -15
+    overhang: -10
   };
 
   box = {
@@ -1336,7 +1341,7 @@
     y: 0,
     width: 120,
     height: 60,
-    minDistance: 25
+    minDistance: 10
   };
 
   params = {

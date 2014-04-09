@@ -74,7 +74,7 @@ class @Box extends Backbone.Model
     @set ratio: params.ratio
 
     @set innerBox: 
-      x:      box_params.x
+      x:      box_params.x 
       y:      box_params.y
       width:  box_params.width
       height: box_params.height
@@ -780,10 +780,11 @@ class @StackBoard
 
     if margin > 0
       overhangOffset.x = overhangOffset.y = box.minDistance
+      @ratio = Math.min(params.stage.height / (longerEdge + 2 * margin), params.stage.width / (shorterEdge + 2 * margin))
     else
       overhangOffset.x = overhangOffset.y = 0 - pallet.overhang
-
-    @ratio = Math.min(params.stage.height / (longerEdge + 2 * margin), params.stage.width / (shorterEdge + 2 * margin))
+      margin = 0
+      @ratio = Math.min(params.stage.height / (longerEdge + 2 * margin), params.stage.width / (shorterEdge + 2 * margin))
 
     stageBackground = new Kinetic.Rect(
         x:            0
@@ -854,6 +855,10 @@ class @StackBoard
         width:  params.box.width * @ratio 
         height: params.box.height * @ratio
         minDistance: params.box.minDistance * @ratio
+
+    console.log @ratio
+    console.log params.box
+    console.log boxByRatio
 
     boxes_params = {layer: @layer, zone: @zone, box: boxByRatio, color: params.color, ratio: @ratio}
     @boxes = new Boxes(boxes_params)
@@ -955,13 +960,13 @@ color =
 pallet =  
   width:    390
   height:   500 
-  overhang: -15 
+  overhang: -10
 box  =      
   x:      0 
   y:      0
   width:  120  
   height: 60  
-  minDistance: 25
+  minDistance: 10
     
 params = 
   pallet: pallet
