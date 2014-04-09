@@ -357,7 +357,7 @@
       this.get('title').setX(this.get('rect').x() + this.get('rect').width() / 2 - 5);
       this.get('title').setY(this.get('rect').y() + this.get('rect').height() / 2 - 5);
       this.set('rotate', (this.get('rotate') + angle) % 180);
-      return Logger.dev("[rotateWithAngle] width: " + (this.get('rect').getWidth()) + ", height: " + (this.get('rect').getHeight()));
+      return Logger.debug("[rotateWithAngle] width: " + (this.get('rect').getWidth()) + ", height: " + (this.get('rect').getHeight()));
     };
 
     Box.prototype.changeFillColor = function() {
@@ -425,7 +425,7 @@
     };
 
     Box.prototype.printPoints = function(prefix) {
-      return Logger.dev(("\n[" + prefix + "]: PointA(x:" + (this.getPointA().x) + ",y:" + (this.getPointA().y) + ")\n ") + ("[" + prefix + "]: PointB(x:" + (this.getPointB().x) + ",y:" + (this.getPointB().y) + ")\n ") + ("[" + prefix + "]: PointC(x:" + (this.getPointC().x) + ",y:" + (this.getPointC().y) + ")\n ") + ("[" + prefix + "]: PointD(x:" + (this.getPointD().x) + ",y:" + (this.getPointD().y) + ")\n "));
+      return Logger.debug(("\n[" + prefix + "]: PointA(x:" + (this.getPointA().x) + ",y:" + (this.getPointA().y) + ")\n ") + ("[" + prefix + "]: PointB(x:" + (this.getPointB().x) + ",y:" + (this.getPointB().y) + ")\n ") + ("[" + prefix + "]: PointC(x:" + (this.getPointC().x) + ",y:" + (this.getPointC().y) + ")\n ") + ("[" + prefix + "]: PointD(x:" + (this.getPointD().x) + ",y:" + (this.getPointD().y) + ")\n "));
     };
 
     return Box;
@@ -480,7 +480,14 @@
       this.currentBox = new Box(this.box_params);
       this.otherCurrentBox = new this.CurrentBox(this.box_params);
       this.availableNewBoxId = 1;
+      this.rivetsBinder = rivets.bind($('.boxes'), {
+        boxes: this
+      });
       return this.flash = "Initialized completed!";
+    };
+
+    Boxes.prototype.availableNewTitle = function() {
+      return this.length + 1;
     };
 
     Boxes.prototype.pprint = function() {
@@ -524,7 +531,9 @@
       this.updateCurrentBox(newBox);
       this.flash = "box" + (this.currentBox.getTitleName()) + " selected!";
       this.availableNewBoxId += 1;
-      return this.testCollision();
+      this.testCollision();
+      this.updateBinders();
+      return Logger.debug("create button clicked!");
     };
 
     Boxes.prototype.settleCurrentBox = function() {
@@ -553,7 +562,7 @@
         }
       }
       this.draw();
-      this.showCurrentBoxPanel();
+      this.updateBinders();
       this.flash = "box" + (this.currentBox.getTitleName()) + " selected!";
       return Logger.debug("remove button clicked!");
     };
@@ -604,15 +613,6 @@
       });
     };
 
-    Boxes.prototype.showCurrentBoxPanel = function() {
-      rivets.bind($('.box'), {
-        box: this.currentBox
-      });
-      Logger.debug("showCurrentBoxPanel: Box number: " + this.length + "; ");
-      Logger.debug("In Boxes: " + (this.pprint()) + "; ");
-      return this.pprint();
-    };
-
     Boxes.prototype.rotate90 = function() {
       this.currentBox.rotateWithAngle(90);
       if (!this.validateZone(this.currentBox)) {
@@ -620,7 +620,7 @@
       }
       this.testCollision();
       this.updateCurrentBox();
-      return Logger.dev("[rotate90] width: " + (this.currentBox.get('rect').getWidth()) + ", height: " + (this.currentBox.get('rect').getHeight()));
+      return Logger.debug("[rotate90] width: " + (this.currentBox.get('rect').getWidth()) + ", height: " + (this.currentBox.get('rect').getHeight()));
     };
 
     Boxes.prototype.up = function() {
@@ -712,9 +712,9 @@
     };
 
     Boxes.prototype.repairCrossZone = function(box) {
-      Logger.dev("[repairCrossZone before]: crossZoneLeft: " + (box.get('crossZoneLeft')) + " crossZoneRight: " + (box.get('crossZoneRight')));
-      Logger.dev("[repairCrossZone before]: crossZoneTop: " + (box.get('crossZoneTop')) + " crossZoneBottom: " + (box.get('crossZoneBottom')));
-      Logger.dev("[repairCrossZone before]: x: " + (box.getXPosition()) + " y: " + (box.getYPosition()));
+      Logger.debug("[repairCrossZone before]: crossZoneLeft: " + (box.get('crossZoneLeft')) + " crossZoneRight: " + (box.get('crossZoneRight')));
+      Logger.debug("[repairCrossZone before]: crossZoneTop: " + (box.get('crossZoneTop')) + " crossZoneBottom: " + (box.get('crossZoneBottom')));
+      Logger.debug("[repairCrossZone before]: x: " + (box.getXPosition()) + " y: " + (box.getYPosition()));
       if (box.get('crossZoneLeft')) {
         box.setXPosition(this.zone.bound.left);
       }
@@ -733,9 +733,9 @@
         crossZoneTop: false,
         crossZoneBottom: false
       });
-      Logger.dev("[repairCrossZone after]: x: " + (box.getXPosition()) + " y: " + (box.getYPosition()));
-      Logger.dev("[repairCrossZone after]: crossZoneLeft: " + (box.get('crossZoneLeft')) + " crossZoneRight: " + (box.get('crossZoneRight')));
-      return Logger.dev("[repairCrossZone after]: crossZoneTop: " + (box.get('crossZoneTop')) + " crossZoneBottom: " + (box.get('crossZoneBottom')));
+      Logger.debug("[repairCrossZone after]: x: " + (box.getXPosition()) + " y: " + (box.getYPosition()));
+      Logger.debug("[repairCrossZone after]: crossZoneLeft: " + (box.get('crossZoneLeft')) + " crossZoneRight: " + (box.get('crossZoneRight')));
+      return Logger.debug("[repairCrossZone after]: crossZoneTop: " + (box.get('crossZoneTop')) + " crossZoneBottom: " + (box.get('crossZoneBottom')));
     };
 
     Boxes.prototype.updateDashboardStatus = function() {
@@ -755,6 +755,13 @@
           return $(this).prop("disabled", false);
         });
       }
+    };
+
+    Boxes.prototype.updateBinders = function() {
+      this.rivetsBinder.unbind();
+      return this.rivetsBinder = rivets.bind($('.boxes'), {
+        boxes: this
+      });
     };
 
     return Boxes;
@@ -1199,9 +1206,6 @@
       rivets.bind($('.currentBox'), {
         currentBox: this.currentBox
       });
-      rivets.bind($('.boxes'), {
-        boxes: this.boxes
-      });
     }
 
     return StackBoard;
@@ -1318,7 +1322,7 @@
   pallet = {
     width: 390,
     height: 500,
-    overhang: 0
+    overhang: -15
   };
 
   box = {
@@ -1326,7 +1330,7 @@
     y: 0,
     width: 120,
     height: 60,
-    minDistance: 20
+    minDistance: 25
   };
 
   params = {
@@ -1347,12 +1351,6 @@
   };
 
   $("input").prop("readonly", true);
-
-  $(".offset").prop("readonly", false);
-
-  $("#ex8").on("slide", function(slideEvt) {
-    $("#box-move-offset").val($("#ex8").val());
-  });
 
 }).call(this);
 

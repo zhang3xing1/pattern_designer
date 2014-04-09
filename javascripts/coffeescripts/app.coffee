@@ -143,6 +143,7 @@ class @Box extends Backbone.Model
     #   4
     Logger.debug "getMoveOffset #{@get('moveOffset')}"
     Number(@get('moveOffset'))
+  
   setTitleName: (newTitle) ->
     @get('title').setText(newTitle) 
   getTitleName: () ->
@@ -233,7 +234,7 @@ class @Box extends Backbone.Model
     @get('title').setY(@get('rect').y() + @get('rect').height()/2 - 5)
     @set('rotate',(@get('rotate') + angle) % 180)
 
-    Logger.dev "[rotateWithAngle] width: #{@get('rect').getWidth()}, height: #{@get('rect').getHeight()}"
+    Logger.debug "[rotateWithAngle] width: #{@get('rect').getWidth()}, height: #{@get('rect').getHeight()}"
 
   changeFillColor: ->
     Logger.debug "Box#{@getTitleName()} collisionStatus: #{@get('collisionStatus')}\t settledStatus: #{@get('settledStatus')}"
@@ -294,7 +295,7 @@ class @Box extends Backbone.Model
           @get('outerRect').strokeAlpha(  @color_params.boxSelected.uncollision.outer.stroke.alpha)
 
   printPoints: (prefix) ->
-    Logger.dev(   "\n[#{prefix}]: PointA(x:#{@getPointA().x},y:#{@getPointA().y})\n " +
+    Logger.debug(   "\n[#{prefix}]: PointA(x:#{@getPointA().x},y:#{@getPointA().y})\n " +
                   "[#{prefix}]: PointB(x:#{@getPointB().x},y:#{@getPointB().y})\n " +
                   "[#{prefix}]: PointC(x:#{@getPointC().x},y:#{@getPointC().y})\n " +
                   "[#{prefix}]: PointD(x:#{@getPointD().x},y:#{@getPointD().y})\n " )
@@ -317,7 +318,6 @@ class @Boxes extends Backbone.Collection
       updateBoxTitle: ->
         @set title: @get('box').getTitleName()
     )
-    # @on('add', @showCurrentBoxPanel)
     @on('all', @draw) 
     @on('all', @updateDashboardStatus)
 
@@ -327,8 +327,13 @@ class @Boxes extends Backbone.Collection
     @otherCurrentBox = new @CurrentBox(@box_params)
 
     @availableNewBoxId = 1
+
+    # view.unbind()
+    @rivetsBinder = rivets.bind $('.boxes'),{boxes: this}
     @flash = "Initialized completed!"
 
+  availableNewTitle: () ->
+    @length + 1
   pprint: () ->
     _.reduce(@models,((str,box) ->
        "#{str} box#{box.getBoxId()}"
@@ -361,6 +366,9 @@ class @Boxes extends Backbone.Collection
     @availableNewBoxId += 1
 
     @testCollision()
+
+    @updateBinders()
+    Logger.debug("create button clicked!")
   settleCurrentBox: =>
     if @currentBox.get('collisionStatus')
       @flash = "Box#{@currentBox.getTitleName()} cannot be placed in collision status!"
@@ -382,8 +390,9 @@ class @Boxes extends Backbone.Collection
       else
         # @currentBox = @last()
         @updateCurrentBox(@last())
+
     @draw()
-    @showCurrentBoxPanel()
+    @updateBinders()
     @flash =  "box#{@currentBox.getTitleName()} selected!"
     Logger.debug("remove button clicked!")
   testCollision:()->
@@ -418,24 +427,15 @@ class @Boxes extends Backbone.Collection
     @currentBox = newBox
     Logger.debug "[updateCurrentBox] width: #{@currentBox.get('rect').getWidth()}, height: #{@currentBox.get('rect').getHeight()}"
     @otherCurrentBox.set('box', newBox)
-    # $('#moveOffset').checked = true
+    
 
     rivets.bind $('.box'),{box: newBox}
-  showCurrentBoxPanel: () ->
-    rivets.bind $('.box'),{box: @currentBox}
-    Logger.debug("showCurrentBoxPanel: Box number: #{@length}; ")
-    Logger.debug("In Boxes: #{@pprint()}; ")
-    @pprint()
-    # if(@length == 0)
-    #   $('.panel').css('display','none')
-    # else
-    #   $('.panel').css('display','block')
   rotate90: () =>
     @currentBox.rotateWithAngle(90)
     @repairCrossZone(@currentBox) unless @validateZone(@currentBox)  
     @testCollision()
     @updateCurrentBox()
-    Logger.dev "[rotate90] width: #{@currentBox.get('rect').getWidth()}, height: #{@currentBox.get('rect').getHeight()}"
+    Logger.debug "[rotate90] width: #{@currentBox.get('rect').getWidth()}, height: #{@currentBox.get('rect').getHeight()}"
   up: () =>
     Logger.debug("@currentBox:\t" + @currentBox.getTitleName())
     @currentBox.setYPosition(@currentBox.getYPosition() - @currentBox.getMoveOffset())
@@ -514,9 +514,9 @@ class @Boxes extends Backbone.Collection
     else
       true
   repairCrossZone: (box) ->
-    Logger.dev "[repairCrossZone before]: crossZoneLeft: #{box.get('crossZoneLeft')} crossZoneRight: #{box.get('crossZoneRight')}"
-    Logger.dev "[repairCrossZone before]: crossZoneTop: #{box.get('crossZoneTop')} crossZoneBottom: #{box.get('crossZoneBottom')}"
-    Logger.dev "[repairCrossZone before]: x: #{box.getXPosition()} y: #{box.getYPosition()}"
+    Logger.debug "[repairCrossZone before]: crossZoneLeft: #{box.get('crossZoneLeft')} crossZoneRight: #{box.get('crossZoneRight')}"
+    Logger.debug "[repairCrossZone before]: crossZoneTop: #{box.get('crossZoneTop')} crossZoneBottom: #{box.get('crossZoneBottom')}"
+    Logger.debug "[repairCrossZone before]: x: #{box.getXPosition()} y: #{box.getYPosition()}"
 
     if box.get('crossZoneLeft') 
       box.setXPosition(@zone.bound.left)
@@ -531,9 +531,9 @@ class @Boxes extends Backbone.Collection
       crossZoneRight:   false
       crossZoneTop:     false
       crossZoneBottom:  false
-    Logger.dev "[repairCrossZone after]: x: #{box.getXPosition()} y: #{box.getYPosition()}"
-    Logger.dev "[repairCrossZone after]: crossZoneLeft: #{box.get('crossZoneLeft')} crossZoneRight: #{box.get('crossZoneRight')}"
-    Logger.dev "[repairCrossZone after]: crossZoneTop: #{box.get('crossZoneTop')} crossZoneBottom: #{box.get('crossZoneBottom')}"
+    Logger.debug "[repairCrossZone after]: x: #{box.getXPosition()} y: #{box.getYPosition()}"
+    Logger.debug "[repairCrossZone after]: crossZoneLeft: #{box.get('crossZoneLeft')} crossZoneRight: #{box.get('crossZoneRight')}"
+    Logger.debug "[repairCrossZone after]: crossZoneTop: #{box.get('crossZoneTop')} crossZoneBottom: #{box.get('crossZoneBottom')}"
     
   ## view controller
   ## should be a controller alone
@@ -556,6 +556,10 @@ class @Boxes extends Backbone.Collection
       # $('#placeCurrentBox').prop "disabled", false
       $("button.placeCurrentBox").each ->
         $(this).prop "disabled", false
+
+  updateBinders: () ->
+    @rivetsBinder.unbind()
+    @rivetsBinder = rivets.bind $('.boxes'),{boxes: this}
 class CollisionPair extends Backbone.Model
   ## attributes:
   ##  boxId
@@ -867,7 +871,7 @@ class @StackBoard
     @boxes.shift()
 
     rivets.bind $('.currentBox'),{currentBox: @currentBox}
-    rivets.bind $('.boxes'),{boxes: @boxes}
+    # rivets.bind $('.boxes'),{boxes: @boxes}
 
 #### Params ####
 # unit: pixal
@@ -962,13 +966,13 @@ color =
 pallet =  
   width:    390
   height:   500 
-  overhang: 0 
+  overhang: -15 
 box  =      
   x:      0 
   y:      0
   width:  120  
   height: 60  
-  minDistance: 20
+  minDistance: 25
     
 params = 
   pallet: pallet
@@ -991,12 +995,8 @@ $("input").prop "readonly", true
 
 
 # $(".currentBox").prop "readonly", false
-$(".offset").prop "readonly", false
+# $(".offset").prop "readonly", false
 
-
-$("#ex8").on "slide", (slideEvt) ->
-  $("#box-move-offset").val($("#ex8").val())
-  return
 
 
 ########  TEST  #########
