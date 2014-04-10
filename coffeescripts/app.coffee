@@ -347,8 +347,13 @@ class @Boxes extends Backbone.Collection
 
     # newBox.setXPosition(Math.min(@zone.bound.left + @availableNewBoxId * newBox.getMoveOffset(), @zone.bound.right))
     # newBox.setYPosition(Math.min(@zone.bound.top + @availableNewBoxId * newBox.getMoveOffset(), @zone.bound.bottom))
-    newBox.setXPosition((@zone.bound.left + @zone.bound.right - newBox.get('rect').getWidth())/2)
-    newBox.setYPosition((@zone.bound.top + @zone.bound.bottom - newBox.get('rect').getHeight())/2)
+    if @length == 0
+      newBox.setXPosition((@zone.bound.left + @zone.bound.right - newBox.get('rect').getWidth())/2)
+      newBox.setYPosition((@zone.bound.top + @zone.bound.bottom - newBox.get('rect').getHeight())/2)
+    else
+      newBox.setXPosition(@last().getXPosition())
+      newBox.setYPosition(@last().getYPosition())
+    
     newBox.setTitleName(@availableNewBoxId)
     newBox.set('boxId', @availableNewBoxId)
     newBox.box().on "click", =>
@@ -966,7 +971,7 @@ color =
 pallet =  
   width:    390
   height:   500 
-  overhang: -15
+  overhang: 20
 box  =      
   x:      0 
   y:      0

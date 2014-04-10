@@ -516,8 +516,13 @@
     Boxes.prototype.createNewBox = function() {
       var newBox;
       newBox = new Box(this.box_params);
-      newBox.setXPosition((this.zone.bound.left + this.zone.bound.right - newBox.get('rect').getWidth()) / 2);
-      newBox.setYPosition((this.zone.bound.top + this.zone.bound.bottom - newBox.get('rect').getHeight()) / 2);
+      if (this.length === 0) {
+        newBox.setXPosition((this.zone.bound.left + this.zone.bound.right - newBox.get('rect').getWidth()) / 2);
+        newBox.setYPosition((this.zone.bound.top + this.zone.bound.bottom - newBox.get('rect').getHeight()) / 2);
+      } else {
+        newBox.setXPosition(this.last().getXPosition());
+        newBox.setYPosition(this.last().getYPosition());
+      }
       newBox.setTitleName(this.availableNewBoxId);
       newBox.set('boxId', this.availableNewBoxId);
       newBox.box().on("click", (function(_this) {
@@ -1126,18 +1131,16 @@
       var boxByRatio, boxes_params, longerEdge, margin, overhangBackground, overhangOffset, palletBackground, shorterEdge, stageBackground;
       longerEdge = Math.max(pallet.width, pallet.height);
       shorterEdge = Math.min(pallet.width, pallet.height);
-      margin = pallet.overhang + box.minDistance;
       Logger.debug("pallet.overhang: " + pallet.overhang + ", box.minDistance: " + box.minDistance + ", margin: " + margin);
+      margin = pallet.overhang;
       overhangOffset = {
         x: 0,
-        y: 0,
-        edge: margin
+        y: 0
       };
       if (margin > 0) {
-        overhangOffset.x = overhangOffset.y = box.minDistance;
         this.ratio = Math.min(params.stage.height / (longerEdge + 2 * margin), params.stage.width / (shorterEdge + 2 * margin));
       } else {
-        overhangOffset.x = overhangOffset.y = 0 - pallet.overhang;
+        overhangOffset.x = overhangOffset.y = 0 - margin;
         margin = 0;
         this.ratio = Math.min(params.stage.height / (longerEdge + 2 * margin), params.stage.width / (shorterEdge + 2 * margin));
       }
@@ -1201,9 +1204,6 @@
         height: params.box.height * this.ratio,
         minDistance: params.box.minDistance * this.ratio
       };
-      console.log(this.ratio);
-      console.log(params.box);
-      console.log(boxByRatio);
       boxes_params = {
         layer: this.layer,
         zone: this.zone,
@@ -1333,7 +1333,7 @@
   pallet = {
     width: 390,
     height: 500,
-    overhang: -10
+    overhang: 20
   };
 
   box = {
@@ -1341,7 +1341,7 @@
     y: 0,
     width: 120,
     height: 60,
-    minDistance: 10
+    minDistance: 30
   };
 
   params = {
