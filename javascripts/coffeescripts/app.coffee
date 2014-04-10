@@ -63,16 +63,14 @@ class @Box extends Backbone.Model
     crossZoneRight:   false
     crossZoneTop:     false
     crossZoneBottom:  false
-
   }
   initialize: (params) ->
     @on('change:rect', @rectChanged)
     #Fill Color: rgb(60, 118, 61)
     
     [box_params, @color_params, @ratio, @zone] = [params.box, params.color, params.ratio, params.zone]
-
-    @set ratio: params.ratio
-
+    @set minDistance: box_params.minDistance
+    # innerBox is stable and origin value of box.
     @set innerBox: 
       x:      box_params.x 
       y:      box_params.y
@@ -94,6 +92,19 @@ class @Box extends Backbone.Model
                                   text:         @get('boxId')
                                   # scaleX:       -1
                                 )
+    @set innerShape: 
+      x:      @get('rect').x() + @get('rect').width()/8
+      y:      @get('rect').y()
+      width:  @get('rect').width() * 0.75
+      height: @get('rect').height() / 8
+
+    @set orientationFlag: new Kinetic.Rect(
+                                  x:            @get('innerShape').x
+                                  y:            @get('innerShape').y
+                                  width:        @get('innerShape').width
+                                  height:       @get('innerShape').height
+                                  fill:         'red'
+                                )
     @set group: new Kinetic.Group(
                                   x: 0
                                   y: 0
@@ -101,37 +112,40 @@ class @Box extends Backbone.Model
     @get('rect').dash(([4, 5]))
     @get('group').add(@get('rect'))
     @get('group').add(@get('title'))
+    @get('group').add(@get('orientationFlag'))
+    
 
     ###### Box has an outer Rect ######
     # box_params.minDistance = $("input:checked","#minDistanceRadio").val()
-    @set outerBox: 
-      x:      @get('innerBox').x - box_params.minDistance
-      y:      @get('innerBox').y - box_params.minDistance
-      width:  @get('innerBox').width + 2 * box_params.minDistance
-      height: @get('innerBox').height + 2 * box_params.minDistance
-    if box_params.minDistance > 0
-      @set minDistance: box_params.minDistance
-      @set outerRect: new Kinetic.Rect(
-                              x:              @get('outerBox').x
-                              y:              @get('outerBox').y
-                              width:          @get('outerBox').width
-                              height:         @get('outerBox').height
-                            )
-      @get('outerRect').dash(([4, 5]))
-      @get('group').add(@get('outerRect'))
-    else
-      @set outerRect: new Kinetic.Rect(
-                              x:              @get('outerBox').x
-                              y:              @get('outerBox').y
-                              width:          @get('outerBox').width
-                              height:         @get('outerBox').height
-                              fillAlpha:      0
-                            )
+    outerBox = @getOuterRectShape()
+    @set outerRect: new Kinetic.Rect(
+                            x:              outerBox.x
+                            y:              outerBox.y
+                            width:          outerBox.width
+                            height:         outerBox.height
+                          )
+    unless @get('minDistance') > 0
+      @get('outerRect').setFillAlpha(0)
+    @get('outerRect').dash(([4, 5]))
+    @get('group').add(@get('outerRect'))
 
     Logger.debug('Box: Generate a new box.')
 
   hasOuterRect: () ->
     @get('minDistance') > 0
+
+  getCenterPoint: () ->
+    centerPoint = 
+      x:  @get('group').x() + @get('rect').width() / 2
+      y:  @get('group').y() + @get('rect').height() / 2
+
+  getOuterRectShape: () ->
+    shape =  
+      x:      @get('innerBox').x - @get('minDistance')
+      y:      @get('innerBox').y - @get('minDistance')
+      width:  @get('innerBox').width + 2 * @get('minDistance')
+      height: @get('innerBox').height + 2 * @get('minDistance')
+
   getBoxId: () ->
     @get('boxId') 
   getMoveOffset: () ->
@@ -216,22 +230,89 @@ class @Box extends Backbone.Model
     @set('collisionStatus', false)
 
   rotateWithAngle: (angle) ->
-    newRotateAngle = (@get('rotate') + angle) / 360 
-    oldBoxFrame = 
-      innerWidth:    @get('rect').getWidth()
-      innerHeight:   @get('rect').getHeight()
-      outerWidth:    @get('outerRect').getWidth()
-      outerHeight:   @get('outerRect').getHeight()     
-    @get('rect').setWidth(oldBoxFrame.innerHeight)
-    @get('rect').setHeight(oldBoxFrame.innerWidth)
-    @get('outerRect').setWidth(oldBoxFrame.outerHeight)
-    @get('outerRect').setHeight(oldBoxFrame.outerWidth)
+    newRotateAngle = (@get('rotate') + angle) % 360
+    centerPointForGroup    = @getCenterPoint()
+
+
+    # @set innerShape: 
+    #   x:      @get('rect').x() + @get('rect').width()/8
+    #   y:      @get('rect').y()
+    #   width:  @get('rect').width() * 0.75
+    #   height: @get('rect').height() / 8
+    switch newRotateAngle
+      when 0
+        @get('rect').setWidth(@get('innerBox').width)
+        @get('rect').setHeight(@get('innerBox').height)
+        @get('group').setX(centerPointForGroup.x - @get('rect').getWidth() / 2 )
+        @get('group').setY(centerPointForGroup.y - @get('rect').getHeight() / 2 )
+
+        outerBox = @getOuterRectShape()
+        @get('outerRect').setWidth(outerBox.width)
+        @get('outerRect').setHeight(outerBox.height)
+
+        shape = @get('innerShape')
+        @get('orientationFlag').setX(@get('rect').width()/8)
+        @get('orientationFlag').setY(0)
+        @get('orientationFlag').setWidth(shape.width)
+        @get('orientationFlag').setHeight(shape.height)
+
+      when 90
+        @get('rect').setWidth(@get('innerBox').height)
+        @get('rect').setHeight(@get('innerBox').width)
+        @get('group').setX(centerPointForGroup.x - @get('rect').getWidth() / 2 )
+        @get('group').setY(centerPointForGroup.y - @get('rect').getHeight() / 2 )
+
+        outerBox = @getOuterRectShape()
+        @get('outerRect').setWidth(outerBox.height)
+        @get('outerRect').setHeight(outerBox.width)
+
+        shape = @get('innerShape')
+        @get('orientationFlag').setX(@get('rect').width()/8 * 7)
+        @get('orientationFlag').setY(@get('rect').height()/8)
+        @get('orientationFlag').setWidth(shape.height)
+        @get('orientationFlag').setHeight(shape.width)
+
+      when 180
+        @get('rect').setWidth(@get('innerBox').width)
+        @get('rect').setHeight(@get('innerBox').height)
+        @get('group').setX(centerPointForGroup.x - @get('rect').getWidth() / 2 )
+        @get('group').setY(centerPointForGroup.y - @get('rect').getHeight() / 2 )
+
+        outerBox = @getOuterRectShape()
+        @get('outerRect').setWidth(outerBox.width)
+        @get('outerRect').setHeight(outerBox.height)
+
+        shape = @get('innerShape')
+        @get('orientationFlag').setX(@get('rect').width()/8)
+        @get('orientationFlag').setY(@get('rect').height()/8 * 7)
+        @get('orientationFlag').setWidth(shape.width)
+        @get('orientationFlag').setHeight(shape.height)
+
+      when 270
+      # 90,270
+
+        @get('rect').setWidth(@get('innerBox').height)
+        @get('rect').setHeight(@get('innerBox').width)
+        @get('group').setX(centerPointForGroup.x - @get('rect').getWidth() / 2 )
+        @get('group').setY(centerPointForGroup.y - @get('rect').getHeight() / 2 )
+
+        outerBox = @getOuterRectShape()
+        @get('outerRect').setWidth(outerBox.height)
+        @get('outerRect').setHeight(outerBox.width)
+
+        shape = @get('innerShape')
+        @get('orientationFlag').setX(0)
+        @get('orientationFlag').setY(@get('rect').height()/8)
+        @get('orientationFlag').setWidth(shape.height)
+        @get('orientationFlag').setHeight(shape.width)
+
     @get('title').setX(@get('rect').x() + @get('rect').width()/2  - 5)
     @get('title').setY(@get('rect').y() + @get('rect').height()/2 - 5)
-    @set('rotate',(@get('rotate') + angle) % 180)
+    @set('rotate',newRotateAngle)
 
     Logger.debug "[rotateWithAngle] width: #{@get('rect').getWidth()}, height: #{@get('rect').getHeight()}"
-
+    Logger.debug   "[rotateWithAngle] group_x: #{@get('group').x()}, group_y: #{@get('group').y()}"
+    Logger.debug   "[rotateWithAngle] rect_x: #{@get('rect').x()}, rect_y: #{@get('rect').y()}"
   changeFillColor: ->
     Logger.debug "Box#{@getTitleName()} collisionStatus: #{@get('collisionStatus')}\t settledStatus: #{@get('settledStatus')}"
     if @get('settledStatus') 
@@ -448,8 +529,6 @@ class @Boxes extends Backbone.Collection
   down: () =>
     @currentBox.setYPosition(@currentBox.getYPosition() + @currentBox.getMoveOffset())
     unless @validateZone(@currentBox)
-      # @currentBox.setYPosition(@zone.bound.bottom - @currentBox.getHeight())
-      # @currentBox.set('crossZoneBottom', false)
       @repairCrossZone(@currentBox)
       @flash = "Box#{@currentBox.getTitleName()} cannot be moved DOWN!"
     else
@@ -975,8 +1054,8 @@ pallet =
 box  =      
   x:      0 
   y:      0
-  width:  120  
-  height: 60  
+  width:  200  
+  height: 30  
   minDistance: 30
     
 params = 

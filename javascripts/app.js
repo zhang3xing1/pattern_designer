@@ -100,11 +100,11 @@
     };
 
     Box.prototype.initialize = function(params) {
-      var box_params, _ref;
+      var box_params, outerBox, _ref;
       this.on('change:rect', this.rectChanged);
       _ref = [params.box, params.color, params.ratio, params.zone], box_params = _ref[0], this.color_params = _ref[1], this.ratio = _ref[2], this.zone = _ref[3];
       this.set({
-        ratio: params.ratio
+        minDistance: box_params.minDistance
       });
       this.set({
         innerBox: {
@@ -133,6 +133,23 @@
         })
       });
       this.set({
+        innerShape: {
+          x: this.get('rect').x() + this.get('rect').width() / 8,
+          y: this.get('rect').y(),
+          width: this.get('rect').width() * 0.75,
+          height: this.get('rect').height() / 8
+        }
+      });
+      this.set({
+        orientationFlag: new Kinetic.Rect({
+          x: this.get('innerShape').x,
+          y: this.get('innerShape').y,
+          width: this.get('innerShape').width,
+          height: this.get('innerShape').height,
+          fill: 'red'
+        })
+      });
+      this.set({
         group: new Kinetic.Group({
           x: 0,
           y: 0
@@ -141,44 +158,44 @@
       this.get('rect').dash([4, 5]);
       this.get('group').add(this.get('rect'));
       this.get('group').add(this.get('title'));
+      this.get('group').add(this.get('orientationFlag'));
+      outerBox = this.getOuterRectShape();
       this.set({
-        outerBox: {
-          x: this.get('innerBox').x - box_params.minDistance,
-          y: this.get('innerBox').y - box_params.minDistance,
-          width: this.get('innerBox').width + 2 * box_params.minDistance,
-          height: this.get('innerBox').height + 2 * box_params.minDistance
-        }
+        outerRect: new Kinetic.Rect({
+          x: outerBox.x,
+          y: outerBox.y,
+          width: outerBox.width,
+          height: outerBox.height
+        })
       });
-      if (box_params.minDistance > 0) {
-        this.set({
-          minDistance: box_params.minDistance
-        });
-        this.set({
-          outerRect: new Kinetic.Rect({
-            x: this.get('outerBox').x,
-            y: this.get('outerBox').y,
-            width: this.get('outerBox').width,
-            height: this.get('outerBox').height
-          })
-        });
-        this.get('outerRect').dash([4, 5]);
-        this.get('group').add(this.get('outerRect'));
-      } else {
-        this.set({
-          outerRect: new Kinetic.Rect({
-            x: this.get('outerBox').x,
-            y: this.get('outerBox').y,
-            width: this.get('outerBox').width,
-            height: this.get('outerBox').height,
-            fillAlpha: 0
-          })
-        });
+      if (!(this.get('minDistance') > 0)) {
+        this.get('outerRect').setFillAlpha(0);
       }
+      this.get('outerRect').dash([4, 5]);
+      this.get('group').add(this.get('outerRect'));
       return Logger.debug('Box: Generate a new box.');
     };
 
     Box.prototype.hasOuterRect = function() {
       return this.get('minDistance') > 0;
+    };
+
+    Box.prototype.getCenterPoint = function() {
+      var centerPoint;
+      return centerPoint = {
+        x: this.get('group').x() + this.get('rect').width() / 2,
+        y: this.get('group').y() + this.get('rect').height() / 2
+      };
+    };
+
+    Box.prototype.getOuterRectShape = function() {
+      var shape;
+      return shape = {
+        x: this.get('innerBox').x - this.get('minDistance'),
+        y: this.get('innerBox').y - this.get('minDistance'),
+        width: this.get('innerBox').width + 2 * this.get('minDistance'),
+        height: this.get('innerBox').height + 2 * this.get('minDistance')
+      };
     };
 
     Box.prototype.getBoxId = function() {
@@ -342,22 +359,72 @@
     };
 
     Box.prototype.rotateWithAngle = function(angle) {
-      var newRotateAngle, oldBoxFrame;
-      newRotateAngle = (this.get('rotate') + angle) / 360;
-      oldBoxFrame = {
-        innerWidth: this.get('rect').getWidth(),
-        innerHeight: this.get('rect').getHeight(),
-        outerWidth: this.get('outerRect').getWidth(),
-        outerHeight: this.get('outerRect').getHeight()
-      };
-      this.get('rect').setWidth(oldBoxFrame.innerHeight);
-      this.get('rect').setHeight(oldBoxFrame.innerWidth);
-      this.get('outerRect').setWidth(oldBoxFrame.outerHeight);
-      this.get('outerRect').setHeight(oldBoxFrame.outerWidth);
+      var centerPointForGroup, newRotateAngle, outerBox, shape;
+      newRotateAngle = (this.get('rotate') + angle) % 360;
+      centerPointForGroup = this.getCenterPoint();
+      switch (newRotateAngle) {
+        case 0:
+          this.get('rect').setWidth(this.get('innerBox').width);
+          this.get('rect').setHeight(this.get('innerBox').height);
+          this.get('group').setX(centerPointForGroup.x - this.get('rect').getWidth() / 2);
+          this.get('group').setY(centerPointForGroup.y - this.get('rect').getHeight() / 2);
+          outerBox = this.getOuterRectShape();
+          this.get('outerRect').setWidth(outerBox.width);
+          this.get('outerRect').setHeight(outerBox.height);
+          shape = this.get('innerShape');
+          this.get('orientationFlag').setX(this.get('rect').width() / 8);
+          this.get('orientationFlag').setY(0);
+          this.get('orientationFlag').setWidth(shape.width);
+          this.get('orientationFlag').setHeight(shape.height);
+          break;
+        case 90:
+          this.get('rect').setWidth(this.get('innerBox').height);
+          this.get('rect').setHeight(this.get('innerBox').width);
+          this.get('group').setX(centerPointForGroup.x - this.get('rect').getWidth() / 2);
+          this.get('group').setY(centerPointForGroup.y - this.get('rect').getHeight() / 2);
+          outerBox = this.getOuterRectShape();
+          this.get('outerRect').setWidth(outerBox.height);
+          this.get('outerRect').setHeight(outerBox.width);
+          shape = this.get('innerShape');
+          this.get('orientationFlag').setX(this.get('rect').width() / 8 * 7);
+          this.get('orientationFlag').setY(this.get('rect').height() / 8);
+          this.get('orientationFlag').setWidth(shape.height);
+          this.get('orientationFlag').setHeight(shape.width);
+          break;
+        case 180:
+          this.get('rect').setWidth(this.get('innerBox').width);
+          this.get('rect').setHeight(this.get('innerBox').height);
+          this.get('group').setX(centerPointForGroup.x - this.get('rect').getWidth() / 2);
+          this.get('group').setY(centerPointForGroup.y - this.get('rect').getHeight() / 2);
+          outerBox = this.getOuterRectShape();
+          this.get('outerRect').setWidth(outerBox.width);
+          this.get('outerRect').setHeight(outerBox.height);
+          shape = this.get('innerShape');
+          this.get('orientationFlag').setX(this.get('rect').width() / 8);
+          this.get('orientationFlag').setY(this.get('rect').height() / 8 * 7);
+          this.get('orientationFlag').setWidth(shape.width);
+          this.get('orientationFlag').setHeight(shape.height);
+          break;
+        case 270:
+          this.get('rect').setWidth(this.get('innerBox').height);
+          this.get('rect').setHeight(this.get('innerBox').width);
+          this.get('group').setX(centerPointForGroup.x - this.get('rect').getWidth() / 2);
+          this.get('group').setY(centerPointForGroup.y - this.get('rect').getHeight() / 2);
+          outerBox = this.getOuterRectShape();
+          this.get('outerRect').setWidth(outerBox.height);
+          this.get('outerRect').setHeight(outerBox.width);
+          shape = this.get('innerShape');
+          this.get('orientationFlag').setX(0);
+          this.get('orientationFlag').setY(this.get('rect').height() / 8);
+          this.get('orientationFlag').setWidth(shape.height);
+          this.get('orientationFlag').setHeight(shape.width);
+      }
       this.get('title').setX(this.get('rect').x() + this.get('rect').width() / 2 - 5);
       this.get('title').setY(this.get('rect').y() + this.get('rect').height() / 2 - 5);
-      this.set('rotate', (this.get('rotate') + angle) % 180);
-      return Logger.debug("[rotateWithAngle] width: " + (this.get('rect').getWidth()) + ", height: " + (this.get('rect').getHeight()));
+      this.set('rotate', newRotateAngle);
+      Logger.debug("[rotateWithAngle] width: " + (this.get('rect').getWidth()) + ", height: " + (this.get('rect').getHeight()));
+      Logger.debug("[rotateWithAngle] group_x: " + (this.get('group').x()) + ", group_y: " + (this.get('group').y()));
+      return Logger.debug("[rotateWithAngle] rect_x: " + (this.get('rect').x()) + ", rect_y: " + (this.get('rect').y()));
     };
 
     Box.prototype.changeFillColor = function() {
@@ -1339,8 +1406,8 @@
   box = {
     x: 0,
     y: 0,
-    width: 120,
-    height: 60,
+    width: 200,
+    height: 30,
     minDistance: 30
   };
 
