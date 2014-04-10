@@ -103,11 +103,15 @@ class @Box extends Backbone.Model
                                   y:            @get('innerShape').y
                                   width:        @get('innerShape').width
                                   height:       @get('innerShape').height
-                                  fill:         'red'
+                                  # fill:         'red'
+                                  fillRed:      255
+                                  fillGreen:    41
+                                  fillBlue:     86
                                 )
     @set group: new Kinetic.Group(
                                   x: 0
                                   y: 0
+                                  draggable: false
                                 )
     @get('rect').dash(([4, 5]))
     @get('group').add(@get('rect'))
@@ -448,6 +452,7 @@ class @Boxes extends Backbone.Collection
     @availableNewBoxId += 1
 
     @testCollision()
+    @repairCrossZone(@currentBox) unless @validateZone(@currentBox)  
 
     Logger.debug("create button clicked!")
   settleCurrentBox: =>
@@ -455,6 +460,7 @@ class @Boxes extends Backbone.Collection
       @flash = "Box#{@currentBox.getTitleName()} cannot be placed in collision status!"
     else
       @currentBox.set('settledStatus', true)
+      @currentBox.get('group').setDraggable(false)
       @draw()
   removeCurrentBox: =>
     Logger.debug "#{@length}"
@@ -505,6 +511,23 @@ class @Boxes extends Backbone.Collection
           ),this)
     newBox.set('settledStatus', false)
     @currentBox = newBox
+
+    #dragg setting
+    @currentBox.get('group').setDraggable(true)
+    @currentBox.get('group').setDragBoundFunc((position) =>
+      unless @validateZone(@currentBox)
+        @repairCrossZone(@currentBox) 
+        newPosition=
+          x: @currentBox.getXPosition()
+          y: @currentBox.getYPosition()
+      else
+        position)
+
+    @currentBox.get('group').on('dragend', =>
+      @repairCrossZone(@currentBox) unless @validateZone(@currentBox)
+      @testCollision())
+
+
     Logger.debug "[updateCurrentBox] width: #{@currentBox.get('rect').getWidth()}, height: #{@currentBox.get('rect').getHeight()}"
     @otherCurrentBox.set('box', newBox)
     
@@ -930,11 +953,77 @@ class @StackBoard
 
     @layer = new Kinetic.Layer()
 
-    @stage.add @layer
+    color_coordinate =
+      red:  95
+      green: 124
+      blue:   247
+    xLine = new Kinetic.Line(
+      points: [
+        @zone.bound.left + 5
+        @zone.bound.bottom - 5
+        @zone.bound.right * 0.2
+        @zone.bound.bottom - 5
+        @zone.bound.right * 0.2 - 15
+        @zone.bound.bottom - 5 - 3
+        @zone.bound.right * 0.2
+        @zone.bound.bottom - 5
+        @zone.bound.right * 0.2 -15
+        @zone.bound.bottom - 5 + 3
+      ]
+      strokeRed:    color_coordinate.red
+      strokeGreen:  color_coordinate.green
+      strokeBlue:   color_coordinate.blue
+      strokeWidth: 2
+      lineCap: "round"
+      lineJoin: "round"
+    )
+    xLabel = new Kinetic.Text(
+        x:  @zone.bound.right * 0.2 - 10
+        y:  @zone.bound.bottom - 5  - 13
+        fontSize:     13
+        fontFamily:   "Calibri"
+        fill:         "blue"
+        text:         'X'
+      )
+    yLine = new Kinetic.Line(
+      points: [
+        @zone.bound.left + 5 - 3
+        @zone.bound.top + @zone.bound.bottom * 0.8 + 15
+        @zone.bound.left + 5
+        @zone.bound.top + @zone.bound.bottom * 0.8
+        @zone.bound.left + 5 + 3
+        @zone.bound.top + @zone.bound.bottom * 0.8 + 15
+        @zone.bound.left + 5
+        @zone.bound.top + @zone.bound.bottom * 0.8
+        @zone.bound.left + 5
+        @zone.bound.bottom - 5
+      ]
+      strokeRed:    color_coordinate.red
+      strokeGreen:  color_coordinate.green
+      strokeBlue:   color_coordinate.blue
+      strokeWidth: 2
+      lineCap: "round"
+      lineJoin: "round"
+    )
+    yLabel = new Kinetic.Text(
+        x:      @zone.bound.left + 5 + 3
+        y:      @zone.bound.top + @zone.bound.bottom * 0.8 + 15
+        fontSize:     13
+        fontFamily:   "Calibri"
+        fill:         "blue"
+        text:         'Y'
+        # scaleX:       -1
+      )
 
     @layer.add stageBackground
     @layer.add palletBackground
     @layer.add overhangBackground
+    @layer.add xLine
+    @layer.add yLine
+    @layer.add xLabel
+    @layer.add yLabel
+
+    @stage.add @layer
 
     #### flip context
     # @layer.getContext().translate(0, @zone.height + @zone.y * 2)
@@ -983,9 +1072,9 @@ color =
           alpha:  0.5
     boxPlaced:
       inner:
-        red:    0
-        green:  0
-        blue:   255
+        red:    79
+        green:  130
+        blue:   246
         alpha:  1
         stroke:
           red:    147
@@ -1026,14 +1115,14 @@ color =
             alpha:  0.5           
       uncollision:
         inner:
-          red:    0
-          green:  255
-          blue:   0
+          red:    108
+          green:  153
+          blue:   57
           alpha:  1
           stroke:
-            red:    147
-            green:  218
-            blue:   87
+            red:    72
+            green:  82
+            blue:   38
             alpha:  0.5
         outer:
           red:    0
@@ -1041,9 +1130,9 @@ color =
           blue:   0
           alpha:  0
           stroke:
-            red:    255
-            green:  255
-            blue:   0
+            red:    70
+            green:  186
+            blue:   3
             alpha:  0.5          
 
 # unit: cm
@@ -1054,8 +1143,8 @@ pallet =
 box  =      
   x:      0 
   y:      0
-  width:  200  
-  height: 30  
+  width:  150  
+  height: 60  
   minDistance: 30
     
 params = 

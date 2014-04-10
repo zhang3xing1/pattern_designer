@@ -146,13 +146,16 @@
           y: this.get('innerShape').y,
           width: this.get('innerShape').width,
           height: this.get('innerShape').height,
-          fill: 'red'
+          fillRed: 255,
+          fillGreen: 41,
+          fillBlue: 86
         })
       });
       this.set({
         group: new Kinetic.Group({
           x: 0,
-          y: 0
+          y: 0,
+          draggable: false
         })
       });
       this.get('rect').dash([4, 5]);
@@ -604,6 +607,9 @@
       this.flash = "box" + (this.currentBox.getTitleName()) + " selected!";
       this.availableNewBoxId += 1;
       this.testCollision();
+      if (!this.validateZone(this.currentBox)) {
+        this.repairCrossZone(this.currentBox);
+      }
       return Logger.debug("create button clicked!");
     };
 
@@ -612,6 +618,7 @@
         return this.flash = "Box" + (this.currentBox.getTitleName()) + " cannot be placed in collision status!";
       } else {
         this.currentBox.set('settledStatus', true);
+        this.currentBox.get('group').setDraggable(false);
         return this.draw();
       }
     };
@@ -676,6 +683,29 @@
       }), this);
       newBox.set('settledStatus', false);
       this.currentBox = newBox;
+      this.currentBox.get('group').setDraggable(true);
+      this.currentBox.get('group').setDragBoundFunc((function(_this) {
+        return function(position) {
+          var newPosition;
+          if (!_this.validateZone(_this.currentBox)) {
+            _this.repairCrossZone(_this.currentBox);
+            return newPosition = {
+              x: _this.currentBox.getXPosition(),
+              y: _this.currentBox.getYPosition()
+            };
+          } else {
+            return position;
+          }
+        };
+      })(this));
+      this.currentBox.get('group').on('dragend', (function(_this) {
+        return function() {
+          if (!_this.validateZone(_this.currentBox)) {
+            _this.repairCrossZone(_this.currentBox);
+          }
+          return _this.testCollision();
+        };
+      })(this));
       Logger.debug("[updateCurrentBox] width: " + (this.currentBox.get('rect').getWidth()) + ", height: " + (this.currentBox.get('rect').getHeight()));
       this.otherCurrentBox.set('box', newBox);
       this.updateBinders();
@@ -1195,7 +1225,7 @@
 
   this.StackBoard = (function() {
     function StackBoard(params) {
-      var boxByRatio, boxes_params, longerEdge, margin, overhangBackground, overhangOffset, palletBackground, shorterEdge, stageBackground;
+      var boxByRatio, boxes_params, color_coordinate, longerEdge, margin, overhangBackground, overhangOffset, palletBackground, shorterEdge, stageBackground, xLabel, xLine, yLabel, yLine;
       longerEdge = Math.max(pallet.width, pallet.height);
       shorterEdge = Math.min(pallet.width, pallet.height);
       Logger.debug("pallet.overhang: " + pallet.overhang + ", box.minDistance: " + box.minDistance + ", margin: " + margin);
@@ -1258,10 +1288,53 @@
         height: params.stage.height * params.stage.stage_zoom
       });
       this.layer = new Kinetic.Layer();
-      this.stage.add(this.layer);
+      color_coordinate = {
+        red: 95,
+        green: 124,
+        blue: 247
+      };
+      xLine = new Kinetic.Line({
+        points: [this.zone.bound.left + 5, this.zone.bound.bottom - 5, this.zone.bound.right * 0.2, this.zone.bound.bottom - 5, this.zone.bound.right * 0.2 - 15, this.zone.bound.bottom - 5 - 3, this.zone.bound.right * 0.2, this.zone.bound.bottom - 5, this.zone.bound.right * 0.2 - 15, this.zone.bound.bottom - 5 + 3],
+        strokeRed: color_coordinate.red,
+        strokeGreen: color_coordinate.green,
+        strokeBlue: color_coordinate.blue,
+        strokeWidth: 2,
+        lineCap: "round",
+        lineJoin: "round"
+      });
+      xLabel = new Kinetic.Text({
+        x: this.zone.bound.right * 0.2 - 10,
+        y: this.zone.bound.bottom - 5 - 13,
+        fontSize: 13,
+        fontFamily: "Calibri",
+        fill: "blue",
+        text: 'X'
+      });
+      yLine = new Kinetic.Line({
+        points: [this.zone.bound.left + 5 - 3, this.zone.bound.top + this.zone.bound.bottom * 0.8 + 15, this.zone.bound.left + 5, this.zone.bound.top + this.zone.bound.bottom * 0.8, this.zone.bound.left + 5 + 3, this.zone.bound.top + this.zone.bound.bottom * 0.8 + 15, this.zone.bound.left + 5, this.zone.bound.top + this.zone.bound.bottom * 0.8, this.zone.bound.left + 5, this.zone.bound.bottom - 5],
+        strokeRed: color_coordinate.red,
+        strokeGreen: color_coordinate.green,
+        strokeBlue: color_coordinate.blue,
+        strokeWidth: 2,
+        lineCap: "round",
+        lineJoin: "round"
+      });
+      yLabel = new Kinetic.Text({
+        x: this.zone.bound.left + 5 + 3,
+        y: this.zone.bound.top + this.zone.bound.bottom * 0.8 + 15,
+        fontSize: 13,
+        fontFamily: "Calibri",
+        fill: "blue",
+        text: 'Y'
+      });
       this.layer.add(stageBackground);
       this.layer.add(palletBackground);
       this.layer.add(overhangBackground);
+      this.layer.add(xLine);
+      this.layer.add(yLine);
+      this.layer.add(xLabel);
+      this.layer.add(yLabel);
+      this.stage.add(this.layer);
       Logger.debug("StackBoard: Stage Initialized!");
       Logger.info("StackBoard: Initialized!");
       boxByRatio = {
@@ -1317,9 +1390,9 @@
     },
     boxPlaced: {
       inner: {
-        red: 0,
-        green: 0,
-        blue: 255,
+        red: 79,
+        green: 130,
+        blue: 246,
         alpha: 1,
         stroke: {
           red: 147,
@@ -1370,14 +1443,14 @@
       },
       uncollision: {
         inner: {
-          red: 0,
-          green: 255,
-          blue: 0,
+          red: 108,
+          green: 153,
+          blue: 57,
           alpha: 1,
           stroke: {
-            red: 147,
-            green: 218,
-            blue: 87,
+            red: 72,
+            green: 82,
+            blue: 38,
             alpha: 0.5
           }
         },
@@ -1387,9 +1460,9 @@
           blue: 0,
           alpha: 0,
           stroke: {
-            red: 255,
-            green: 255,
-            blue: 0,
+            red: 70,
+            green: 186,
+            blue: 3,
             alpha: 0.5
           }
         }
@@ -1406,8 +1479,8 @@
   box = {
     x: 0,
     y: 0,
-    width: 200,
-    height: 30,
+    width: 150,
+    height: 60,
     minDistance: 30
   };
 
