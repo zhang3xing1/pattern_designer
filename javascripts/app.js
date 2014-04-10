@@ -102,7 +102,7 @@
     Box.prototype.initialize = function(params) {
       var box_params, outerBox, _ref;
       this.on('change:rect', this.rectChanged);
-      _ref = [params.box, params.color, params.ratio, params.zone], box_params = _ref[0], this.color_params = _ref[1], this.ratio = _ref[2], this.zone = _ref[3];
+      _ref = [params.box, params.color, params.ratio, params.zone, params.palletOverhang], box_params = _ref[0], this.color_params = _ref[1], this.ratio = _ref[2], this.zone = _ref[3], this.palletOverhang = _ref[4];
       this.set({
         minDistance: box_params.minDistance
       });
@@ -223,11 +223,11 @@
     };
 
     Box.prototype.getXPositionByRatio = function() {
-      return (this.get('group').x() - this.zone.bound.left) / this.ratio;
+      return ((this.get('group').x() + this.get('rect').getWidth() / 2) - this.zone.bound.left) / this.ratio - this.palletOverhang;
     };
 
     Box.prototype.getYPositionByRatio = function() {
-      return (this.zone.bound.bottom - this.get('group').y() - this.getHeight()) / this.ratio;
+      return (this.zone.bound.bottom - (this.get('group').y() - this.get('rect').getHeight() / 2) - this.getHeight()) / this.ratio - this.palletOverhang;
     };
 
     Box.prototype.getWidthByRatio = function() {
@@ -526,7 +526,8 @@
         box: params.box,
         color: params.color,
         ratio: params.ratio,
-        zone: params.zone
+        zone: params.zone,
+        palletOverhang: params.palletOverhang
       };
       this.CurrentBox = Backbone.Model.extend({
         initialize: function(box_params) {
@@ -552,6 +553,9 @@
       this.availableNewBoxId = 1;
       this.rivetsBinder = rivets.bind($('.boxes'), {
         boxes: this
+      });
+      this.rivetsBinderCurrentBox = rivets.bind($('.currentBox'), {
+        currentBox: this.otherCurrentBox
       });
       return this.flash = "Initialized completed!";
     };
@@ -689,13 +693,15 @@
           var newPosition;
           if (!_this.validateZone(_this.currentBox)) {
             _this.repairCrossZone(_this.currentBox);
-            return newPosition = {
+            newPosition = {
               x: _this.currentBox.getXPosition(),
               y: _this.currentBox.getYPosition()
             };
           } else {
-            return position;
+            newPosition = position;
           }
+          _this.updateCurrentBox();
+          return newPosition;
         };
       })(this));
       this.currentBox.get('group').on('dragend', (function(_this) {
@@ -862,6 +868,10 @@
       this.rivetsBinder.unbind();
       this.rivetsBinder = rivets.bind($('.boxes'), {
         boxes: this
+      });
+      this.rivetsBinderCurrentBox.unbind();
+      this.rivetsBinderCurrentBox = rivets.bind($('.currentBox'), {
+        currentBox: this.otherCurrentBox
       });
       return Logger.debug("[updateBinders]: " + this.flash);
     };
@@ -1225,7 +1235,8 @@
 
   this.StackBoard = (function() {
     function StackBoard(params) {
-      var boxByRatio, boxes_params, color_coordinate, longerEdge, margin, overhangBackground, overhangOffset, palletBackground, shorterEdge, stageBackground, xLabel, xLine, yLabel, yLine;
+      var boxByRatio, boxes_params, color_coordinate, longerEdge, margin, overhangBackground, overhangOffset, pallet, palletBackground, shorterEdge, stageBackground, xLabel, xLine, yLabel, yLine;
+      pallet = params.pallet;
       longerEdge = Math.max(pallet.width, pallet.height);
       shorterEdge = Math.min(pallet.width, pallet.height);
       Logger.debug("pallet.overhang: " + pallet.overhang + ", box.minDistance: " + box.minDistance + ", margin: " + margin);
@@ -1289,9 +1300,9 @@
       });
       this.layer = new Kinetic.Layer();
       color_coordinate = {
-        red: 95,
-        green: 124,
-        blue: 247
+        red: 67,
+        green: 123,
+        blue: 188
       };
       xLine = new Kinetic.Line({
         points: [this.zone.bound.left + 5, this.zone.bound.bottom - 5, this.zone.bound.right * 0.2, this.zone.bound.bottom - 5, this.zone.bound.right * 0.2 - 15, this.zone.bound.bottom - 5 - 3, this.zone.bound.right * 0.2, this.zone.bound.bottom - 5, this.zone.bound.right * 0.2 - 15, this.zone.bound.bottom - 5 + 3],
@@ -1303,15 +1314,15 @@
         lineJoin: "round"
       });
       xLabel = new Kinetic.Text({
-        x: this.zone.bound.right * 0.2 - 10,
-        y: this.zone.bound.bottom - 5 - 13,
+        x: this.zone.bound.right * 0.2,
+        y: this.zone.bound.bottom - 5 - 5,
         fontSize: 13,
         fontFamily: "Calibri",
         fill: "blue",
         text: 'X'
       });
       yLine = new Kinetic.Line({
-        points: [this.zone.bound.left + 5 - 3, this.zone.bound.top + this.zone.bound.bottom * 0.8 + 15, this.zone.bound.left + 5, this.zone.bound.top + this.zone.bound.bottom * 0.8, this.zone.bound.left + 5 + 3, this.zone.bound.top + this.zone.bound.bottom * 0.8 + 15, this.zone.bound.left + 5, this.zone.bound.top + this.zone.bound.bottom * 0.8, this.zone.bound.left + 5, this.zone.bound.bottom - 5],
+        points: [this.zone.bound.left + 5 - 3, this.zone.bound.top + this.zone.bound.bottom * 0.82 + 15, this.zone.bound.left + 5, this.zone.bound.top + this.zone.bound.bottom * 0.82, this.zone.bound.left + 5 + 3, this.zone.bound.top + this.zone.bound.bottom * 0.82 + 15, this.zone.bound.left + 5, this.zone.bound.top + this.zone.bound.bottom * 0.82, this.zone.bound.left + 5, this.zone.bound.bottom - 5],
         strokeRed: color_coordinate.red,
         strokeGreen: color_coordinate.green,
         strokeBlue: color_coordinate.blue,
@@ -1320,8 +1331,8 @@
         lineJoin: "round"
       });
       yLabel = new Kinetic.Text({
-        x: this.zone.bound.left + 5 + 3,
-        y: this.zone.bound.top + this.zone.bound.bottom * 0.8 + 15,
+        x: this.zone.bound.left + 5 - 5,
+        y: this.zone.bound.top + this.zone.bound.bottom * 0.82 - 15,
         fontSize: 13,
         fontFamily: "Calibri",
         fill: "blue",
@@ -1349,14 +1360,11 @@
         zone: this.zone,
         box: boxByRatio,
         color: params.color,
-        ratio: this.ratio
+        ratio: this.ratio,
+        palletOverhang: pallet.overhang
       };
       this.boxes = new Boxes(boxes_params);
-      this.currentBox = this.boxes.otherCurrentBox;
       this.boxes.shift();
-      rivets.bind($('.currentBox'), {
-        currentBox: this.currentBox
-      });
     }
 
     return StackBoard;
@@ -1393,7 +1401,7 @@
         red: 79,
         green: 130,
         blue: 246,
-        alpha: 1,
+        alpha: 0.8,
         stroke: {
           red: 147,
           green: 218,
@@ -1479,9 +1487,9 @@
   box = {
     x: 0,
     y: 0,
-    width: 150,
-    height: 60,
-    minDistance: 30
+    width: 120,
+    height: 40,
+    minDistance: 10
   };
 
   params = {

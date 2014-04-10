@@ -68,7 +68,7 @@ class @Box extends Backbone.Model
     @on('change:rect', @rectChanged)
     #Fill Color: rgb(60, 118, 61)
     
-    [box_params, @color_params, @ratio, @zone] = [params.box, params.color, params.ratio, params.zone]
+    [box_params, @color_params, @ratio, @zone, @palletOverhang] = [params.box, params.color, params.ratio, params.zone, params.palletOverhang]
     @set minDistance: box_params.minDistance
     # innerBox is stable and origin value of box.
     @set innerBox: 
@@ -165,9 +165,10 @@ class @Box extends Backbone.Model
   setXPosition: (x) ->
     @get('group').setX(x)
   getXPositionByRatio: () ->
-    (@get('group').x() - @zone.bound.left) / @ratio
+    # the center point x
+    ((@get('group').x() + @get('rect').getWidth() / 2) - @zone.bound.left) / @ratio - @palletOverhang
   getYPositionByRatio: ()  ->   
-    (@zone.bound.bottom - @get('group').y() - @getHeight()) / @ratio
+    (@zone.bound.bottom - (@get('group').y() - @get('rect').getHeight() / 2) - @getHeight()) / @ratio - @palletOverhang
   getWidthByRatio: () ->
     @get('rect').width() / @ratio
   getHeightByRatio: ()  ->   
@@ -391,6 +392,8 @@ class @Boxes extends Backbone.Collection
       color:  params.color
       ratio:  params.ratio
       zone:   params.zone
+      palletOverhang: params.palletOverhang
+
     @CurrentBox = Backbone.Model.extend(
       initialize: (box_params)->
         @set box:         new Box(box_params)
@@ -411,6 +414,7 @@ class @Boxes extends Backbone.Collection
 
     # view.unbind()
     @rivetsBinder = rivets.bind $('.boxes'),{boxes: this}
+    @rivetsBinderCurrentBox = rivets.bind $('.currentBox'),{currentBox: @otherCurrentBox}
     @flash = "Initialized completed!"
 
   availableNewTitle: () ->
@@ -430,8 +434,6 @@ class @Boxes extends Backbone.Collection
   createNewBox: =>
     newBox  = new Box(@box_params)
 
-    # newBox.setXPosition(Math.min(@zone.bound.left + @availableNewBoxId * newBox.getMoveOffset(), @zone.bound.right))
-    # newBox.setYPosition(Math.min(@zone.bound.top + @availableNewBoxId * newBox.getMoveOffset(), @zone.bound.bottom))
     if @length == 0
       newBox.setXPosition((@zone.bound.left + @zone.bound.right - newBox.get('rect').getWidth())/2)
       newBox.setYPosition((@zone.bound.top + @zone.bound.bottom - newBox.get('rect').getHeight())/2)
@@ -521,12 +523,13 @@ class @Boxes extends Backbone.Collection
           x: @currentBox.getXPosition()
           y: @currentBox.getYPosition()
       else
-        position)
+        newPosition = position
+      @updateCurrentBox()
+      newPosition)
 
     @currentBox.get('group').on('dragend', =>
       @repairCrossZone(@currentBox) unless @validateZone(@currentBox)
       @testCollision())
-
 
     Logger.debug "[updateCurrentBox] width: #{@currentBox.get('rect').getWidth()}, height: #{@currentBox.get('rect').getHeight()}"
     @otherCurrentBox.set('box', newBox)
@@ -652,6 +655,9 @@ class @Boxes extends Backbone.Collection
   updateBinders: () ->
     @rivetsBinder.unbind()
     @rivetsBinder = rivets.bind $('.boxes'),{boxes: this}
+
+    @rivetsBinderCurrentBox.unbind()
+    @rivetsBinderCurrentBox = rivets.bind $('.currentBox'),{currentBox: @otherCurrentBox}
     Logger.debug "[updateBinders]: #{@flash}"
   showFlash: () ->
     @flash
@@ -878,11 +884,11 @@ class CollisionUtil extends Backbone.Collection
 class @StackBoard
   constructor:(params) ->
     #background_color: rgb(255,​ 228,​ 196)
-    
+    pallet = params.pallet
     longerEdge = Math.max(pallet.width, pallet.height)
     shorterEdge = Math.min(pallet.width, pallet.height)
     # margin = pallet.overhang + box.minDistance
-
+    
     Logger.debug "pallet.overhang: #{pallet.overhang}, box.minDistance: #{box.minDistance}, margin: #{margin}"
     # overhangOffset = {x: 0 , y: 0, edge: margin}
 
@@ -954,9 +960,9 @@ class @StackBoard
     @layer = new Kinetic.Layer()
 
     color_coordinate =
-      red:  95
-      green: 124
-      blue:   247
+      red:  67
+      green: 123
+      blue:   188
     xLine = new Kinetic.Line(
       points: [
         @zone.bound.left + 5
@@ -978,8 +984,8 @@ class @StackBoard
       lineJoin: "round"
     )
     xLabel = new Kinetic.Text(
-        x:  @zone.bound.right * 0.2 - 10
-        y:  @zone.bound.bottom - 5  - 13
+        x:  @zone.bound.right * 0.2 
+        y:  @zone.bound.bottom - 5 - 5
         fontSize:     13
         fontFamily:   "Calibri"
         fill:         "blue"
@@ -988,13 +994,13 @@ class @StackBoard
     yLine = new Kinetic.Line(
       points: [
         @zone.bound.left + 5 - 3
-        @zone.bound.top + @zone.bound.bottom * 0.8 + 15
+        @zone.bound.top + @zone.bound.bottom * 0.82 + 15
         @zone.bound.left + 5
-        @zone.bound.top + @zone.bound.bottom * 0.8
+        @zone.bound.top + @zone.bound.bottom * 0.82
         @zone.bound.left + 5 + 3
-        @zone.bound.top + @zone.bound.bottom * 0.8 + 15
+        @zone.bound.top + @zone.bound.bottom * 0.82 + 15
         @zone.bound.left + 5
-        @zone.bound.top + @zone.bound.bottom * 0.8
+        @zone.bound.top + @zone.bound.bottom * 0.82
         @zone.bound.left + 5
         @zone.bound.bottom - 5
       ]
@@ -1006,8 +1012,8 @@ class @StackBoard
       lineJoin: "round"
     )
     yLabel = new Kinetic.Text(
-        x:      @zone.bound.left + 5 + 3
-        y:      @zone.bound.top + @zone.bound.bottom * 0.8 + 15
+        x:      @zone.bound.left + 5 - 5
+        y:      @zone.bound.top + @zone.bound.bottom * 0.82 - 15
         fontSize:     13
         fontFamily:   "Calibri"
         fill:         "blue"
@@ -1039,12 +1045,10 @@ class @StackBoard
         height: params.box.height * @ratio
         minDistance: params.box.minDistance * @ratio
 
-    boxes_params = {layer: @layer, zone: @zone, box: boxByRatio, color: params.color, ratio: @ratio}
+    boxes_params = {layer: @layer, zone: @zone, box: boxByRatio, color: params.color, ratio: @ratio, palletOverhang: pallet.overhang }
     @boxes = new Boxes(boxes_params)
-    @currentBox = @boxes.otherCurrentBox
     @boxes.shift()
 
-    rivets.bind $('.currentBox'),{currentBox: @currentBox}
 
 #### Params ####
 # unit: pixal
@@ -1075,7 +1079,7 @@ color =
         red:    79
         green:  130
         blue:   246
-        alpha:  1
+        alpha:  0.8
         stroke:
           red:    147
           green:  218
@@ -1143,9 +1147,9 @@ pallet =
 box  =      
   x:      0 
   y:      0
-  width:  150  
-  height: 60  
-  minDistance: 30
+  width:  120  
+  height: 40  
+  minDistance: 10
     
 params = 
   pallet: pallet
