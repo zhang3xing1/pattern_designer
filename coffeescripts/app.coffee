@@ -1,4 +1,8 @@
 # "use strict"
+
+
+
+
 ###### rivets adapter configure, below ######
 rivets.adapters[":"] =
   subscribe: (obj, keypath, callback) ->
@@ -542,6 +546,44 @@ class @Boxes extends Backbone.Collection
     @testCollision()
     @updateCurrentBox()
     Logger.debug "[rotate90] width: #{@currentBox.get('rect').getWidth()}, height: #{@currentBox.get('rect').getHeight()}"
+  moveByVector: () =>
+    moveDegree = $("input.dial").val()
+    switch Number(moveDegree)
+      when 0
+        @moveByX(0)
+        @moveByY(1)
+      when 45
+        @moveByX(1)
+        @moveByY(1)
+      when 90
+        @moveByX(1)
+        @moveByY(0)
+      when 135
+        @moveByX(1)
+        @moveByY(-1)
+      when 180
+        @moveByX(0)
+        @moveByY(-1)
+      when 225
+        @moveByX(-1)
+        @moveByY(-1)
+      when 270
+        @moveByX(-1)
+        @moveByY(0)
+      when 315
+        @moveByX(-1)
+        @moveByY(1)
+      when 360
+        @moveByX(0)
+        @moveByY(1)
+    @testCollision()
+    @updateCurrentBox()
+  moveByY: (direction) ->
+    @currentBox.setYPosition(@currentBox.getYPosition() - @currentBox.getMoveOffset() * direction)
+    @repairCrossZone(@currentBox) unless @validateZone(@currentBox)
+  moveByX: (direction) ->
+    @currentBox.setXPosition(@currentBox.getXPosition() + @currentBox.getMoveOffset() * direction)
+    @repairCrossZone(@currentBox) unless @validateZone(@currentBox)
   up: () =>
     Logger.debug("@currentBox:\t" + @currentBox.getTitleName())
     @currentBox.setYPosition(@currentBox.getYPosition() - @currentBox.getMoveOffset())
@@ -1171,9 +1213,19 @@ rivets.formatters.availableNewTitle = (value) ->
 $("input").prop "readonly", true
 
 
-# $(".currentBox").prop "readonly", false
-# $(".offset").prop "readonly", false
-
+# vector degree
+$("input.dial").prop "readonly", false
+$(".dial").knob
+  min: 0
+  max: 360
+  cursor: 10
+  width: 50
+  height: 50
+  thickness: 0.3
+  font: "20px"
+  fgColor: "#d44c52"
+  displayPrevious: true
+  step: "45"
 
 
 ########  TEST  #########

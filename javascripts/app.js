@@ -510,6 +510,7 @@
       this.left = __bind(this.left, this);
       this.down = __bind(this.down, this);
       this.up = __bind(this.up, this);
+      this.moveByVector = __bind(this.moveByVector, this);
       this.rotate90 = __bind(this.rotate90, this);
       this.removeCurrentBox = __bind(this.removeCurrentBox, this);
       this.settleCurrentBox = __bind(this.settleCurrentBox, this);
@@ -728,6 +729,64 @@
       this.testCollision();
       this.updateCurrentBox();
       return Logger.debug("[rotate90] width: " + (this.currentBox.get('rect').getWidth()) + ", height: " + (this.currentBox.get('rect').getHeight()));
+    };
+
+    Boxes.prototype.moveByVector = function() {
+      var moveDegree;
+      moveDegree = $("input.dial").val();
+      switch (Number(moveDegree)) {
+        case 0:
+          this.moveByX(0);
+          this.moveByY(1);
+          break;
+        case 45:
+          this.moveByX(1);
+          this.moveByY(1);
+          break;
+        case 90:
+          this.moveByX(1);
+          this.moveByY(0);
+          break;
+        case 135:
+          this.moveByX(1);
+          this.moveByY(-1);
+          break;
+        case 180:
+          this.moveByX(0);
+          this.moveByY(-1);
+          break;
+        case 225:
+          this.moveByX(-1);
+          this.moveByY(-1);
+          break;
+        case 270:
+          this.moveByX(-1);
+          this.moveByY(0);
+          break;
+        case 315:
+          this.moveByX(-1);
+          this.moveByY(1);
+          break;
+        case 360:
+          this.moveByX(0);
+          this.moveByY(1);
+      }
+      this.testCollision();
+      return this.updateCurrentBox();
+    };
+
+    Boxes.prototype.moveByY = function(direction) {
+      this.currentBox.setYPosition(this.currentBox.getYPosition() - this.currentBox.getMoveOffset() * direction);
+      if (!this.validateZone(this.currentBox)) {
+        return this.repairCrossZone(this.currentBox);
+      }
+    };
+
+    Boxes.prototype.moveByX = function(direction) {
+      this.currentBox.setXPosition(this.currentBox.getXPosition() + this.currentBox.getMoveOffset() * direction);
+      if (!this.validateZone(this.currentBox)) {
+        return this.repairCrossZone(this.currentBox);
+      }
     };
 
     Boxes.prototype.up = function() {
@@ -1510,6 +1569,21 @@
   };
 
   $("input").prop("readonly", true);
+
+  $("input.dial").prop("readonly", false);
+
+  $(".dial").knob({
+    min: 0,
+    max: 360,
+    cursor: 10,
+    width: 50,
+    height: 50,
+    thickness: 0.3,
+    font: "20px",
+    fgColor: "#d44c52",
+    displayPrevious: true,
+    step: "45"
+  });
 
 }).call(this);
 
