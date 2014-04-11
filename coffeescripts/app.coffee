@@ -1,8 +1,5 @@
 # "use strict"
 
-
-
-
 ###### rivets adapter configure, below ######
 rivets.adapters[":"] =
   subscribe: (obj, keypath, callback) ->
@@ -1218,14 +1215,44 @@ $("input.dial").prop "readonly", false
 $(".dial").knob
   min: 0
   max: 360
-  cursor: 10
-  width: 50
-  height: 50
+  cursor: 8
+  width: 40
+  height: 40
   thickness: 0.3
-  font: "20px"
-  fgColor: "#d44c52"
+  skin: 'tron'
+  font: "10px"
+  fgColor: "#ff8703"
+  bgColor: 'black'
   displayPrevious: true
+  displayInput:   false
   step: "45"
+
+  draw: ->
+    
+    # "tron" case
+    if @$.data("skin") is "tron"
+      @cursorExt = 0.3
+      a = @arc(@cv) # Arc
+      pa = undefined
+      # Previous arc
+      r = 1
+      @g.lineWidth = @lineWidth
+      if @o.displayPrevious
+        pa = @arc(@v)
+        @g.beginPath()
+        @g.strokeStyle = @pColor
+        @g.arc @xy, @xy, @radius - @lineWidth, pa.s, pa.e, pa.d
+        @g.stroke()
+      @g.beginPath()
+      @g.strokeStyle = (if r then @o.fgColor else @fgColor)
+      @g.arc @xy, @xy, @radius - @lineWidth, a.s, a.e, a.d
+      @g.stroke()
+      @g.lineWidth = 2
+      @g.beginPath()
+      @g.strokeStyle = @o.fgColor
+      @g.arc @xy, @xy, @radius - @lineWidth + 1 + @lineWidth * 2 / 3, 0, 2 * Math.PI, false
+      @g.stroke()
+      false
 
 
 ########  TEST  #########

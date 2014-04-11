@@ -57,12 +57,11 @@
               </div>
 
               <div class="input-group row column" style="width: 220px" >
-                <div class="input-group col-md-3"  style="float: left">
-                   <input type="text" class="dial" data-min="0" data-max="360" value="90">
-                   <button type="button" class="btn btn-primary placeCurrentBox boxes" rv-on-click="boxes.moveByVector">Move</button>
+                <div class="input-group col-md-3"  style="float: right">
+                   <input type="text" class="dial" data-min="0" data-max="360" data-skin="tron" value="90">
                 </div>
         
-                <div class="btn-group boxes" style="float: right">
+                <div class="btn-group boxes" style="float: left">
                     <button type="button" class="btn btn-primary placeCurrentBox" rv-on-click="boxes.left">←</button>
                     <button type="button" class="btn btn-primary placeCurrentBox" rv-on-click="boxes.right">→</button>
                     <button type="button" class="btn btn-primary placeCurrentBox" rv-on-click="boxes.up">↑</button>
@@ -70,25 +69,33 @@
                 </div> 
               </div>
 
-              <div class="input-group row column"  >
-                <div class="box input-group col-md-20" style="float: right">
+              <div class="input-group row column" style="margin-top: -10px;">
+                <div class="input-group col-md-20" style="float: right">
                     <span class="input-group-addon label-info">Offset</span>
-                    <input type="radio" name = 'moveOffset' style="margin-left: 4px" rv-checked="box:moveOffset"  value="1" >1
-                    <input type="radio" name = 'moveOffset' style="margin-left: 4px" rv-checked="box:moveOffset"  value="4" >4
-                    <input type="radio" id='moveOffset' name = 'moveOffset' style="margin-left: 4px" rv-checked="box:moveOffset"  value="10" checked="checked">10
-                    <input type="radio" name = 'moveOffset' style="margin-left: 4px" rv-checked="box:moveOffset"  value="20" >20
+                    <input type="radio" class= "box" name = 'moveOffset' style="margin-left: 4px" rv-checked="box:moveOffset"  value="1" >1
+                    <input type="radio" class= "box" name = 'moveOffset' style="margin-left: 4px" rv-checked="box:moveOffset"  value="4" >4
+                    <input type="radio" class= "box" id='moveOffset' name = 'moveOffset' style="margin-left: 4px" rv-checked="box:moveOffset"  value="10" checked="checked">10
+                    <button type="button" class="btn btn-primary placeCurrentBox boxes" rv-on-click="boxes.moveByVector">Move</button>
                 </div>      
               </div>
 
-              <div class="input-group row column"  >
-                <div class="col-md-2" style="float: left" >
+              <div class="input-group row column"  style="width: 220px" >
+                <div class="input-group col-md-20" style="float: right">
+                  <button type="button" class="btn btn-primary boxes placeCurrentBox" id="rotateButton" rv-on-click="boxes.rotate90">
+                        Rotate
+                  </button>
+                </div>
+                <div class="input-group col-md-20" style="float: left">
+                   <button type="button" class="btn btn-danger boxes placeCurrentBox" rv-on-click="boxes.removeCurrentBox">Delete</button>
+                </div>
+ <!--                <div class="col-md-2" style="float: left" >
                       <button type="button" class="btn btn-primary boxes placeCurrentBox" id="rotateButton" rv-on-click="boxes.rotate90">
                         Rotate
                       </button>
                 </div>              
-                <div class="col-md-2" style="margin-left: 18px; float: left" >
+                <div class="col-md-2" style="margin-left: 18px; float: right" >
                       <button type="button" class="btn btn-danger boxes placeCurrentBox" rv-on-click="boxes.removeCurrentBox">Delete</button>
-                </div>
+                </div> -->
               </div>
 
               <span class="flash-info boxes " rv-text="boxes.flash"></span>
@@ -96,9 +103,6 @@
             </div>
           </div>
         </div>
-
-
-
 
 
       </div>

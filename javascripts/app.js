@@ -1575,14 +1575,44 @@
   $(".dial").knob({
     min: 0,
     max: 360,
-    cursor: 10,
-    width: 50,
-    height: 50,
+    cursor: 8,
+    width: 40,
+    height: 40,
     thickness: 0.3,
-    font: "20px",
-    fgColor: "#d44c52",
+    skin: 'tron',
+    font: "10px",
+    fgColor: "#ff8703",
+    bgColor: 'black',
     displayPrevious: true,
-    step: "45"
+    displayInput: false,
+    step: "45",
+    draw: function() {
+      var a, pa, r;
+      if (this.$.data("skin") === "tron") {
+        this.cursorExt = 0.3;
+        a = this.arc(this.cv);
+        pa = void 0;
+        r = 1;
+        this.g.lineWidth = this.lineWidth;
+        if (this.o.displayPrevious) {
+          pa = this.arc(this.v);
+          this.g.beginPath();
+          this.g.strokeStyle = this.pColor;
+          this.g.arc(this.xy, this.xy, this.radius - this.lineWidth, pa.s, pa.e, pa.d);
+          this.g.stroke();
+        }
+        this.g.beginPath();
+        this.g.strokeStyle = (r ? this.o.fgColor : this.fgColor);
+        this.g.arc(this.xy, this.xy, this.radius - this.lineWidth, a.s, a.e, a.d);
+        this.g.stroke();
+        this.g.lineWidth = 2;
+        this.g.beginPath();
+        this.g.strokeStyle = this.o.fgColor;
+        this.g.arc(this.xy, this.xy, this.radius - this.lineWidth + 1 + this.lineWidth * 2 / 3, 0, 2 * Math.PI, false);
+        this.g.stroke();
+        return false;
+      }
+    }
   });
 
 }).call(this);
