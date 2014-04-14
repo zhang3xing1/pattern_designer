@@ -59,7 +59,11 @@ class @Box extends Backbone.Model
     collisionStatus:  false
     settledStatus:    false   # false: unsettled | true: settled(placed)
     moveOffset:       4
-    rotate:           0   
+    rotate:           0
+
+    vectorDegree:     0
+    vectorEnabled:    false
+
     crossZoneLeft:    false
     crossZoneRight:   false
     crossZoneTop:     false
@@ -85,13 +89,54 @@ class @Box extends Backbone.Model
                                   height:       @get('innerBox').height
                                 )
     @set title: new Kinetic.Text(
-                                  x:            @get('rect').x() + @get('rect').width()/2  - 5
-                                  y:            @get('rect').y() + @get('rect').height()/2 - 5
+                                  x:            @get('rect').x() + @get('rect').width() - 5
+                                  y:            @get('rect').y() +  5
                                   fontSize:     14
                                   fontFamily:   "Calibri"
                                   fill:         "white"
                                   text:         @get('boxId')
-                                  # scaleX:       -1
+                                  rotate:       0
+                                  offset:       {x:4 , y:4 }
+                                )
+    centerPointOnRect = @getCenterPoint('inner')
+
+    @set dot:  new Kinetic.Circle(
+                                  x: centerPointOnRect.x
+                                  y: centerPointOnRect.y
+                                  radius: 2
+                                  fillRed:    1
+                                  fillGreen:  1
+                                  fillBlue:   1 
+                                  fillAlpha:  1
+                                )
+
+    @set arrow: new Kinetic.Line(
+                                  x: centerPointOnRect.x
+                                  y: centerPointOnRect.y
+                                  points: [
+                                    centerPointOnRect.x
+                                    centerPointOnRect.y  + 4
+                                    
+                                    centerPointOnRect.x
+                                    centerPointOnRect.y - 4
+                                    
+                                    centerPointOnRect.x - 2
+                                    centerPointOnRect.y 
+                                    
+                                    centerPointOnRect.x
+                                    centerPointOnRect.y - 4 
+
+                                    centerPointOnRect.x + 2
+                                    centerPointOnRect.y
+                                  ]
+                                  strokeRed:    1
+                                  strokeGreen:  1
+                                  strokeBlue:   1
+                                  strokeWidth:  2
+                                  strokeAlpha:  0
+                                  lineCap: "round"
+                                  lineJoin: "round"
+                                  offset:       {x:centerPointOnRect.x , y:centerPointOnRect.y }
                                 )
     @set innerShape: 
       x:      @get('rect').x() + @get('rect').width()/8
@@ -117,6 +162,8 @@ class @Box extends Backbone.Model
     @get('rect').dash(([4, 5]))
     @get('group').add(@get('rect'))
     @get('group').add(@get('title'))
+    @get('group').add(@get('arrow'))
+    @get('group').add(@get('dot'))
     @get('group').add(@get('orientationFlag'))
     
 
@@ -139,10 +186,15 @@ class @Box extends Backbone.Model
   hasOuterRect: () ->
     @get('minDistance') > 0
 
-  getCenterPoint: () ->
-    centerPoint = 
-      x:  @get('group').x() + @get('rect').width() / 2
-      y:  @get('group').y() + @get('rect').height() / 2
+  getCenterPoint: (options) ->
+    if options == 'inner'
+      centerPointOnRect = 
+        x:  @get('rect').x() + @get('rect').width() / 2
+        y:  @get('rect').y() + @get('rect').height() / 2
+    else
+      centerPointOnGroup = 
+        x:  @get('group').x() + @get('rect').width() / 2
+        y:  @get('group').y() + @get('rect').height() / 2
 
   getOuterRectShape: () ->
     shape =  
@@ -157,7 +209,6 @@ class @Box extends Backbone.Model
     Logger.debug "getMoveOffset #{@get('moveOffset')}"
     # moveoffset * ratio = unit mm, not unit px
     Number(@get('moveOffset') * @ratio)
-
 
   setTitleName: (newTitle) ->
     @get('title').setText(newTitle) 
@@ -312,8 +363,13 @@ class @Box extends Backbone.Model
         @get('orientationFlag').setWidth(shape.height)
         @get('orientationFlag').setHeight(shape.width)
 
-    @get('title').setX(@get('rect').x() + @get('rect').width()/2  - 5)
-    @get('title').setY(@get('rect').y() + @get('rect').height()/2 - 5)
+    @get('arrow').setX(@get('rect').x() + @get('rect').width()/2)
+    @get('arrow').setY(@get('rect').y() + @get('rect').height()/2)
+    @get('dot').setX(@get('rect').x() + @get('rect').width()/2)
+    @get('dot').setY(@get('rect').y() + @get('rect').height()/2)
+
+    @get('title').setX(@get('rect').x() + @get('rect').width()   - 5)
+    @get('title').setY(@get('rect').y() + 5)
     @set('rotate',newRotateAngle)
 
     Logger.debug "[rotateWithAngle] width: #{@get('rect').getWidth()}, height: #{@get('rect').getHeight()}"
@@ -388,6 +444,7 @@ class @Boxes extends Backbone.Collection
   initialize: (params)->
     @layer = params.layer
     @zone = params.zone
+    @knob = params.knob
     @box_params = 
       box:    params.box
       color:  params.color
@@ -412,6 +469,15 @@ class @Boxes extends Backbone.Collection
     @otherCurrentBox = new @CurrentBox(@box_params)
 
     @availableNewBoxId = 1
+
+
+    $(".dial").trigger "configure",
+      release: (v) =>
+        vectorDegree = Number(v)
+        @currentBox.get('arrow').rotation(vectorDegree)
+        Logger.debug "box#{@currentBox.getTitleName()} vector #{v}"
+        @updateCurrentBox(@currentBox)
+
 
     # view.unbind()
     @rivetsBinder = rivets.bind $('.boxes'),{boxes: this}
@@ -448,6 +514,21 @@ class @Boxes extends Backbone.Collection
       Logger.debug "box#{newBox.getTitleName()} clicked!"
       @flash =  "box#{newBox.getTitleName()} selected!"
       @updateCurrentBox(newBox)
+    newBox.box().on "dblclick", =>
+      Logger.debug "box#{newBox.getTitleName()} double clicked!"
+      if @currentBox.get('vectorEnabled')
+        @currentBox.set('vectorEnabled', false)
+        # change arrow to dot
+        @currentBox.get('dot').setFillAlpha(1)
+        @currentBox.get('arrow').strokeAlpha(0)
+      else
+        @currentBox.set('vectorEnabled', true)
+        # change dot to arrow
+        @currentBox.get('dot').setFillAlpha(0)
+        @currentBox.get('arrow').strokeAlpha(1)
+      Logger.debug "double click: dot: #{@currentBox.get('dot').fillAlpha()}; arrow: #{@currentBox.get('arrow').strokeAlpha()};"
+      @updateCurrentBox()
+
 
     @add(newBox)
     @updateCurrentBox(newBox)
@@ -456,6 +537,9 @@ class @Boxes extends Backbone.Collection
 
     @testCollision()
     @repairCrossZone(@currentBox) unless @validateZone(@currentBox)  
+
+
+    $(".dial").val(180).trigger "change"
 
     Logger.debug("create button clicked!")
   settleCurrentBox: =>
@@ -537,6 +621,7 @@ class @Boxes extends Backbone.Collection
     
     @updateBinders()
     rivets.bind $('.box'),{box: newBox}
+
   rotate90: () =>
     @currentBox.rotateWithAngle(90)
     @repairCrossZone(@currentBox) unless @validateZone(@currentBox)  
@@ -1002,18 +1087,33 @@ class @StackBoard
       red:  67
       green: 123
       blue:   188
+
+    @zone2 = 
+            x: overhangOffset.x * @ratio
+            y: overhangOffset.y * @ratio 
+            width: (shorterEdge + pallet.overhang * 2) * @ratio
+            height:(longerEdge + pallet.overhang * 2) * @ratio
+            bound:
+              top:      0
+              bottom:   params.stage.height
+              left:     0
+              right:    params.stage.width
+
+    coordinateOriginPoint = 
+      x: @zone2.bound.left + 2
+      y: @zone2.bound.bottom - 2
     xLine = new Kinetic.Line(
       points: [
-        @zone.bound.left + 5
-        @zone.bound.bottom - 5
-        @zone.bound.right * 0.2
-        @zone.bound.bottom - 5
-        @zone.bound.right * 0.2 - 15
-        @zone.bound.bottom - 5 - 3
-        @zone.bound.right * 0.2
-        @zone.bound.bottom - 5
-        @zone.bound.right * 0.2 -15
-        @zone.bound.bottom - 5 + 3
+        coordinateOriginPoint.x
+        coordinateOriginPoint.y
+        @zone2.bound.right * 0.2
+        coordinateOriginPoint.y
+        @zone2.bound.right * 0.2 - 15
+        coordinateOriginPoint.y - 3
+        @zone2.bound.right * 0.2
+        coordinateOriginPoint.y
+        @zone2.bound.right * 0.2 -15
+        coordinateOriginPoint.y + 3
       ]
       strokeRed:    color_coordinate.red
       strokeGreen:  color_coordinate.green
@@ -1022,9 +1122,11 @@ class @StackBoard
       lineCap: "round"
       lineJoin: "round"
     )
+    console.log xLine.points()
+
     xLabel = new Kinetic.Text(
-        x:  @zone.bound.right * 0.2 
-        y:  @zone.bound.bottom - 5 - 5
+        x:  @zone2.bound.right * 0.2 
+        y:  coordinateOriginPoint.y - 5
         fontSize:     13
         fontFamily:   "Calibri"
         fill:         "blue"
@@ -1032,16 +1134,16 @@ class @StackBoard
       )
     yLine = new Kinetic.Line(
       points: [
-        @zone.bound.left + 5 - 3
-        @zone.bound.top + @zone.bound.bottom * 0.82 + 15
-        @zone.bound.left + 5
-        @zone.bound.top + @zone.bound.bottom * 0.82
-        @zone.bound.left + 5 + 3
-        @zone.bound.top + @zone.bound.bottom * 0.82 + 15
-        @zone.bound.left + 5
-        @zone.bound.top + @zone.bound.bottom * 0.82
-        @zone.bound.left + 5
-        @zone.bound.bottom - 5
+        coordinateOriginPoint.x - 3
+        @zone2.bound.top + @zone2.bound.bottom * 0.82 + 15
+        coordinateOriginPoint.x
+        @zone2.bound.top + @zone2.bound.bottom * 0.82
+        coordinateOriginPoint.x + 3
+        @zone2.bound.top + @zone2.bound.bottom * 0.82 + 15
+        coordinateOriginPoint.x
+        @zone2.bound.top + @zone2.bound.bottom * 0.82
+        coordinateOriginPoint.x
+        coordinateOriginPoint.y
       ]
       strokeRed:    color_coordinate.red
       strokeGreen:  color_coordinate.green
@@ -1051,8 +1153,8 @@ class @StackBoard
       lineJoin: "round"
     )
     yLabel = new Kinetic.Text(
-        x:      @zone.bound.left + 5 - 5
-        y:      @zone.bound.top + @zone.bound.bottom * 0.82 - 15
+        x:      coordinateOriginPoint.x - 2
+        y:      @zone2.bound.top + @zone2.bound.bottom * 0.82 - 15
         fontSize:     13
         fontFamily:   "Calibri"
         fill:         "blue"
@@ -1085,6 +1187,7 @@ class @StackBoard
         minDistance: params.box.minDistance * @ratio
 
     boxes_params = {layer: @layer, zone: @zone, box: boxByRatio, color: params.color, ratio: @ratio, palletOverhang: pallet.overhang }
+    boxes_params.knob = params.knob
     @boxes = new Boxes(boxes_params)
     @boxes.shift()
 
@@ -1176,43 +1279,10 @@ color =
             red:    70
             green:  186
             blue:   3
-            alpha:  0.5          
+            alpha:  0.5
 
-# unit: cm
-pallet =  
-  width:    390
-  height:   500 
-  overhang: 20
-box  =      
-  x:      0 
-  y:      0
-  width:  120  
-  height: 40  
-  minDistance: 10
-    
-params = 
-  pallet: pallet
-  box: box
-  stage: canvasStage
-  color: color
-
-################
-
-
-@board = new StackBoard(params)
-
-rivets.formatters.suffix_cm = (value) ->
-   "#{value.toFixed(2)}"
-
-rivets.formatters.availableNewTitle = (value) ->
-  "#{value + 100}"
-
-$("input").prop "readonly", true
-
-
-# vector degree
-$("input.dial").prop "readonly", false
-$(".dial").knob
+# dial
+vectorKnob = $(".dial").knob
   min: 0
   max: 360
   cursor: 8
@@ -1227,6 +1297,10 @@ $(".dial").knob
   displayInput:   false
   step: "45"
 
+  # release: (v) -> 
+  #   console.log v + 1000
+  # change: (v) -> 
+  #   console.log v
   draw: ->
     
     # "tron" case
@@ -1253,6 +1327,44 @@ $(".dial").knob
       @g.arc @xy, @xy, @radius - @lineWidth + 1 + @lineWidth * 2 / 3, 0, 2 * Math.PI, false
       @g.stroke()
       false
+
+# unit: cm
+pallet =  
+  width:    390
+  height:   500 
+  overhang: 20
+box  =      
+  x:      0 
+  y:      0
+  width:  120  
+  height: 40  
+  minDistance: 10
+    
+params = 
+  pallet: pallet
+  box: box
+  stage: canvasStage
+  color: color
+  knob:  vectorKnob
+
+################
+
+
+@board = new StackBoard(params)
+
+rivets.formatters.suffix_cm = (value) ->
+   "#{value.toFixed(2)}"
+
+rivets.formatters.availableNewTitle = (value) ->
+  "#{value + 100}"
+
+$("input").prop "readonly", true
+
+
+# vector degree
+$("input.dial").prop "readonly", false
+
+
 
 
 ########  TEST  #########

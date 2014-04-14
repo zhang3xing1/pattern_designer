@@ -1,5 +1,5 @@
 (function() {
-  var CollisionPair, CollisionUtil, box, canvasStage, color, pallet, params,
+  var CollisionPair, CollisionUtil, box, canvasStage, color, pallet, params, vectorKnob,
     __hasProp = {}.hasOwnProperty,
     __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
     __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
@@ -93,6 +93,8 @@
       settledStatus: false,
       moveOffset: 4,
       rotate: 0,
+      vectorDegree: 0,
+      vectorEnabled: false,
       crossZoneLeft: false,
       crossZoneRight: false,
       crossZoneTop: false,
@@ -100,7 +102,7 @@
     };
 
     Box.prototype.initialize = function(params) {
-      var box_params, outerBox, _ref;
+      var box_params, centerPointOnRect, outerBox, _ref;
       this.on('change:rect', this.rectChanged);
       _ref = [params.box, params.color, params.ratio, params.zone, params.palletOverhang], box_params = _ref[0], this.color_params = _ref[1], this.ratio = _ref[2], this.zone = _ref[3], this.palletOverhang = _ref[4];
       this.set({
@@ -124,12 +126,47 @@
       });
       this.set({
         title: new Kinetic.Text({
-          x: this.get('rect').x() + this.get('rect').width() / 2 - 5,
-          y: this.get('rect').y() + this.get('rect').height() / 2 - 5,
+          x: this.get('rect').x() + this.get('rect').width() - 5,
+          y: this.get('rect').y() + 5,
           fontSize: 14,
           fontFamily: "Calibri",
           fill: "white",
-          text: this.get('boxId')
+          text: this.get('boxId'),
+          rotate: 0,
+          offset: {
+            x: 4,
+            y: 4
+          }
+        })
+      });
+      centerPointOnRect = this.getCenterPoint('inner');
+      this.set({
+        dot: new Kinetic.Circle({
+          x: centerPointOnRect.x,
+          y: centerPointOnRect.y,
+          radius: 2,
+          fillRed: 1,
+          fillGreen: 1,
+          fillBlue: 1,
+          fillAlpha: 1
+        })
+      });
+      this.set({
+        arrow: new Kinetic.Line({
+          x: centerPointOnRect.x,
+          y: centerPointOnRect.y,
+          points: [centerPointOnRect.x, centerPointOnRect.y + 4, centerPointOnRect.x, centerPointOnRect.y - 4, centerPointOnRect.x - 2, centerPointOnRect.y, centerPointOnRect.x, centerPointOnRect.y - 4, centerPointOnRect.x + 2, centerPointOnRect.y],
+          strokeRed: 1,
+          strokeGreen: 1,
+          strokeBlue: 1,
+          strokeWidth: 2,
+          strokeAlpha: 0,
+          lineCap: "round",
+          lineJoin: "round",
+          offset: {
+            x: centerPointOnRect.x,
+            y: centerPointOnRect.y
+          }
         })
       });
       this.set({
@@ -161,6 +198,8 @@
       this.get('rect').dash([4, 5]);
       this.get('group').add(this.get('rect'));
       this.get('group').add(this.get('title'));
+      this.get('group').add(this.get('arrow'));
+      this.get('group').add(this.get('dot'));
       this.get('group').add(this.get('orientationFlag'));
       outerBox = this.getOuterRectShape();
       this.set({
@@ -183,12 +222,19 @@
       return this.get('minDistance') > 0;
     };
 
-    Box.prototype.getCenterPoint = function() {
-      var centerPoint;
-      return centerPoint = {
-        x: this.get('group').x() + this.get('rect').width() / 2,
-        y: this.get('group').y() + this.get('rect').height() / 2
-      };
+    Box.prototype.getCenterPoint = function(options) {
+      var centerPointOnGroup, centerPointOnRect;
+      if (options === 'inner') {
+        return centerPointOnRect = {
+          x: this.get('rect').x() + this.get('rect').width() / 2,
+          y: this.get('rect').y() + this.get('rect').height() / 2
+        };
+      } else {
+        return centerPointOnGroup = {
+          x: this.get('group').x() + this.get('rect').width() / 2,
+          y: this.get('group').y() + this.get('rect').height() / 2
+        };
+      }
     };
 
     Box.prototype.getOuterRectShape = function() {
@@ -422,8 +468,12 @@
           this.get('orientationFlag').setWidth(shape.height);
           this.get('orientationFlag').setHeight(shape.width);
       }
-      this.get('title').setX(this.get('rect').x() + this.get('rect').width() / 2 - 5);
-      this.get('title').setY(this.get('rect').y() + this.get('rect').height() / 2 - 5);
+      this.get('arrow').setX(this.get('rect').x() + this.get('rect').width() / 2);
+      this.get('arrow').setY(this.get('rect').y() + this.get('rect').height() / 2);
+      this.get('dot').setX(this.get('rect').x() + this.get('rect').width() / 2);
+      this.get('dot').setY(this.get('rect').y() + this.get('rect').height() / 2);
+      this.get('title').setX(this.get('rect').x() + this.get('rect').width() - 5);
+      this.get('title').setY(this.get('rect').y() + 5);
       this.set('rotate', newRotateAngle);
       Logger.debug("[rotateWithAngle] width: " + (this.get('rect').getWidth()) + ", height: " + (this.get('rect').getHeight()));
       Logger.debug("[rotateWithAngle] group_x: " + (this.get('group').x()) + ", group_y: " + (this.get('group').y()));
@@ -523,6 +573,7 @@
     Boxes.prototype.initialize = function(params) {
       this.layer = params.layer;
       this.zone = params.zone;
+      this.knob = params.knob;
       this.box_params = {
         box: params.box,
         color: params.color,
@@ -552,6 +603,17 @@
       this.currentBox = new Box(this.box_params);
       this.otherCurrentBox = new this.CurrentBox(this.box_params);
       this.availableNewBoxId = 1;
+      $(".dial").trigger("configure", {
+        release: (function(_this) {
+          return function(v) {
+            var vectorDegree;
+            vectorDegree = Number(v);
+            _this.currentBox.get('arrow').rotation(vectorDegree);
+            Logger.debug("box" + (_this.currentBox.getTitleName()) + " vector " + v);
+            return _this.updateCurrentBox(_this.currentBox);
+          };
+        })(this)
+      });
       this.rivetsBinder = rivets.bind($('.boxes'), {
         boxes: this
       });
@@ -607,6 +669,22 @@
           return _this.updateCurrentBox(newBox);
         };
       })(this));
+      newBox.box().on("dblclick", (function(_this) {
+        return function() {
+          Logger.debug("box" + (newBox.getTitleName()) + " double clicked!");
+          if (_this.currentBox.get('vectorEnabled')) {
+            _this.currentBox.set('vectorEnabled', false);
+            _this.currentBox.get('dot').setFillAlpha(1);
+            _this.currentBox.get('arrow').strokeAlpha(0);
+          } else {
+            _this.currentBox.set('vectorEnabled', true);
+            _this.currentBox.get('dot').setFillAlpha(0);
+            _this.currentBox.get('arrow').strokeAlpha(1);
+          }
+          Logger.debug("double click: dot: " + (_this.currentBox.get('dot').fillAlpha()) + "; arrow: " + (_this.currentBox.get('arrow').strokeAlpha()) + ";");
+          return _this.updateCurrentBox();
+        };
+      })(this));
       this.add(newBox);
       this.updateCurrentBox(newBox);
       this.flash = "box" + (this.currentBox.getTitleName()) + " selected!";
@@ -615,6 +693,7 @@
       if (!this.validateZone(this.currentBox)) {
         this.repairCrossZone(this.currentBox);
       }
+      $(".dial").val(180).trigger("change");
       return Logger.debug("create button clicked!");
     };
 
@@ -1294,7 +1373,7 @@
 
   this.StackBoard = (function() {
     function StackBoard(params) {
-      var boxByRatio, boxes_params, color_coordinate, longerEdge, margin, overhangBackground, overhangOffset, pallet, palletBackground, shorterEdge, stageBackground, xLabel, xLine, yLabel, yLine;
+      var boxByRatio, boxes_params, color_coordinate, coordinateOriginPoint, longerEdge, margin, overhangBackground, overhangOffset, pallet, palletBackground, shorterEdge, stageBackground, xLabel, xLine, yLabel, yLine;
       pallet = params.pallet;
       longerEdge = Math.max(pallet.width, pallet.height);
       shorterEdge = Math.min(pallet.width, pallet.height);
@@ -1363,8 +1442,24 @@
         green: 123,
         blue: 188
       };
+      this.zone2 = {
+        x: overhangOffset.x * this.ratio,
+        y: overhangOffset.y * this.ratio,
+        width: (shorterEdge + pallet.overhang * 2) * this.ratio,
+        height: (longerEdge + pallet.overhang * 2) * this.ratio,
+        bound: {
+          top: 0,
+          bottom: params.stage.height,
+          left: 0,
+          right: params.stage.width
+        }
+      };
+      coordinateOriginPoint = {
+        x: this.zone2.bound.left + 2,
+        y: this.zone2.bound.bottom - 2
+      };
       xLine = new Kinetic.Line({
-        points: [this.zone.bound.left + 5, this.zone.bound.bottom - 5, this.zone.bound.right * 0.2, this.zone.bound.bottom - 5, this.zone.bound.right * 0.2 - 15, this.zone.bound.bottom - 5 - 3, this.zone.bound.right * 0.2, this.zone.bound.bottom - 5, this.zone.bound.right * 0.2 - 15, this.zone.bound.bottom - 5 + 3],
+        points: [coordinateOriginPoint.x, coordinateOriginPoint.y, this.zone2.bound.right * 0.2, coordinateOriginPoint.y, this.zone2.bound.right * 0.2 - 15, coordinateOriginPoint.y - 3, this.zone2.bound.right * 0.2, coordinateOriginPoint.y, this.zone2.bound.right * 0.2 - 15, coordinateOriginPoint.y + 3],
         strokeRed: color_coordinate.red,
         strokeGreen: color_coordinate.green,
         strokeBlue: color_coordinate.blue,
@@ -1372,16 +1467,17 @@
         lineCap: "round",
         lineJoin: "round"
       });
+      console.log(xLine.points());
       xLabel = new Kinetic.Text({
-        x: this.zone.bound.right * 0.2,
-        y: this.zone.bound.bottom - 5 - 5,
+        x: this.zone2.bound.right * 0.2,
+        y: coordinateOriginPoint.y - 5,
         fontSize: 13,
         fontFamily: "Calibri",
         fill: "blue",
         text: 'X'
       });
       yLine = new Kinetic.Line({
-        points: [this.zone.bound.left + 5 - 3, this.zone.bound.top + this.zone.bound.bottom * 0.82 + 15, this.zone.bound.left + 5, this.zone.bound.top + this.zone.bound.bottom * 0.82, this.zone.bound.left + 5 + 3, this.zone.bound.top + this.zone.bound.bottom * 0.82 + 15, this.zone.bound.left + 5, this.zone.bound.top + this.zone.bound.bottom * 0.82, this.zone.bound.left + 5, this.zone.bound.bottom - 5],
+        points: [coordinateOriginPoint.x - 3, this.zone2.bound.top + this.zone2.bound.bottom * 0.82 + 15, coordinateOriginPoint.x, this.zone2.bound.top + this.zone2.bound.bottom * 0.82, coordinateOriginPoint.x + 3, this.zone2.bound.top + this.zone2.bound.bottom * 0.82 + 15, coordinateOriginPoint.x, this.zone2.bound.top + this.zone2.bound.bottom * 0.82, coordinateOriginPoint.x, coordinateOriginPoint.y],
         strokeRed: color_coordinate.red,
         strokeGreen: color_coordinate.green,
         strokeBlue: color_coordinate.blue,
@@ -1390,8 +1486,8 @@
         lineJoin: "round"
       });
       yLabel = new Kinetic.Text({
-        x: this.zone.bound.left + 5 - 5,
-        y: this.zone.bound.top + this.zone.bound.bottom * 0.82 - 15,
+        x: coordinateOriginPoint.x - 2,
+        y: this.zone2.bound.top + this.zone2.bound.bottom * 0.82 - 15,
         fontSize: 13,
         fontFamily: "Calibri",
         fill: "blue",
@@ -1422,6 +1518,7 @@
         ratio: this.ratio,
         palletOverhang: pallet.overhang
       };
+      boxes_params.knob = params.knob;
       this.boxes = new Boxes(boxes_params);
       this.boxes.shift();
     }
@@ -1537,42 +1634,7 @@
     }
   };
 
-  pallet = {
-    width: 390,
-    height: 500,
-    overhang: 20
-  };
-
-  box = {
-    x: 0,
-    y: 0,
-    width: 120,
-    height: 40,
-    minDistance: 10
-  };
-
-  params = {
-    pallet: pallet,
-    box: box,
-    stage: canvasStage,
-    color: color
-  };
-
-  this.board = new StackBoard(params);
-
-  rivets.formatters.suffix_cm = function(value) {
-    return "" + (value.toFixed(2));
-  };
-
-  rivets.formatters.availableNewTitle = function(value) {
-    return "" + (value + 100);
-  };
-
-  $("input").prop("readonly", true);
-
-  $("input.dial").prop("readonly", false);
-
-  $(".dial").knob({
+  vectorKnob = $(".dial").knob({
     min: 0,
     max: 360,
     cursor: 8,
@@ -1614,6 +1676,42 @@
       }
     }
   });
+
+  pallet = {
+    width: 390,
+    height: 500,
+    overhang: 20
+  };
+
+  box = {
+    x: 0,
+    y: 0,
+    width: 120,
+    height: 40,
+    minDistance: 10
+  };
+
+  params = {
+    pallet: pallet,
+    box: box,
+    stage: canvasStage,
+    color: color,
+    knob: vectorKnob
+  };
+
+  this.board = new StackBoard(params);
+
+  rivets.formatters.suffix_cm = function(value) {
+    return "" + (value.toFixed(2));
+  };
+
+  rivets.formatters.availableNewTitle = function(value) {
+    return "" + (value + 100);
+  };
+
+  $("input").prop("readonly", true);
+
+  $("input.dial").prop("readonly", false);
 
 }).call(this);
 
