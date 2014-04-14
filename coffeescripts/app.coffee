@@ -98,8 +98,8 @@ class @Box extends Backbone.Model
                                   rotate:       0
                                   offset:       {x:4 , y:4 }
                                 )
-    centerPointOnRect = @getCenterPoint('inner')
 
+    centerPointOnRect = @getCenterPoint('inner')
     @set dot:  new Kinetic.Circle(
                                   x: centerPointOnRect.x
                                   y: centerPointOnRect.y
@@ -166,7 +166,6 @@ class @Box extends Backbone.Model
     @get('group').add(@get('dot'))
     @get('group').add(@get('orientationFlag'))
     
-
     ###### Box has an outer Rect ######
     # box_params.minDistance = $("input:checked","#minDistanceRadio").val()
     outerBox = @getOuterRectShape()
@@ -289,7 +288,6 @@ class @Box extends Backbone.Model
   rotateWithAngle: (angle) ->
     newRotateAngle = (@get('rotate') + angle) % 360
     centerPointForGroup    = @getCenterPoint()
-
 
     # @set innerShape: 
     #   x:      @get('rect').x() + @get('rect').width()/8
@@ -529,7 +527,6 @@ class @Boxes extends Backbone.Collection
       Logger.debug "double click: dot: #{@currentBox.get('dot').fillAlpha()}; arrow: #{@currentBox.get('arrow').strokeAlpha()};"
       @updateCurrentBox()
 
-
     @add(newBox)
     @updateCurrentBox(newBox)
     @flash =  "box#{@currentBox.getTitleName()} selected!"
@@ -537,9 +534,6 @@ class @Boxes extends Backbone.Collection
 
     @testCollision()
     @repairCrossZone(@currentBox) unless @validateZone(@currentBox)  
-
-
-    $(".dial").val(180).trigger "change"
 
     Logger.debug("create button clicked!")
   settleCurrentBox: =>
@@ -628,6 +622,19 @@ class @Boxes extends Backbone.Collection
     @testCollision()
     @updateCurrentBox()
     Logger.debug "[rotate90] width: #{@currentBox.get('rect').getWidth()}, height: #{@currentBox.get('rect').getHeight()}"
+  rotateByVector: () =>
+    # change dot to arrow
+    @currentBox.set('vectorEnabled', true)
+    @currentBox.get('dot').setFillAlpha(0)
+    @currentBox.get('arrow').strokeAlpha(1)
+
+    vectorDegree = @currentBox.get('vectorDegree')
+    @currentBox.set('vectorDegree', vectorDegree + 45)
+    @currentBox.get('arrow').rotation(@currentBox.get('vectorDegree'))
+    Logger.debug "box#{@currentBox.getTitleName()} vector #{vectorDegree}"
+
+    @updateCurrentBox()
+
   moveByVector: () =>
     moveDegree = $("input.dial").val()
     switch Number(moveDegree)
@@ -1122,7 +1129,6 @@ class @StackBoard
       lineCap: "round"
       lineJoin: "round"
     )
-    console.log xLine.points()
 
     xLabel = new Kinetic.Text(
         x:  @zone2.bound.right * 0.2 
@@ -1297,10 +1303,6 @@ vectorKnob = $(".dial").knob
   displayInput:   false
   step: "45"
 
-  # release: (v) -> 
-  #   console.log v + 1000
-  # change: (v) -> 
-  #   console.log v
   draw: ->
     
     # "tron" case
