@@ -561,6 +561,7 @@
       this.down = __bind(this.down, this);
       this.up = __bind(this.up, this);
       this.moveByVector = __bind(this.moveByVector, this);
+      this.rotateByVector = __bind(this.rotateByVector, this);
       this.rotate90 = __bind(this.rotate90, this);
       this.removeCurrentBox = __bind(this.removeCurrentBox, this);
       this.settleCurrentBox = __bind(this.settleCurrentBox, this);
@@ -666,21 +667,7 @@
         return function() {
           Logger.debug("box" + (newBox.getTitleName()) + " clicked!");
           _this.flash = "box" + (newBox.getTitleName()) + " selected!";
-          return _this.updateCurrentBox(newBox);
-        };
-      })(this));
-      newBox.box().on("dblclick", (function(_this) {
-        return function() {
-          Logger.debug("box" + (newBox.getTitleName()) + " double clicked!");
-          if (_this.currentBox.get('vectorEnabled')) {
-            _this.currentBox.set('vectorEnabled', false);
-            _this.currentBox.get('dot').setFillAlpha(1);
-            _this.currentBox.get('arrow').strokeAlpha(0);
-          } else {
-            _this.currentBox.set('vectorEnabled', true);
-            _this.currentBox.get('dot').setFillAlpha(0);
-            _this.currentBox.get('arrow').strokeAlpha(1);
-          }
+          _this.updateCurrentBox(newBox);
           Logger.debug("double click: dot: " + (_this.currentBox.get('dot').fillAlpha()) + "; arrow: " + (_this.currentBox.get('arrow').strokeAlpha()) + ";");
           return _this.updateCurrentBox();
         };
@@ -693,7 +680,6 @@
       if (!this.validateZone(this.currentBox)) {
         this.repairCrossZone(this.currentBox);
       }
-      $(".dial").val(180).trigger("change");
       return Logger.debug("create button clicked!");
     };
 
@@ -808,6 +794,25 @@
       this.testCollision();
       this.updateCurrentBox();
       return Logger.debug("[rotate90] width: " + (this.currentBox.get('rect').getWidth()) + ", height: " + (this.currentBox.get('rect').getHeight()));
+    };
+
+    Boxes.prototype.rotateByVector = function() {
+      var vectorDegree;
+      vectorDegree = this.currentBox.get('vectorDegree') + 45;
+      if (vectorDegree <= 360) {
+        this.currentBox.set('vectorEnabled', true);
+        this.currentBox.get('dot').setFillAlpha(0);
+        this.currentBox.get('arrow').strokeAlpha(1);
+        this.currentBox.set('vectorDegree', vectorDegree);
+        this.currentBox.get('arrow').rotation(this.currentBox.get('vectorDegree'));
+      } else {
+        this.currentBox.set('vectorEnabled', false);
+        this.currentBox.get('dot').setFillAlpha(1);
+        this.currentBox.get('arrow').strokeAlpha(0);
+        this.currentBox.set('vectorDegree', -45);
+      }
+      Logger.debug("box" + (this.currentBox.getTitleName()) + " vector " + vectorDegree);
+      return this.updateCurrentBox();
     };
 
     Boxes.prototype.moveByVector = function() {
@@ -1467,7 +1472,6 @@
         lineCap: "round",
         lineJoin: "round"
       });
-      console.log(xLine.points());
       xLabel = new Kinetic.Text({
         x: this.zone2.bound.right * 0.2,
         y: coordinateOriginPoint.y - 5,
@@ -1702,7 +1706,7 @@
   this.board = new StackBoard(params);
 
   rivets.formatters.suffix_cm = function(value) {
-    return "" + (value.toFixed(2));
+    return "" + (Math.abs(value.toFixed(0)));
   };
 
   rivets.formatters.availableNewTitle = function(value) {

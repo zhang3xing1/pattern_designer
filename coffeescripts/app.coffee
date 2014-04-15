@@ -512,18 +512,18 @@ class @Boxes extends Backbone.Collection
       Logger.debug "box#{newBox.getTitleName()} clicked!"
       @flash =  "box#{newBox.getTitleName()} selected!"
       @updateCurrentBox(newBox)
-    newBox.box().on "dblclick", =>
-      Logger.debug "box#{newBox.getTitleName()} double clicked!"
-      if @currentBox.get('vectorEnabled')
-        @currentBox.set('vectorEnabled', false)
-        # change arrow to dot
-        @currentBox.get('dot').setFillAlpha(1)
-        @currentBox.get('arrow').strokeAlpha(0)
-      else
-        @currentBox.set('vectorEnabled', true)
-        # change dot to arrow
-        @currentBox.get('dot').setFillAlpha(0)
-        @currentBox.get('arrow').strokeAlpha(1)
+    # newBox.box().on "dblclick", =>
+    #   Logger.debug "box#{newBox.getTitleName()} double clicked!"
+    #   if @currentBox.get('vectorEnabled')
+    #     @currentBox.set('vectorEnabled', false)
+    #     # change arrow to dot
+    #     @currentBox.get('dot').setFillAlpha(1)
+    #     @currentBox.get('arrow').strokeAlpha(0)
+    #   else
+    #     @currentBox.set('vectorEnabled', true)
+    #     # change dot to arrow
+    #     @currentBox.get('dot').setFillAlpha(0)
+    #     @currentBox.get('arrow').strokeAlpha(1)
       Logger.debug "double click: dot: #{@currentBox.get('dot').fillAlpha()}; arrow: #{@currentBox.get('arrow').strokeAlpha()};"
       @updateCurrentBox()
 
@@ -623,14 +623,22 @@ class @Boxes extends Backbone.Collection
     @updateCurrentBox()
     Logger.debug "[rotate90] width: #{@currentBox.get('rect').getWidth()}, height: #{@currentBox.get('rect').getHeight()}"
   rotateByVector: () =>
-    # change dot to arrow
-    @currentBox.set('vectorEnabled', true)
-    @currentBox.get('dot').setFillAlpha(0)
-    @currentBox.get('arrow').strokeAlpha(1)
+    vectorDegree = @currentBox.get('vectorDegree') + 45
 
-    vectorDegree = @currentBox.get('vectorDegree')
-    @currentBox.set('vectorDegree', vectorDegree + 45)
-    @currentBox.get('arrow').rotation(@currentBox.get('vectorDegree'))
+    if vectorDegree <= 360 
+      @currentBox.set('vectorEnabled', true)
+      # change dot to arrow
+      @currentBox.get('dot').setFillAlpha(0)
+      @currentBox.get('arrow').strokeAlpha(1)
+      @currentBox.set('vectorDegree', vectorDegree)
+      @currentBox.get('arrow').rotation(@currentBox.get('vectorDegree'))
+    else
+      @currentBox.set('vectorEnabled', false)
+      # change arrow to dot
+      @currentBox.get('dot').setFillAlpha(1)
+      @currentBox.get('arrow').strokeAlpha(0)
+      @currentBox.set('vectorDegree', -45)
+
     Logger.debug "box#{@currentBox.getTitleName()} vector #{vectorDegree}"
 
     @updateCurrentBox()
@@ -1355,7 +1363,7 @@ params =
 @board = new StackBoard(params)
 
 rivets.formatters.suffix_cm = (value) ->
-   "#{value.toFixed(2)}"
+   "#{Math.abs(value.toFixed(0))}"
 
 rivets.formatters.availableNewTitle = (value) ->
   "#{value + 100}"
