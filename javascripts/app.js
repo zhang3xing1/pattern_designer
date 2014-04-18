@@ -155,7 +155,7 @@
         arrow: new Kinetic.Line({
           x: centerPointOnRect.x,
           y: centerPointOnRect.y,
-          points: [centerPointOnRect.x, centerPointOnRect.y + 4, centerPointOnRect.x, centerPointOnRect.y - 4, centerPointOnRect.x - 2, centerPointOnRect.y, centerPointOnRect.x, centerPointOnRect.y - 4, centerPointOnRect.x + 2, centerPointOnRect.y],
+          points: [centerPointOnRect.x, centerPointOnRect.y + 8, centerPointOnRect.x, centerPointOnRect.y - 8, centerPointOnRect.x - 4, centerPointOnRect.y, centerPointOnRect.x, centerPointOnRect.y - 8, centerPointOnRect.x + 4, centerPointOnRect.y],
           strokeRed: 1,
           strokeGreen: 1,
           strokeBlue: 1,
@@ -604,24 +604,51 @@
       this.currentBox = new Box(this.box_params);
       this.otherCurrentBox = new this.CurrentBox(this.box_params);
       this.availableNewBoxId = 1;
-      $(".dial").trigger("configure", {
-        release: (function(_this) {
-          return function(v) {
-            var vectorDegree;
-            vectorDegree = Number(v);
-            _this.currentBox.get('arrow').rotation(vectorDegree);
-            Logger.debug("box" + (_this.currentBox.getTitleName()) + " vector " + v);
-            return _this.updateCurrentBox(_this.currentBox);
-          };
-        })(this)
-      });
       this.rivetsBinder = rivets.bind($('.boxes'), {
         boxes: this
       });
       this.rivetsBinderCurrentBox = rivets.bind($('.currentBox'), {
         currentBox: this.otherCurrentBox
       });
-      return this.flash = "Initialized completed!";
+      this.flash = "Initialized completed!";
+      this.alignGroup = new Kinetic.Group({
+        x: 0,
+        y: 0,
+        draggable: false
+      });
+      return this.layer.add(this.alignGroup);
+    };
+
+    Boxes.prototype.updateAlignGroup = function(pointTop, pointBottom, pointLeft, pointRight, offset, status) {
+      this.alignGroup.destroyChildren();
+      this.alignGroup.add(this.generateXAlignLine(pointTop, pointBottom, offset, status));
+      return this.alignGroup.add(this.generateYAlignLine(pointLeft, pointRight, offset, status));
+    };
+
+    Boxes.prototype.generateXAlignLine = function(pointTop, pointBottom, offset, status) {
+      var xAlignLine;
+      return xAlignLine = new Kinetic.Line({
+        points: [pointTop.x, pointTop.y - offset, pointTop.x, pointBottom.y + offset],
+        strokeRed: 255,
+        strokeGreen: 1,
+        strokeBlue: 1,
+        strokeWidth: 2,
+        lineCap: "round",
+        lineJoin: "round"
+      });
+    };
+
+    Boxes.prototype.generateYAlignLine = function(pointLeft, pointRight, offset) {
+      var yAlignLine;
+      return yAlignLine = new Kinetic.Line({
+        points: [pointLeft.x - offset, pointLeft.y, pointRight.x + offset, pointRight.y],
+        strokeRed: 1,
+        strokeGreen: 255,
+        strokeBlue: 1,
+        strokeWidth: 2,
+        lineCap: "round",
+        lineJoin: "round"
+      });
     };
 
     Boxes.prototype.availableNewTitle = function() {
@@ -667,9 +694,7 @@
         return function() {
           Logger.debug("box" + (newBox.getTitleName()) + " clicked!");
           _this.flash = "box" + (newBox.getTitleName()) + " selected!";
-          _this.updateCurrentBox(newBox);
-          Logger.debug("double click: dot: " + (_this.currentBox.get('dot').fillAlpha()) + "; arrow: " + (_this.currentBox.get('arrow').strokeAlpha()) + ";");
-          return _this.updateCurrentBox();
+          return _this.updateCurrentBox(newBox);
         };
       })(this));
       this.add(newBox);
@@ -859,18 +884,20 @@
       return this.updateCurrentBox();
     };
 
-    Boxes.prototype.moveByY = function(direction) {
+    Boxes.prototype.moveByY = function(direction, flash) {
       this.currentBox.setYPosition(this.currentBox.getYPosition() - this.currentBox.getMoveOffset() * direction);
       if (!this.validateZone(this.currentBox)) {
-        return this.repairCrossZone(this.currentBox);
+        this.repairCrossZone(this.currentBox);
       }
+      return this.flash = flash;
     };
 
-    Boxes.prototype.moveByX = function(direction) {
+    Boxes.prototype.moveByX = function(direction, flash) {
       this.currentBox.setXPosition(this.currentBox.getXPosition() + this.currentBox.getMoveOffset() * direction);
       if (!this.validateZone(this.currentBox)) {
-        return this.repairCrossZone(this.currentBox);
+        this.repairCrossZone(this.currentBox);
       }
+      return this.flash = flash;
     };
 
     Boxes.prototype.up = function() {
@@ -1447,24 +1474,20 @@
         green: 123,
         blue: 188
       };
-      this.zone2 = {
-        x: overhangOffset.x * this.ratio,
-        y: overhangOffset.y * this.ratio,
-        width: (shorterEdge + pallet.overhang * 2) * this.ratio,
-        height: (longerEdge + pallet.overhang * 2) * this.ratio,
+      this.palletZone = {
         bound: {
-          top: 0,
-          bottom: params.stage.height,
-          left: 0,
-          right: params.stage.width
+          top: margin * this.ratio,
+          bottom: (margin + longerEdge) * this.ratio,
+          left: margin * this.ratio,
+          right: (margin + shorterEdge) * this.ratio
         }
       };
       coordinateOriginPoint = {
-        x: this.zone2.bound.left + 2,
-        y: this.zone2.bound.bottom - 2
+        x: this.palletZone.bound.left,
+        y: this.palletZone.bound.bottom
       };
       xLine = new Kinetic.Line({
-        points: [coordinateOriginPoint.x, coordinateOriginPoint.y, this.zone2.bound.right * 0.2, coordinateOriginPoint.y, this.zone2.bound.right * 0.2 - 15, coordinateOriginPoint.y - 3, this.zone2.bound.right * 0.2, coordinateOriginPoint.y, this.zone2.bound.right * 0.2 - 15, coordinateOriginPoint.y + 3],
+        points: [coordinateOriginPoint.x, coordinateOriginPoint.y, this.palletZone.bound.right * 0.2, coordinateOriginPoint.y, this.palletZone.bound.right * 0.2 - 15, coordinateOriginPoint.y - 3, this.palletZone.bound.right * 0.2, coordinateOriginPoint.y, this.palletZone.bound.right * 0.2 - 15, coordinateOriginPoint.y + 3],
         strokeRed: color_coordinate.red,
         strokeGreen: color_coordinate.green,
         strokeBlue: color_coordinate.blue,
@@ -1473,7 +1496,7 @@
         lineJoin: "round"
       });
       xLabel = new Kinetic.Text({
-        x: this.zone2.bound.right * 0.2,
+        x: this.palletZone.bound.right * 0.2,
         y: coordinateOriginPoint.y - 5,
         fontSize: 13,
         fontFamily: "Calibri",
@@ -1481,7 +1504,7 @@
         text: 'X'
       });
       yLine = new Kinetic.Line({
-        points: [coordinateOriginPoint.x - 3, this.zone2.bound.top + this.zone2.bound.bottom * 0.82 + 15, coordinateOriginPoint.x, this.zone2.bound.top + this.zone2.bound.bottom * 0.82, coordinateOriginPoint.x + 3, this.zone2.bound.top + this.zone2.bound.bottom * 0.82 + 15, coordinateOriginPoint.x, this.zone2.bound.top + this.zone2.bound.bottom * 0.82, coordinateOriginPoint.x, coordinateOriginPoint.y],
+        points: [coordinateOriginPoint.x - 3, this.palletZone.bound.top + this.palletZone.bound.bottom * 0.82 + 15, coordinateOriginPoint.x, this.palletZone.bound.top + this.palletZone.bound.bottom * 0.82, coordinateOriginPoint.x + 3, this.palletZone.bound.top + this.palletZone.bound.bottom * 0.82 + 15, coordinateOriginPoint.x, this.palletZone.bound.top + this.palletZone.bound.bottom * 0.82, coordinateOriginPoint.x, coordinateOriginPoint.y],
         strokeRed: color_coordinate.red,
         strokeGreen: color_coordinate.green,
         strokeBlue: color_coordinate.blue,
@@ -1491,7 +1514,7 @@
       });
       yLabel = new Kinetic.Text({
         x: coordinateOriginPoint.x - 2,
-        y: this.zone2.bound.top + this.zone2.bound.bottom * 0.82 - 15,
+        y: this.palletZone.bound.top + this.palletZone.bound.bottom * 0.82 - 15,
         fontSize: 13,
         fontFamily: "Calibri",
         fill: "blue",

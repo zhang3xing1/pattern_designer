@@ -115,18 +115,18 @@ class @Box extends Backbone.Model
                                   y: centerPointOnRect.y
                                   points: [
                                     centerPointOnRect.x
-                                    centerPointOnRect.y  + 4
+                                    centerPointOnRect.y  + 8
                                     
                                     centerPointOnRect.x
-                                    centerPointOnRect.y - 4
+                                    centerPointOnRect.y - 8
                                     
-                                    centerPointOnRect.x - 2
+                                    centerPointOnRect.x - 4
                                     centerPointOnRect.y 
                                     
                                     centerPointOnRect.x
-                                    centerPointOnRect.y - 4 
+                                    centerPointOnRect.y - 8 
 
-                                    centerPointOnRect.x + 2
+                                    centerPointOnRect.x + 4
                                     centerPointOnRect.y
                                   ]
                                   strokeRed:    1
@@ -468,19 +468,59 @@ class @Boxes extends Backbone.Collection
 
     @availableNewBoxId = 1
 
-
-    $(".dial").trigger "configure",
-      release: (v) =>
-        vectorDegree = Number(v)
-        @currentBox.get('arrow').rotation(vectorDegree)
-        Logger.debug "box#{@currentBox.getTitleName()} vector #{v}"
-        @updateCurrentBox(@currentBox)
-
-
     # view.unbind()
     @rivetsBinder = rivets.bind $('.boxes'),{boxes: this}
     @rivetsBinderCurrentBox = rivets.bind $('.currentBox'),{currentBox: @otherCurrentBox}
     @flash = "Initialized completed!"
+
+    @alignGroup = new Kinetic.Group(
+                                  x: 0
+                                  y: 0
+                                  draggable: false
+                                )
+    @layer.add @alignGroup
+
+    # @updateAlignGroup({x: 100, y: 200}, {x: 100, y: 400}, {x: 50, y: 150}, {x: 250, y: 150}, 100)
+    # console.log @alignGroup.setZIndex()
+
+  updateAlignGroup: (pointTop, pointBottom, pointLeft, pointRight, offset, status) ->
+    @alignGroup.destroyChildren()
+    @alignGroup.add(@generateXAlignLine(pointTop, pointBottom, offset, status))
+    @alignGroup.add(@generateYAlignLine(pointLeft, pointRight, offset, status))
+
+  generateXAlignLine: (pointTop, pointBottom, offset, status) ->
+    xAlignLine = new Kinetic.Line(
+                                  points: [
+                                    pointTop.x
+                                    pointTop.y - offset
+                                    
+                                    pointTop.x
+                                    pointBottom.y + offset
+                                  ]
+                                  strokeRed:    255
+                                  strokeGreen:  1
+                                  strokeBlue:   1
+                                  strokeWidth:  2
+                                  lineCap: "round"
+                                  lineJoin: "round"
+                                )
+
+  generateYAlignLine: (pointLeft, pointRight, offset) ->
+    yAlignLine = new Kinetic.Line(
+                                      points: [
+                                        pointLeft.x - offset
+                                        pointLeft.y 
+                                        
+                                        pointRight.x + offset
+                                        pointRight.y 
+                                      ]
+                                      strokeRed:    1
+                                      strokeGreen:  255
+                                      strokeBlue:   1
+                                      strokeWidth:  2
+                                      lineCap: "round"
+                                      lineJoin: "round"
+                                    )
 
   availableNewTitle: () ->
     @length + 1
@@ -524,8 +564,8 @@ class @Boxes extends Backbone.Collection
     #     # change dot to arrow
     #     @currentBox.get('dot').setFillAlpha(0)
     #     @currentBox.get('arrow').strokeAlpha(1)
-      Logger.debug "double click: dot: #{@currentBox.get('dot').fillAlpha()}; arrow: #{@currentBox.get('arrow').strokeAlpha()};"
-      @updateCurrentBox()
+    #   Logger.debug "double click: dot: #{@currentBox.get('dot').fillAlpha()}; arrow: #{@currentBox.get('arrow').strokeAlpha()};"
+    #   @updateCurrentBox()
 
     @add(newBox)
     @updateCurrentBox(newBox)
@@ -675,12 +715,14 @@ class @Boxes extends Backbone.Collection
         @moveByY(1)
     @testCollision()
     @updateCurrentBox()
-  moveByY: (direction) ->
+  moveByY: (direction, flash) ->
     @currentBox.setYPosition(@currentBox.getYPosition() - @currentBox.getMoveOffset() * direction)
     @repairCrossZone(@currentBox) unless @validateZone(@currentBox)
-  moveByX: (direction) ->
+    @flash = flash
+  moveByX: (direction, flash) ->
     @currentBox.setXPosition(@currentBox.getXPosition() + @currentBox.getMoveOffset() * direction)
     @repairCrossZone(@currentBox) unless @validateZone(@currentBox)
+    @flash = flash
   up: () =>
     Logger.debug("@currentBox:\t" + @currentBox.getTitleName())
     @currentBox.setYPosition(@currentBox.getYPosition() - @currentBox.getMoveOffset())
@@ -972,7 +1014,6 @@ class CollisionUtil extends Backbone.Collection
         pair.boxId != boxAId && pair.isCollisionWith(boxAId)
     status  = (result.length > 0)
 
-
   ######## public api ########
   testCollisionBetween:(boxA,boxB,options = {collisionType: 'inner-inner'}) ->
     status  =     false
@@ -1099,35 +1140,31 @@ class @StackBoard
     @layer = new Kinetic.Layer()
 
     color_coordinate =
-      red:  67
-      green: 123
+      red:    67
+      green:  123
       blue:   188
 
-    @zone2 = 
-            x: overhangOffset.x * @ratio
-            y: overhangOffset.y * @ratio 
-            width: (shorterEdge + pallet.overhang * 2) * @ratio
-            height:(longerEdge + pallet.overhang * 2) * @ratio
-            bound:
-              top:      0
-              bottom:   params.stage.height
-              left:     0
-              right:    params.stage.width
+    @palletZone = 
+        bound:
+          top:      margin * @ratio  # y
+          bottom:   (margin + longerEdge) * @ratio # y + height
+          left:     margin * @ratio # x
+          right:    (margin + shorterEdge) * @ratio # x + width 
 
     coordinateOriginPoint = 
-      x: @zone2.bound.left + 2
-      y: @zone2.bound.bottom - 2
+      x: @palletZone.bound.left
+      y: @palletZone.bound.bottom 
     xLine = new Kinetic.Line(
       points: [
         coordinateOriginPoint.x
         coordinateOriginPoint.y
-        @zone2.bound.right * 0.2
+        @palletZone.bound.right * 0.2
         coordinateOriginPoint.y
-        @zone2.bound.right * 0.2 - 15
+        @palletZone.bound.right * 0.2 - 15
         coordinateOriginPoint.y - 3
-        @zone2.bound.right * 0.2
+        @palletZone.bound.right * 0.2
         coordinateOriginPoint.y
-        @zone2.bound.right * 0.2 -15
+        @palletZone.bound.right * 0.2 -15
         coordinateOriginPoint.y + 3
       ]
       strokeRed:    color_coordinate.red
@@ -1139,7 +1176,7 @@ class @StackBoard
     )
 
     xLabel = new Kinetic.Text(
-        x:  @zone2.bound.right * 0.2 
+        x:  @palletZone.bound.right * 0.2 
         y:  coordinateOriginPoint.y - 5
         fontSize:     13
         fontFamily:   "Calibri"
@@ -1149,13 +1186,13 @@ class @StackBoard
     yLine = new Kinetic.Line(
       points: [
         coordinateOriginPoint.x - 3
-        @zone2.bound.top + @zone2.bound.bottom * 0.82 + 15
+        @palletZone.bound.top + @palletZone.bound.bottom * 0.82 + 15
         coordinateOriginPoint.x
-        @zone2.bound.top + @zone2.bound.bottom * 0.82
+        @palletZone.bound.top + @palletZone.bound.bottom * 0.82
         coordinateOriginPoint.x + 3
-        @zone2.bound.top + @zone2.bound.bottom * 0.82 + 15
+        @palletZone.bound.top + @palletZone.bound.bottom * 0.82 + 15
         coordinateOriginPoint.x
-        @zone2.bound.top + @zone2.bound.bottom * 0.82
+        @palletZone.bound.top + @palletZone.bound.bottom * 0.82
         coordinateOriginPoint.x
         coordinateOriginPoint.y
       ]
@@ -1168,7 +1205,7 @@ class @StackBoard
     )
     yLabel = new Kinetic.Text(
         x:      coordinateOriginPoint.x - 2
-        y:      @zone2.bound.top + @zone2.bound.bottom * 0.82 - 15
+        y:      @palletZone.bound.top + @palletZone.bound.bottom * 0.82 - 15
         fontSize:     13
         fontFamily:   "Calibri"
         fill:         "blue"

@@ -45,3 +45,12 @@ note:
         ###PLACED box cannot be dragged.
 so if I want to dragging a box,
 select this box first.###
+
+
+# move alone with approach vector
+
+
+
+
+## knob
+## blue coordinate
