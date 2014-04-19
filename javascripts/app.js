@@ -229,6 +229,11 @@
           x: this.get('rect').x() + this.get('rect').width() / 2,
           y: this.get('rect').y() + this.get('rect').height() / 2
         };
+      } else if (options === 'byRatio') {
+        return {
+          x: (this.get('group').x() + this.get('rect').width() / 2) / this.ratio,
+          y: (this.get('group').y() + this.get('rect').height() / 2) / this.ratio
+        };
       } else {
         return centerPointOnGroup = {
           x: this.get('group').x() + this.get('rect').width() / 2,
@@ -582,6 +587,7 @@
         zone: params.zone,
         palletOverhang: params.palletOverhang
       };
+      this.ratio = this.box_params.ratio;
       this.CurrentBox = Backbone.Model.extend({
         initialize: function(box_params) {
           this.set({
@@ -619,36 +625,130 @@
       return this.layer.add(this.alignGroup);
     };
 
-    Boxes.prototype.updateAlignGroup = function(pointTop, pointBottom, pointLeft, pointRight, offset, status) {
+    Boxes.prototype.updateAlignGroup = function(options) {
+      var bottomBox, bottomSpan, currentBoxCenterPoint, currentBoxCenterPointByRatio, leftBox, leftSpan, rightBox, rightSpan, topBox, topSpan, xAlignFlag, xAlignLine, xApproachLine, yAlignFlag, yAlignLine, yApproachLine;
+      if (options == null) {
+        options = {};
+      }
+      if (this.length <= 1) {
+        return;
+      }
       this.alignGroup.destroyChildren();
-      this.alignGroup.add(this.generateXAlignLine(pointTop, pointBottom, offset, status));
-      return this.alignGroup.add(this.generateYAlignLine(pointLeft, pointRight, offset, status));
+      currentBoxCenterPoint = this.currentBox.getCenterPoint();
+      currentBoxCenterPointByRatio = this.currentBox.getCenterPoint('byRatio');
+      xApproachLine = yApproachLine = 0;
+      xAlignLine = yAlignLine = 0;
+      leftBox = rightBox = topBox = bottomBox = this.currentBox;
+      leftSpan = rightSpan = topSpan = bottomSpan = 0;
+      xApproachLine = yApproachLine = 0;
+      xAlignLine = yAlignLine = 0;
+      xAlignFlag = false;
+      yAlignFlag = false;
+      _.each(this.models, (function(aBox) {
+        var aBoxCenterPoint, aBoxCenterPointByRatio, newBottomSpan, newLeftSpan, newRightSpan, newTopSpan;
+        if (aBox.getBoxId() !== this.currentBox.getBoxId()) {
+          aBoxCenterPoint = aBox.getCenterPoint();
+          aBoxCenterPointByRatio = aBox.getCenterPoint('byRatio');
+          Logger.dev("aBox.getCenterPoint('byRatio').y - currentBoxCenterPointByRatio.y " + (aBox.getCenterPoint('byRatio').y - currentBoxCenterPointByRatio.y));
+          if (Math.abs(aBox.getCenterPoint('byRatio').y - currentBoxCenterPointByRatio.y) < 1) {
+            newLeftSpan = currentBoxCenterPoint.x - aBoxCenterPoint.x;
+            newRightSpan = aBoxCenterPoint.x - currentBoxCenterPoint.x;
+            if (newLeftSpan > leftSpan) {
+              leftBox = aBox;
+              leftSpan = newLeftSpan;
+            }
+            if (newRightSpan > rightSpan) {
+              rightBox = aBox;
+              rightSpan = newRightSpan;
+            }
+            xAlignFlag = true;
+          }
+          Logger.dev("aBox.getCenterPoint('byRatio').x - currentBoxCenterPointByRatio.x : " + (aBox.getCenterPoint('byRatio').x - currentBoxCenterPointByRatio.x));
+          if (Math.abs(aBox.getCenterPoint('byRatio').x - currentBoxCenterPointByRatio.x) < 1) {
+            newTopSpan = currentBoxCenterPoint.y - aBoxCenterPoint.y;
+            newBottomSpan = aBoxCenterPoint.y - currentBoxCenterPoint.y;
+            if (newBottomSpan > bottomSpan) {
+              bottomBox = aBox;
+              bottomSpan = newBottomSpan;
+            }
+            if (newTopSpan > topSpan) {
+              topBox = aBox;
+              topSpan = newTopSpan;
+            }
+            return yAlignFlag = true;
+          }
+        }
+      }), this);
+      if (xAlignFlag) {
+        Logger.dev("[updateAlignGroup]: x align add: leftBox " + (leftBox.getTitleName()) + ", rightBox " + (rightBox.getTitleName()));
+        xAlignLine = this.generateYAlignLine(leftBox.getCenterPoint().x, rightBox.getCenterPoint().x, currentBoxCenterPoint.y, 50, 'alignment');
+        this.alignGroup.add(xAlignLine);
+      }
+      if (yAlignFlag) {
+        Logger.dev("[updateAlignGroup]: y align add: topBox" + (topBox.getTitleName()) + ": " + (topBox.getCenterPoint().y) + ", bottomBox" + (bottomBox.getTitleName()) + ": " + (bottomBox.getCenterPoint().y));
+        yAlignLine = this.generateXAlignLine(topBox.getCenterPoint().y, bottomBox.getCenterPoint().y, currentBoxCenterPoint.x, 50, 'alignment');
+        this.currentBox.setXPosition(topBox.getXPosition());
+        return this.alignGroup.add(yAlignLine);
+      }
     };
 
-    Boxes.prototype.generateXAlignLine = function(pointTop, pointBottom, offset, status) {
+    Boxes.prototype.generateXAlignLine = function(pointTopY, pointBottomY, pointX, offset, status) {
       var xAlignLine;
-      return xAlignLine = new Kinetic.Line({
-        points: [pointTop.x, pointTop.y - offset, pointTop.x, pointBottom.y + offset],
-        strokeRed: 255,
-        strokeGreen: 1,
-        strokeBlue: 1,
-        strokeWidth: 2,
-        lineCap: "round",
-        lineJoin: "round"
-      });
+      Logger.debug("[generateXAlignLine] pointTop: " + pointTopY + "  pointBottom: " + pointBottomY);
+      xAlignLine === null;
+      if (status === 'approach') {
+        xAlignLine = new Kinetic.Line({
+          points: [pointX, pointTopY - offset, pointX, pointBottomY + offset],
+          strokeRed: 65,
+          strokeGreen: 219,
+          strokeBlue: 248,
+          strokeWidth: 1,
+          strokeAlpha: 1,
+          lineCap: "round",
+          lineJoin: "round"
+        });
+      } else {
+        xAlignLine = new Kinetic.Line({
+          points: [pointX, pointTopY - offset, pointX, pointBottomY + offset],
+          strokeRed: 255,
+          strokeGreen: 255,
+          strokeBlue: 27,
+          strokeWidth: 1,
+          strokeAlpha: 1,
+          lineCap: "round",
+          lineJoin: "round"
+        });
+      }
+      return xAlignLine;
     };
 
-    Boxes.prototype.generateYAlignLine = function(pointLeft, pointRight, offset) {
+    Boxes.prototype.generateYAlignLine = function(pointLeftX, pointRightX, pointY, offset, status) {
       var yAlignLine;
-      return yAlignLine = new Kinetic.Line({
-        points: [pointLeft.x - offset, pointLeft.y, pointRight.x + offset, pointRight.y],
-        strokeRed: 1,
-        strokeGreen: 255,
-        strokeBlue: 1,
-        strokeWidth: 2,
-        lineCap: "round",
-        lineJoin: "round"
-      });
+      yAlignLine = null;
+      if (status === 'approach') {
+        yAlignLine = new Kinetic.Line({
+          points: [pointLeftX - offset, pointY, pointRightX + offset, pointY],
+          strokeRed: 65,
+          strokeGreen: 219,
+          strokeBlue: 248,
+          strokeWidth: 1,
+          strokeAlpha: 1,
+          lineCap: "round",
+          lineJoin: "round"
+        });
+      } else {
+        yAlignLine = new Kinetic.Line({
+          points: [pointLeftX - offset, pointY, pointRightX + offset, pointY],
+          strokeRed: 255,
+          strokeGreen: 255,
+          strokeBlue: 27,
+          strokeWidth: 1,
+          strokeAlpha: 1,
+          lineCap: "round",
+          lineJoin: "round"
+        });
+      }
+      return yAlignLine;
     };
 
     Boxes.prototype.availableNewTitle = function() {
@@ -682,8 +782,8 @@
       var newBox;
       newBox = new Box(this.box_params);
       if (this.length === 0) {
-        newBox.setXPosition((this.zone.bound.left + this.zone.bound.right - newBox.get('rect').getWidth()) / 2);
-        newBox.setYPosition((this.zone.bound.top + this.zone.bound.bottom - newBox.get('rect').getHeight()) / 2);
+        newBox.setXPosition(Math.floor((this.zone.bound.left + this.zone.bound.right - newBox.get('rect').getWidth()) / 2));
+        newBox.setYPosition(Math.floor((this.zone.bound.top + this.zone.bound.bottom - newBox.get('rect').getHeight()) / 2));
       } else {
         newBox.setXPosition(this.last().getXPosition());
         newBox.setYPosition(this.last().getYPosition());
@@ -714,8 +814,19 @@
       } else {
         this.currentBox.set('settledStatus', true);
         this.currentBox.get('group').setDraggable(false);
+        this.alignGroup.destroyChildren();
         return this.draw();
       }
+    };
+
+    Boxes.prototype.updateDragStatus = function(draggableBox) {
+      return _.each(this.models, (function(aBox) {
+        if (aBox.getBoxId() === draggableBox.getBoxId()) {
+          return draggableBox.get('group').setDraggable(true);
+        } else {
+          return aBox.get('group').setDraggable(false);
+        }
+      }), this);
     };
 
     Boxes.prototype.removeCurrentBox = function() {
@@ -765,7 +876,10 @@
         box.updateTitle(index + 1);
         this.layer.add(box.box());
         index += 1;
+        Logger.debug("[draw]: Box" + (box.getTitleName()) + " " + (box.box().draggable()));
+        Logger.debug("[draw]: X" + (box.getXPosition()) + " Y" + (box.getYPosition()));
       }
+      this.layer.add(this.alignGroup);
       return this.layer.draw();
     };
 
@@ -806,8 +920,12 @@
       Logger.debug("[updateCurrentBox] width: " + (this.currentBox.get('rect').getWidth()) + ", height: " + (this.currentBox.get('rect').getHeight()));
       this.otherCurrentBox.set('box', newBox);
       this.updateBinders();
-      return rivets.bind($('.box'), {
+      this.updateDragStatus(this.currentBox);
+      rivets.bind($('.box'), {
         box: newBox
+      });
+      return this.updateAlignGroup({
+        offset: 10
       });
     };
 
@@ -1705,16 +1823,16 @@
   });
 
   pallet = {
-    width: 390,
-    height: 500,
-    overhang: 20
+    width: 200,
+    height: 250,
+    overhang: 10
   };
 
   box = {
     x: 0,
     y: 0,
-    width: 120,
-    height: 40,
+    width: 60,
+    height: 20,
     minDistance: 10
   };
 
