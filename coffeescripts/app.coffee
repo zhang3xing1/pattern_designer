@@ -484,21 +484,61 @@ class @Boxes extends Backbone.Collection
                                   y: 0
                                   draggable: false
                                 )
+
+    @xAlignLine = new Kinetic.Line(
+                                  points: [
+                                    0
+                                    0
+                                    
+                                    0
+                                    0
+                                  ]
+                                  strokeRed:    65
+                                  strokeGreen:  219
+                                  strokeBlue:   248
+                                  strokeWidth:  1
+                                  strokeAlpha:  0
+                                  lineCap: "round"
+                                  lineJoin: "round"
+                                )
+    @yAlignLine = new Kinetic.Line(
+                                  points: [
+                                    0
+                                    0
+                                    
+                                    0
+                                    0
+                                  ]
+                                  strokeRed:    65
+                                  strokeGreen:  219
+                                  strokeBlue:   248
+                                  strokeWidth:  1
+                                  strokeAlpha:  0
+                                  lineCap: "round"
+                                  lineJoin: "round"
+                                )
+    @alignGroup.add @xAlignLine
+    @alignGroup.add @yAlignLine
+
+
     @layer.add @alignGroup
 
   updateAlignGroup: (options={}) ->
+    console.log @alignGroup
+
+    Logger.dev "[updateAlignGroup] before: box#{@currentBox.getTitleName()}"
     return if @length <= 1
-    @alignGroup.destroyChildren()
+    @hideAlignLines()
+
+    console.log @xAlignLine.strokeAlpha()
+    console.log @yAlignLine.strokeAlpha()
+
     currentBoxCenterPoint = @currentBox.getCenterPoint()
     currentBoxCenterPointByRatio = @currentBox.getCenterPoint('byRatio')
-    xApproachLine = yApproachLine = 0
-    xAlignLine = yAlignLine = 0 
 
     leftBox = rightBox = topBox = bottomBox = @currentBox
     leftSpan = rightSpan = topSpan = bottomSpan = 0
 
-    xApproachLine = yApproachLine = 0
-    xAlignLine = yAlignLine = 0 
     xAlignFlag = false
     yAlignFlag = false
 
@@ -507,7 +547,7 @@ class @Boxes extends Backbone.Collection
         aBoxCenterPoint = aBox.getCenterPoint()
         aBoxCenterPointByRatio = aBox.getCenterPoint('byRatio')
 
-        Logger.dev "aBox.getCenterPoint('byRatio').y - currentBoxCenterPointByRatio.y #{aBox.getCenterPoint('byRatio').y - currentBoxCenterPointByRatio.y}"
+        Logger.debug "aBox.getCenterPoint('byRatio').y - currentBoxCenterPointByRatio.y #{aBox.getCenterPoint('byRatio').y - currentBoxCenterPointByRatio.y}"
         if Math.abs(aBox.getCenterPoint('byRatio').y - currentBoxCenterPointByRatio.y) < 1
           # have a some y value, find approach x
           newLeftSpan   = currentBoxCenterPoint.x - aBoxCenterPoint.x
@@ -520,7 +560,7 @@ class @Boxes extends Backbone.Collection
             rightSpan = newRightSpan
           xAlignFlag = true
 
-        Logger.dev "aBox.getCenterPoint('byRatio').x - currentBoxCenterPointByRatio.x : #{aBox.getCenterPoint('byRatio').x - currentBoxCenterPointByRatio.x}"
+        Logger.debug "aBox.getCenterPoint('byRatio').x - currentBoxCenterPointByRatio.x : #{aBox.getCenterPoint('byRatio').x - currentBoxCenterPointByRatio.x}"
         if Math.abs(aBox.getCenterPoint('byRatio').x - currentBoxCenterPointByRatio.x) < 1
           # have a some x value, find approach y
           newTopSpan    = currentBoxCenterPoint.y - aBoxCenterPoint.y
@@ -538,100 +578,52 @@ class @Boxes extends Backbone.Collection
 
     if xAlignFlag 
       Logger.dev("[updateAlignGroup]: x align add: leftBox #{leftBox.getTitleName()}, rightBox #{rightBox.getTitleName()}")
-      xAlignLine = @generateYAlignLine(leftBox.getCenterPoint().x, rightBox.getCenterPoint().x, currentBoxCenterPoint.y, 50, 'alignment')
-      @alignGroup.add(xAlignLine)
+      @updateYAlignLine(leftBox.getCenterPoint().x, rightBox.getCenterPoint().x, currentBoxCenterPoint.y, 50, 'alignment')
+    else
+      @yAlignLine.strokeAlpha(0)
     if yAlignFlag
       Logger.dev("[updateAlignGroup]: y align add: topBox#{topBox.getTitleName()}: #{topBox.getCenterPoint().y}, bottomBox#{bottomBox.getTitleName()}: #{bottomBox.getCenterPoint().y}")
-      yAlignLine = @generateXAlignLine(topBox.getCenterPoint().y, bottomBox.getCenterPoint().y, currentBoxCenterPoint.x, 50, 'alignment')
-      @currentBox.setXPosition(topBox.getXPosition())
-      @alignGroup.add(yAlignLine)
-
-
-    # @alignGroup.add(xAlignLine) unless xf == 0
-    # @alignGroup.add(yAlignLine) unless yAlignLine == 0
-    # @alignGroup.add(xApproachLine) unless xApproachLine == 0
-    # @alignGroup.add(yApproachLine) unless yApproachLine == 0
-
-    # @alignGroup.add(@generateXAlignLine(pointTop, pointBottom, 100, options.status))
-    # @alignGroup.add(@generateYAlignLine(pointLeft, pointRight, 100, options.status))
-
-  generateXAlignLine: (pointTopY, pointBottomY, pointX, offset, status) ->
-    Logger.debug "[generateXAlignLine] pointTop: #{pointTopY}  pointBottom: #{pointBottomY}"
-    xAlignLine == null
-    if status == 'approach'
-      xAlignLine = new Kinetic.Line(
-                                    points: [
-                                      pointX
-                                      pointTopY - offset
-                                      
-                                      pointX
-                                      pointBottomY + offset
-                                    ]
-                                    strokeRed:    65
-                                    strokeGreen:  219
-                                    strokeBlue:   248
-                                    strokeWidth:  1
-                                    strokeAlpha:  1
-                                    lineCap: "round"
-                                    lineJoin: "round"
-                                  )
+      @updateXAlignLine(topBox.getCenterPoint().y, bottomBox.getCenterPoint().y, currentBoxCenterPoint.x, 50, 'alignment')
     else
-      xAlignLine = new Kinetic.Line(
-                              points: [
-                                pointX
-                                pointTopY - offset
-                                
-                                pointX
-                                pointBottomY + offset
-                              ]
-                              strokeRed:    255
-                              strokeGreen:  255
-                              strokeBlue:   27
-                              strokeWidth:  1
-                              strokeAlpha:  1
-                              lineCap: "round"
-                              lineJoin: "round"
-                            )
-    xAlignLine
+      @xAlignLine.strokeAlpha(0)
 
 
-  generateYAlignLine: (pointLeftX, pointRightX, pointY, offset, status) ->
-    yAlignLine = null
+    Logger.dev "[updateAlignGroup] after: box#{@currentBox.getTitleName()}"
+    console.log @xAlignLine.strokeAlpha()
+    console.log @yAlignLine.strokeAlpha()
+
+
+  hideAlignLines: () ->
+    @xAlignLine.strokeAlpha(0)
+    @yAlignLine.strokeAlpha(0)
+
+  updateXAlignLine: (pointTopY, pointBottomY, pointX, offset, status) ->
+    Logger.dev "[updateXAlignLine] pointTop: #{pointTopY}  pointBottom: #{pointBottomY}"
+    @xAlignLine.strokeAlpha(1)
+    @xAlignLine.points([pointX, pointTopY - offset, pointX, pointBottomY + offset])
     if status == 'approach'
-      yAlignLine = new Kinetic.Line(
-                                        points: [
-                                          pointLeftX - offset
-                                          pointY 
-                                          
-                                          pointRightX + offset
-                                          pointY 
-                                        ]
-                                        strokeRed:    65
-                                        strokeGreen:  219
-                                        strokeBlue:   248
-                                        strokeWidth:  1
-                                        strokeAlpha:  1
-                                        lineCap: "round"
-                                        lineJoin: "round"
-                                      )
+      @xAlignLine.strokeRed(65)
+      @xAlignLine.strokeGreen(219)
+      @xAlignLine.strokeBlue(248)
     else
-      yAlignLine = new Kinetic.Line(
-                                        points: [
-                                          pointLeftX - offset
-                                          pointY 
-                                          
-                                          pointRightX + offset
-                                          pointY 
-                                        ]
-                                        strokeRed:    255
-                                        strokeGreen:  255
-                                        strokeBlue:   27
-                                        strokeWidth:  1
-                                        strokeAlpha:  1
-                                        lineCap: "round"
-                                        lineJoin: "round"
-                                      )
-    yAlignLine
+      @xAlignLine.strokeRed(255)
+      @xAlignLine.strokeGreen(255)
+      @xAlignLine.strokeBlue(27)
+    @xAlignLine
+
+
+  updateYAlignLine: (pointLeftX, pointRightX, pointY, offset, status) ->
+    @yAlignLine.strokeAlpha(1)
+    @yAlignLine.points([pointLeftX - offset, pointY, pointRightX + offset, pointY])
+    if status == 'approach'
+      @yAlignLine.strokeRed(65)
+      @yAlignLine.strokeGreen(219)
+      @yAlignLine.strokeBlue(248)
+    else
+      @yAlignLine.strokeRed(255)
+      @yAlignLine.strokeGreen(255)
+      @yAlignLine.strokeBlue(27)
+    @yAlignLine
 
   availableNewTitle: () ->
     @length + 1
@@ -664,6 +656,9 @@ class @Boxes extends Backbone.Collection
       Logger.debug "box#{newBox.getTitleName()} clicked!"
       @flash =  "box#{newBox.getTitleName()} selected!"
       @updateCurrentBox(newBox)
+      @draw()
+      # @hideAlignLines()
+      # @updateAlignGroup()
     # newBox.box().on "dblclick", =>
     #   Logger.debug "box#{newBox.getTitleName()} double clicked!"
     #   if @currentBox.get('vectorEnabled')
@@ -694,7 +689,7 @@ class @Boxes extends Backbone.Collection
     else
       @currentBox.set('settledStatus', true)
       @currentBox.get('group').setDraggable(false)
-      @alignGroup.destroyChildren()
+      # @alignGroup.destroyChildren()
       @draw()
   updateDragStatus: (draggableBox) ->
     _.each(@models,((aBox) ->
@@ -780,14 +775,13 @@ class @Boxes extends Backbone.Collection
     @updateDragStatus(@currentBox)
     rivets.bind $('.box'),{box: newBox}
 
-    @updateAlignGroup
-      offset: 10
+    @updateAlignGroup()
 
 
 
   rotate90: () =>
     @currentBox.rotateWithAngle(90)
-    @repairCrossZone(@currentBox) unless @validateZone(@currentBox)  
+    # @repairCrossZone(@currentBox) unless @validateZone(@currentBox)  
     @testCollision()
     @updateCurrentBox()
     Logger.debug "[rotate90] width: #{@currentBox.get('rect').getWidth()}, height: #{@currentBox.get('rect').getHeight()}"
