@@ -674,7 +674,7 @@
     };
 
     Boxes.prototype.updateAlignGroup = function(options) {
-      var bottomBox, bottomBoxApproach, bottomSpan, bottomSpanApproach, currentBoxCenterPoint, currentBoxCenterPointByRatio, leftBox, leftBoxApproach, leftSpan, leftSpanApproach, rightBox, rightBoxApproach, rightSpan, rightSpanApproach, topBox, topBoxApproach, topSpan, topSpanApproach, xAlignFlag, yAlignFlag;
+      var bottomBox, bottomBoxApproach, bottomSpan, bottomSpanApproach, currentBoxCenterPoint, currentBoxCenterPointByRatio, leftBox, leftBoxApproach, leftSpan, leftSpanApproach, notCurrentBox, rightBox, rightBoxApproach, rightSpan, rightSpanApproach, topBox, topBoxApproach, topSpan, topSpanApproach, xAlignFlag, yAlignFlag;
       if (options == null) {
         options = {};
       }
@@ -707,7 +707,7 @@
               rightBoxApproach = aBox;
               rightSpanApproach = newRightSpanApproach;
             }
-            Logger.dev("[updateAlignGroup]:leftSpanApproach " + leftSpanApproach + ";  rightSpanApproach " + rightSpanApproach);
+            Logger.debug("[updateAlignGroup]:leftSpanApproach " + leftSpanApproach + ";  rightSpanApproach " + rightSpanApproach);
             xAlignFlag = 'approach';
           }
           if (this.nearCompareWithFloatNumber(aBox.getCenterPoint('byRatio').x, currentBoxCenterPointByRatio.x, this.currentBox.getWidthByRatio() / 2)) {
@@ -757,7 +757,12 @@
         Logger.debug("[updateAlignGroup]: x align add: leftBox " + (leftBox.getTitleName()) + ", rightBox " + (rightBox.getTitleName()));
         this.updateYAlignLine(leftBox.getCenterPoint().x, rightBox.getCenterPoint().x, currentBoxCenterPoint.y, 50, 'alignment');
       } else if (xAlignFlag === 'approach') {
-        this.updateYAlignLine(leftBoxApproach.getCenterPoint().x, rightBoxApproach.getCenterPoint().x, leftBoxApproach.getCenterPoint().y, 50, 'approach');
+        if (leftBoxApproach.getTitleName() !== this.currentBox.getTitleName()) {
+          notCurrentBox = leftBoxApproach;
+        } else if (rightBoxApproach.getTitleName() !== this.currentBox.getTitleName()) {
+          notCurrentBox = rightBoxApproach;
+        }
+        this.updateYAlignLine(leftBoxApproach.getCenterPoint().x, rightBoxApproach.getCenterPoint().x, notCurrentBox.getCenterPoint().y, 50, 'approach');
       } else {
         this.yAlignLine.strokeAlpha(0);
       }
@@ -765,7 +770,12 @@
         Logger.debug("[updateAlignGroup]: y align add: topBox" + (topBox.getTitleName()) + ": " + (topBox.getCenterPoint().y) + ", bottomBox" + (bottomBox.getTitleName()) + ": " + (bottomBox.getCenterPoint().y));
         this.updateXAlignLine(topBox.getCenterPoint().y, bottomBox.getCenterPoint().y, currentBoxCenterPoint.x, 50, 'alignment');
       } else if (yAlignFlag === 'approach') {
-        this.updateXAlignLine(topBoxApproach.getCenterPoint().y, bottomBoxApproach.getCenterPoint().y, bottomBoxApproach.getCenterPoint().x, 50, 'approach');
+        if (topBoxApproach.getTitleName() !== this.currentBox.getTitleName()) {
+          notCurrentBox = topBoxApproach;
+        } else if (bottomBoxApproach.getTitleName() !== this.currentBox.getTitleName()) {
+          notCurrentBox = bottomBoxApproach;
+        }
+        this.updateXAlignLine(topBoxApproach.getCenterPoint().y, bottomBoxApproach.getCenterPoint().y, notCurrentBox.getCenterPoint().x, 50, 'approach');
       } else {
         this.xAlignLine.strokeAlpha(0);
       }
@@ -799,7 +809,6 @@
     Boxes.prototype.updateYAlignLine = function(pointLeftX, pointRightX, pointY, offset, status) {
       this.yAlignLine.strokeAlpha(1);
       this.yAlignLine.points([pointLeftX - offset, pointY, pointRightX + offset, pointY]);
-      console.log(this.yAlignLine.points());
       if (status === 'approach') {
         this.yAlignLine.strokeRed(65);
         this.yAlignLine.strokeGreen(219);

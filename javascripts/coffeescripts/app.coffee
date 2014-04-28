@@ -569,7 +569,7 @@ class @Boxes extends Backbone.Collection
             rightBoxApproach = aBox
             rightSpanApproach = newRightSpanApproach
 
-          Logger.dev "[updateAlignGroup]:leftSpanApproach #{leftSpanApproach};  rightSpanApproach #{rightSpanApproach}"
+          Logger.debug "[updateAlignGroup]:leftSpanApproach #{leftSpanApproach};  rightSpanApproach #{rightSpanApproach}"
           xAlignFlag = 'approach'       
 
         if @nearCompareWithFloatNumber(aBox.getCenterPoint('byRatio').x,currentBoxCenterPointByRatio.x, @currentBox.getWidthByRatio()/2)
@@ -619,22 +619,29 @@ class @Boxes extends Backbone.Collection
       Logger.debug("[updateAlignGroup]: x align add: leftBox #{leftBox.getTitleName()}, rightBox #{rightBox.getTitleName()}")
       @updateYAlignLine(leftBox.getCenterPoint().x, rightBox.getCenterPoint().x, currentBoxCenterPoint.y, 50, 'alignment')
     else if xAlignFlag == 'approach'
-      @updateYAlignLine(leftBoxApproach.getCenterPoint().x, rightBoxApproach.getCenterPoint().x, leftBoxApproach.getCenterPoint().y, 50, 'approach')
+      if leftBoxApproach.getTitleName() != @currentBox.getTitleName()
+        notCurrentBox = leftBoxApproach
+      else if rightBoxApproach.getTitleName() != @currentBox.getTitleName()
+        notCurrentBox = rightBoxApproach
+      @updateYAlignLine(leftBoxApproach.getCenterPoint().x, rightBoxApproach.getCenterPoint().x, notCurrentBox.getCenterPoint().y, 50, 'approach')
     else
       @yAlignLine.strokeAlpha(0)
 
     if yAlignFlag == 'align'    
       Logger.debug("[updateAlignGroup]: y align add: topBox#{topBox.getTitleName()}: #{topBox.getCenterPoint().y}, bottomBox#{bottomBox.getTitleName()}: #{bottomBox.getCenterPoint().y}")
       @updateXAlignLine(topBox.getCenterPoint().y, bottomBox.getCenterPoint().y, currentBoxCenterPoint.x, 50, 'alignment')
-    else if yAlignFlag == 'approach'  
-      @updateXAlignLine(topBoxApproach.getCenterPoint().y, bottomBoxApproach.getCenterPoint().y, bottomBoxApproach.getCenterPoint().x, 50, 'approach')
+    else if yAlignFlag == 'approach' 
+      if topBoxApproach.getTitleName() != @currentBox.getTitleName()
+        notCurrentBox = topBoxApproach
+      else if bottomBoxApproach.getTitleName() != @currentBox.getTitleName()
+        notCurrentBox = bottomBoxApproach 
+      @updateXAlignLine(topBoxApproach.getCenterPoint().y, bottomBoxApproach.getCenterPoint().y, notCurrentBox.getCenterPoint().x, 50, 'approach')
     else 
       @xAlignLine.strokeAlpha(0)
 
     Logger.debug "[updateAlignGroup] @xAlignLine.strokeAlpha(0) #{@xAlignLine.strokeAlpha()}"
     Logger.debug "[updateAlignGroup] @yAlignLine.strokeAlpha(0) #{@yAlignLine.strokeAlpha()}"
     Logger.debug "[updateAlignGroup] after: box#{@currentBox.getTitleName()}"
-
     @draw()
 
   hideAlignLines: () ->
@@ -658,7 +665,6 @@ class @Boxes extends Backbone.Collection
   updateYAlignLine: (pointLeftX, pointRightX, pointY, offset, status) ->
     @yAlignLine.strokeAlpha(1)
     @yAlignLine.points([pointLeftX - offset, pointY, pointRightX + offset, pointY])
-    console.log @yAlignLine.points()
     if status == 'approach'
       @yAlignLine.strokeRed(65)
       @yAlignLine.strokeGreen(219)
