@@ -627,7 +627,7 @@ class @Boxes extends Backbone.Collection
       Logger.debug("[updateAlignGroup]: y align add: topBox#{topBox.getTitleName()}: #{topBox.getCenterPoint().y}, bottomBox#{bottomBox.getTitleName()}: #{bottomBox.getCenterPoint().y}")
       @updateXAlignLine(topBox.getCenterPoint().y, bottomBox.getCenterPoint().y, currentBoxCenterPoint.x, 50, 'alignment')
     else if yAlignFlag == 'approach'  
-      @updateXAlignLine(topBoxApproach.getCenterPoint().y, bottomBoxApproach.getCenterPoint().y, topBoxApproach.getCenterPoint().x, 50, 'approach')
+      @updateXAlignLine(topBoxApproach.getCenterPoint().y, bottomBoxApproach.getCenterPoint().y, bottomBoxApproach.getCenterPoint().x, 50, 'approach')
     else 
       @xAlignLine.strokeAlpha(0)
 
@@ -807,6 +807,8 @@ class @Boxes extends Backbone.Collection
       newPosition)
 
     @currentBox.get('group').on('dragend', =>
+      @currentBox.setXPosition( @precisionAdjustment(@currentBox.getXPosition()) )
+      @currentBox.setYPosition( @precisionAdjustment(@currentBox.getYPosition()) )
       @repairCrossZone(@currentBox) unless @validateZone(@currentBox)
       @testCollision())
 

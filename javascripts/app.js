@@ -765,7 +765,7 @@
         Logger.debug("[updateAlignGroup]: y align add: topBox" + (topBox.getTitleName()) + ": " + (topBox.getCenterPoint().y) + ", bottomBox" + (bottomBox.getTitleName()) + ": " + (bottomBox.getCenterPoint().y));
         this.updateXAlignLine(topBox.getCenterPoint().y, bottomBox.getCenterPoint().y, currentBoxCenterPoint.x, 50, 'alignment');
       } else if (yAlignFlag === 'approach') {
-        this.updateXAlignLine(topBoxApproach.getCenterPoint().y, bottomBoxApproach.getCenterPoint().y, topBoxApproach.getCenterPoint().x, 50, 'approach');
+        this.updateXAlignLine(topBoxApproach.getCenterPoint().y, bottomBoxApproach.getCenterPoint().y, bottomBoxApproach.getCenterPoint().x, 50, 'approach');
       } else {
         this.xAlignLine.strokeAlpha(0);
       }
@@ -973,6 +973,8 @@
       })(this));
       this.currentBox.get('group').on('dragend', (function(_this) {
         return function() {
+          _this.currentBox.setXPosition(_this.precisionAdjustment(_this.currentBox.getXPosition()));
+          _this.currentBox.setYPosition(_this.precisionAdjustment(_this.currentBox.getYPosition()));
           if (!_this.validateZone(_this.currentBox)) {
             _this.repairCrossZone(_this.currentBox);
           }
