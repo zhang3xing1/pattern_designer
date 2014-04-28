@@ -58,7 +58,7 @@ class @Box extends Backbone.Model
     boxId:            '0'
     collisionStatus:  false
     settledStatus:    false   # false: unsettled | true: settled(placed)
-    moveOffset:       4
+    moveOffset:       1
     rotate:           0
 
     vectorDegree:     0
@@ -529,11 +529,12 @@ class @Boxes extends Backbone.Collection
     Math.round(parseFloat(floatNumber)*ratioBy10)/ratioBy10
 
   equalCompareWithFloatNumber: (numberLeft, numberRight,digitNumber = 0) ->
-    ratioBy10 = 1 * Math.pow(10,digitNumber)
-    Logger.dev "[equalCompareWithFloatNumber:] numberLeft #{Math.round(parseFloat(numberLeft)*ratioBy10)/ratioBy10}"
-    Logger.dev "[equalCompareWithFloatNumber:] numberRight #{Math.round(parseFloat(numberRight)*ratioBy10)/ratioBy10}"
-    Logger.dev "#{@precisionAdjustment(numberLeft) == @precisionAdjustment(numberRight)}"
+    Logger.debug "[equalCompareWithFloatNumber:] numberLeft #{@precisionAdjustment(numberLeft)}"
+    Logger.debug "[equalCompareWithFloatNumber:] numberRight #{@precisionAdjustment(numberRight)}"
+    Logger.debug "#{@precisionAdjustment(numberLeft) == @precisionAdjustment(numberRight)}"
     @precisionAdjustment(numberLeft) == @precisionAdjustment(numberRight)
+  nearCompareWithFloatNumber: (numberLeft, numberRight, offset, digitNumber = 0 ) ->
+    Math.abs(@precisionAdjustment(numberLeft) - @precisionAdjustment(numberRight)) < offset
   updateAlignGroup: (options={}) ->
     Logger.debug "[updateAlignGroup] before: box#{@currentBox.getTitleName()}"
     return if @length <= 1
@@ -545,17 +546,49 @@ class @Boxes extends Backbone.Collection
     leftBox = rightBox = topBox = bottomBox = @currentBox
     leftSpan = rightSpan = topSpan = bottomSpan = 0
 
-    xAlignFlag = false
-    yAlignFlag = false
+    leftBoxApproach = rightBoxApproach = topBoxApproach = bottomBoxApproach = @currentBox
+    leftSpanApproach = rightSpanApproach = topSpanApproach = bottomSpanApproach = 0
+
+    xAlignFlag = ''
+    yAlignFlag = ''
 
     _.each(@models,((aBox) ->
       if aBox.getBoxId() != @currentBox.getBoxId()
         aBoxCenterPoint = aBox.getCenterPoint()
         aBoxCenterPointByRatio = aBox.getCenterPoint('byRatio')
 
+        #approach
+        if @nearCompareWithFloatNumber(aBox.getCenterPoint('byRatio').y, currentBoxCenterPointByRatio.y, @currentBox.getWidthByRatio()/2)
+           # have a same y value, find approach x
+          newLeftSpanApproach   = currentBoxCenterPoint.x - aBoxCenterPoint.x
+          newRightSpanApproach  = aBoxCenterPoint.x - currentBoxCenterPoint.x
+          if newLeftSpanApproach > leftSpanApproach
+            leftBoxApproach = aBox
+            leftSpanApproach = newLeftSpanApproach
+          if newRightSpanApproach > rightSpanApproach
+            rightBoxApproach = aBox
+            rightSpanApproach = newRightSpanApproach
+
+          Logger.dev "[updateAlignGroup]:leftSpanApproach #{leftSpanApproach};  rightSpanApproach #{rightSpanApproach}"
+          xAlignFlag = 'approach'       
+
+        if @nearCompareWithFloatNumber(aBox.getCenterPoint('byRatio').x,currentBoxCenterPointByRatio.x, @currentBox.getWidthByRatio()/2)
+          # have a same x value, find approach y
+          newTopSpanApproach    = currentBoxCenterPoint.y - aBoxCenterPoint.y
+          newBottomSpanApproach = aBoxCenterPoint.y - currentBoxCenterPoint.y
+
+          if newBottomSpanApproach > bottomSpanApproach
+            bottomBoxApproach = aBox
+            bottomSpanApproach = newBottomSpanApproach
+          if newTopSpanApproach > topSpanApproach
+            topBoxApproach = aBox
+            topSpanApproach = newTopSpanApproach
+          yAlignFlag = 'approach'  
+
+        # equal
         Logger.debug "aBox.getCenterPoint('byRatio').y - currentBoxCenterPointByRatio.y #{aBox.getCenterPoint('byRatio').y - currentBoxCenterPointByRatio.y}"
         if @equalCompareWithFloatNumber(aBox.getCenterPoint('byRatio').y, currentBoxCenterPointByRatio.y)
-          # have a some y value, find approach x
+          # have a same y value, find align x
           newLeftSpan   = currentBoxCenterPoint.x - aBoxCenterPoint.x
           newRightSpan  = aBoxCenterPoint.x - currentBoxCenterPoint.x
           if newLeftSpan > leftSpan
@@ -564,11 +597,11 @@ class @Boxes extends Backbone.Collection
           if newRightSpan > rightSpan
             rightBox = aBox
             rightSpan = newRightSpan
-          xAlignFlag = true
+          xAlignFlag = 'align'
 
         Logger.debug "aBox.getCenterPoint('byRatio').x - currentBoxCenterPointByRatio.x : #{aBox.getCenterPoint('byRatio').x - currentBoxCenterPointByRatio.x}"
         if @equalCompareWithFloatNumber(aBox.getCenterPoint('byRatio').x,currentBoxCenterPointByRatio.x)
-          # have a some x value, find approach y
+          # have a same x value, find align y
           newTopSpan    = currentBoxCenterPoint.y - aBoxCenterPoint.y
           newBottomSpan = aBoxCenterPoint.y - currentBoxCenterPoint.y
 
@@ -578,23 +611,28 @@ class @Boxes extends Backbone.Collection
           if newTopSpan > topSpan
             topBox = aBox
             topSpan = newTopSpan
-          yAlignFlag = true
+          yAlignFlag = 'align'
 
     ),this)  
 
-    if xAlignFlag 
+    if xAlignFlag == 'align'
       Logger.debug("[updateAlignGroup]: x align add: leftBox #{leftBox.getTitleName()}, rightBox #{rightBox.getTitleName()}")
       @updateYAlignLine(leftBox.getCenterPoint().x, rightBox.getCenterPoint().x, currentBoxCenterPoint.y, 50, 'alignment')
+    else if xAlignFlag == 'approach'
+      @updateYAlignLine(leftBoxApproach.getCenterPoint().x, rightBoxApproach.getCenterPoint().x, leftBoxApproach.getCenterPoint().y, 50, 'approach')
     else
       @yAlignLine.strokeAlpha(0)
-    if yAlignFlag
+
+    if yAlignFlag == 'align'    
       Logger.debug("[updateAlignGroup]: y align add: topBox#{topBox.getTitleName()}: #{topBox.getCenterPoint().y}, bottomBox#{bottomBox.getTitleName()}: #{bottomBox.getCenterPoint().y}")
       @updateXAlignLine(topBox.getCenterPoint().y, bottomBox.getCenterPoint().y, currentBoxCenterPoint.x, 50, 'alignment')
-    else
+    else if yAlignFlag == 'approach'  
+      @updateXAlignLine(topBoxApproach.getCenterPoint().y, bottomBoxApproach.getCenterPoint().y, topBoxApproach.getCenterPoint().x, 50, 'approach')
+    else 
       @xAlignLine.strokeAlpha(0)
 
-    Logger.dev "[updateAlignGroup] @xAlignLine.strokeAlpha(0) #{@xAlignLine.strokeAlpha()}"
-    Logger.dev "[updateAlignGroup] @yAlignLine.strokeAlpha(0) #{@yAlignLine.strokeAlpha()}"
+    Logger.debug "[updateAlignGroup] @xAlignLine.strokeAlpha(0) #{@xAlignLine.strokeAlpha()}"
+    Logger.debug "[updateAlignGroup] @yAlignLine.strokeAlpha(0) #{@yAlignLine.strokeAlpha()}"
     Logger.debug "[updateAlignGroup] after: box#{@currentBox.getTitleName()}"
 
     @draw()
@@ -620,6 +658,7 @@ class @Boxes extends Backbone.Collection
   updateYAlignLine: (pointLeftX, pointRightX, pointY, offset, status) ->
     @yAlignLine.strokeAlpha(1)
     @yAlignLine.points([pointLeftX - offset, pointY, pointRightX + offset, pointY])
+    console.log @yAlignLine.points()
     if status == 'approach'
       @yAlignLine.strokeRed(65)
       @yAlignLine.strokeGreen(219)
@@ -776,7 +815,6 @@ class @Boxes extends Backbone.Collection
     
     @updateBinders()
     @updateDragStatus(@currentBox)
-    Logger.dev "[updateCurrentBox]: beforeupdateAlignGroup"
     @updateAlignGroup()
     rivets.bind $('.box'),{box: newBox}
 
