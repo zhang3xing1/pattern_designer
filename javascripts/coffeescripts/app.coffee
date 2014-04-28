@@ -210,7 +210,8 @@ class @Box extends Backbone.Model
   getMoveOffset: () ->
     Logger.debug "getMoveOffset #{@get('moveOffset')}"
     # moveoffset * ratio = unit mm, not unit px
-    Number(@get('moveOffset') * @ratio)
+    (Math.round(parseFloat(Number(@get('moveOffset') * @ratio))*100)/100)
+    # Number(@get('moveOffset') * @ratio)
 
   setTitleName: (newTitle) ->
     @get('title').setText(newTitle) 
@@ -523,15 +524,20 @@ class @Boxes extends Backbone.Collection
 
     @layer.add @alignGroup
 
-  updateAlignGroup: (options={}) ->
-    console.log @alignGroup
+  precisionAdjustment: (floatNumber, digitNumber = 0) ->
+    ratioBy10 = 1 * Math.pow(10,digitNumber)
+    Math.round(parseFloat(floatNumber)*ratioBy10)/ratioBy10
 
-    Logger.dev "[updateAlignGroup] before: box#{@currentBox.getTitleName()}"
+  equalCompareWithFloatNumber: (numberLeft, numberRight,digitNumber = 0) ->
+    ratioBy10 = 1 * Math.pow(10,digitNumber)
+    Logger.dev "[equalCompareWithFloatNumber:] numberLeft #{Math.round(parseFloat(numberLeft)*ratioBy10)/ratioBy10}"
+    Logger.dev "[equalCompareWithFloatNumber:] numberRight #{Math.round(parseFloat(numberRight)*ratioBy10)/ratioBy10}"
+    Logger.dev "#{@precisionAdjustment(numberLeft) == @precisionAdjustment(numberRight)}"
+    @precisionAdjustment(numberLeft) == @precisionAdjustment(numberRight)
+  updateAlignGroup: (options={}) ->
+    Logger.debug "[updateAlignGroup] before: box#{@currentBox.getTitleName()}"
     return if @length <= 1
     @hideAlignLines()
-
-    console.log @xAlignLine.strokeAlpha()
-    console.log @yAlignLine.strokeAlpha()
 
     currentBoxCenterPoint = @currentBox.getCenterPoint()
     currentBoxCenterPointByRatio = @currentBox.getCenterPoint('byRatio')
@@ -548,7 +554,7 @@ class @Boxes extends Backbone.Collection
         aBoxCenterPointByRatio = aBox.getCenterPoint('byRatio')
 
         Logger.debug "aBox.getCenterPoint('byRatio').y - currentBoxCenterPointByRatio.y #{aBox.getCenterPoint('byRatio').y - currentBoxCenterPointByRatio.y}"
-        if Math.abs(aBox.getCenterPoint('byRatio').y - currentBoxCenterPointByRatio.y) < 1
+        if @equalCompareWithFloatNumber(aBox.getCenterPoint('byRatio').y, currentBoxCenterPointByRatio.y)
           # have a some y value, find approach x
           newLeftSpan   = currentBoxCenterPoint.x - aBoxCenterPoint.x
           newRightSpan  = aBoxCenterPoint.x - currentBoxCenterPoint.x
@@ -561,7 +567,7 @@ class @Boxes extends Backbone.Collection
           xAlignFlag = true
 
         Logger.debug "aBox.getCenterPoint('byRatio').x - currentBoxCenterPointByRatio.x : #{aBox.getCenterPoint('byRatio').x - currentBoxCenterPointByRatio.x}"
-        if Math.abs(aBox.getCenterPoint('byRatio').x - currentBoxCenterPointByRatio.x) < 1
+        if @equalCompareWithFloatNumber(aBox.getCenterPoint('byRatio').x,currentBoxCenterPointByRatio.x)
           # have a some x value, find approach y
           newTopSpan    = currentBoxCenterPoint.y - aBoxCenterPoint.y
           newBottomSpan = aBoxCenterPoint.y - currentBoxCenterPoint.y
@@ -577,28 +583,28 @@ class @Boxes extends Backbone.Collection
     ),this)  
 
     if xAlignFlag 
-      Logger.dev("[updateAlignGroup]: x align add: leftBox #{leftBox.getTitleName()}, rightBox #{rightBox.getTitleName()}")
+      Logger.debug("[updateAlignGroup]: x align add: leftBox #{leftBox.getTitleName()}, rightBox #{rightBox.getTitleName()}")
       @updateYAlignLine(leftBox.getCenterPoint().x, rightBox.getCenterPoint().x, currentBoxCenterPoint.y, 50, 'alignment')
     else
       @yAlignLine.strokeAlpha(0)
     if yAlignFlag
-      Logger.dev("[updateAlignGroup]: y align add: topBox#{topBox.getTitleName()}: #{topBox.getCenterPoint().y}, bottomBox#{bottomBox.getTitleName()}: #{bottomBox.getCenterPoint().y}")
+      Logger.debug("[updateAlignGroup]: y align add: topBox#{topBox.getTitleName()}: #{topBox.getCenterPoint().y}, bottomBox#{bottomBox.getTitleName()}: #{bottomBox.getCenterPoint().y}")
       @updateXAlignLine(topBox.getCenterPoint().y, bottomBox.getCenterPoint().y, currentBoxCenterPoint.x, 50, 'alignment')
     else
       @xAlignLine.strokeAlpha(0)
 
+    Logger.dev "[updateAlignGroup] @xAlignLine.strokeAlpha(0) #{@xAlignLine.strokeAlpha()}"
+    Logger.dev "[updateAlignGroup] @yAlignLine.strokeAlpha(0) #{@yAlignLine.strokeAlpha()}"
+    Logger.debug "[updateAlignGroup] after: box#{@currentBox.getTitleName()}"
 
-    Logger.dev "[updateAlignGroup] after: box#{@currentBox.getTitleName()}"
-    console.log @xAlignLine.strokeAlpha()
-    console.log @yAlignLine.strokeAlpha()
-
+    @draw()
 
   hideAlignLines: () ->
     @xAlignLine.strokeAlpha(0)
     @yAlignLine.strokeAlpha(0)
 
   updateXAlignLine: (pointTopY, pointBottomY, pointX, offset, status) ->
-    Logger.dev "[updateXAlignLine] pointTop: #{pointTopY}  pointBottom: #{pointBottomY}"
+    Logger.debug "[updateXAlignLine] pointTop: #{pointTopY}  pointBottom: #{pointBottomY}"
     @xAlignLine.strokeAlpha(1)
     @xAlignLine.points([pointX, pointTopY - offset, pointX, pointBottomY + offset])
     if status == 'approach'
@@ -610,7 +616,6 @@ class @Boxes extends Backbone.Collection
       @xAlignLine.strokeGreen(255)
       @xAlignLine.strokeBlue(27)
     @xAlignLine
-
 
   updateYAlignLine: (pointLeftX, pointRightX, pointY, offset, status) ->
     @yAlignLine.strokeAlpha(1)
@@ -657,8 +662,6 @@ class @Boxes extends Backbone.Collection
       @flash =  "box#{newBox.getTitleName()} selected!"
       @updateCurrentBox(newBox)
       @draw()
-      # @hideAlignLines()
-      # @updateAlignGroup()
     # newBox.box().on "dblclick", =>
     #   Logger.debug "box#{newBox.getTitleName()} double clicked!"
     #   if @currentBox.get('vectorEnabled')
@@ -689,7 +692,7 @@ class @Boxes extends Backbone.Collection
     else
       @currentBox.set('settledStatus', true)
       @currentBox.get('group').setDraggable(false)
-      # @alignGroup.destroyChildren()
+      @hideAlignLines()
       @draw()
   updateDragStatus: (draggableBox) ->
     _.each(@models,((aBox) ->
@@ -773,10 +776,9 @@ class @Boxes extends Backbone.Collection
     
     @updateBinders()
     @updateDragStatus(@currentBox)
-    rivets.bind $('.box'),{box: newBox}
-
+    Logger.dev "[updateCurrentBox]: beforeupdateAlignGroup"
     @updateAlignGroup()
-
+    rivets.bind $('.box'),{box: newBox}
 
 
   rotate90: () =>
@@ -839,11 +841,11 @@ class @Boxes extends Backbone.Collection
     @testCollision()
     @updateCurrentBox()
   moveByY: (direction, flash) ->
-    @currentBox.setYPosition(@currentBox.getYPosition() - @currentBox.getMoveOffset() * direction)
+    @currentBox.setYPosition(Math.round(parseFloat(@currentBox.getYPosition() - @currentBox.getMoveOffset() * direction)))
     @repairCrossZone(@currentBox) unless @validateZone(@currentBox)
     @flash = flash
   moveByX: (direction, flash) ->
-    @currentBox.setXPosition(@currentBox.getXPosition() + @currentBox.getMoveOffset() * direction)
+    @currentBox.setXPosition(Math.round(parseFloat(@currentBox.getXPosition() + @currentBox.getMoveOffset() * direction)))
     @repairCrossZone(@currentBox) unless @validateZone(@currentBox)
     @flash = flash
   up: () =>

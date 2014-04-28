@@ -258,7 +258,7 @@
 
     Box.prototype.getMoveOffset = function() {
       Logger.debug("getMoveOffset " + (this.get('moveOffset')));
-      return Number(this.get('moveOffset') * this.ratio);
+      return Math.round(parseFloat(Number(this.get('moveOffset') * this.ratio)) * 100) / 100;
     };
 
     Box.prototype.setTitleName = function(newTitle) {
@@ -647,19 +647,37 @@
       return this.layer.add(this.alignGroup);
     };
 
+    Boxes.prototype.precisionAdjustment = function(floatNumber, digitNumber) {
+      var ratioBy10;
+      if (digitNumber == null) {
+        digitNumber = 0;
+      }
+      ratioBy10 = 1 * Math.pow(10, digitNumber);
+      return Math.round(parseFloat(floatNumber) * ratioBy10) / ratioBy10;
+    };
+
+    Boxes.prototype.equalCompareWithFloatNumber = function(numberLeft, numberRight, digitNumber) {
+      var ratioBy10;
+      if (digitNumber == null) {
+        digitNumber = 0;
+      }
+      ratioBy10 = 1 * Math.pow(10, digitNumber);
+      Logger.dev("[equalCompareWithFloatNumber:] numberLeft " + (Math.round(parseFloat(numberLeft) * ratioBy10) / ratioBy10));
+      Logger.dev("[equalCompareWithFloatNumber:] numberRight " + (Math.round(parseFloat(numberRight) * ratioBy10) / ratioBy10));
+      Logger.dev("" + (this.precisionAdjustment(numberLeft) === this.precisionAdjustment(numberRight)));
+      return this.precisionAdjustment(numberLeft) === this.precisionAdjustment(numberRight);
+    };
+
     Boxes.prototype.updateAlignGroup = function(options) {
       var bottomBox, bottomSpan, currentBoxCenterPoint, currentBoxCenterPointByRatio, leftBox, leftSpan, rightBox, rightSpan, topBox, topSpan, xAlignFlag, yAlignFlag;
       if (options == null) {
         options = {};
       }
-      console.log(this.alignGroup);
-      Logger.dev("[updateAlignGroup] before: box" + (this.currentBox.getTitleName()));
+      Logger.debug("[updateAlignGroup] before: box" + (this.currentBox.getTitleName()));
       if (this.length <= 1) {
         return;
       }
       this.hideAlignLines();
-      console.log(this.xAlignLine.strokeAlpha());
-      console.log(this.yAlignLine.strokeAlpha());
       currentBoxCenterPoint = this.currentBox.getCenterPoint();
       currentBoxCenterPointByRatio = this.currentBox.getCenterPoint('byRatio');
       leftBox = rightBox = topBox = bottomBox = this.currentBox;
@@ -672,7 +690,7 @@
           aBoxCenterPoint = aBox.getCenterPoint();
           aBoxCenterPointByRatio = aBox.getCenterPoint('byRatio');
           Logger.debug("aBox.getCenterPoint('byRatio').y - currentBoxCenterPointByRatio.y " + (aBox.getCenterPoint('byRatio').y - currentBoxCenterPointByRatio.y));
-          if (Math.abs(aBox.getCenterPoint('byRatio').y - currentBoxCenterPointByRatio.y) < 1) {
+          if (this.equalCompareWithFloatNumber(aBox.getCenterPoint('byRatio').y, currentBoxCenterPointByRatio.y)) {
             newLeftSpan = currentBoxCenterPoint.x - aBoxCenterPoint.x;
             newRightSpan = aBoxCenterPoint.x - currentBoxCenterPoint.x;
             if (newLeftSpan > leftSpan) {
@@ -686,7 +704,7 @@
             xAlignFlag = true;
           }
           Logger.debug("aBox.getCenterPoint('byRatio').x - currentBoxCenterPointByRatio.x : " + (aBox.getCenterPoint('byRatio').x - currentBoxCenterPointByRatio.x));
-          if (Math.abs(aBox.getCenterPoint('byRatio').x - currentBoxCenterPointByRatio.x) < 1) {
+          if (this.equalCompareWithFloatNumber(aBox.getCenterPoint('byRatio').x, currentBoxCenterPointByRatio.x)) {
             newTopSpan = currentBoxCenterPoint.y - aBoxCenterPoint.y;
             newBottomSpan = aBoxCenterPoint.y - currentBoxCenterPoint.y;
             if (newBottomSpan > bottomSpan) {
@@ -702,20 +720,21 @@
         }
       }), this);
       if (xAlignFlag) {
-        Logger.dev("[updateAlignGroup]: x align add: leftBox " + (leftBox.getTitleName()) + ", rightBox " + (rightBox.getTitleName()));
+        Logger.debug("[updateAlignGroup]: x align add: leftBox " + (leftBox.getTitleName()) + ", rightBox " + (rightBox.getTitleName()));
         this.updateYAlignLine(leftBox.getCenterPoint().x, rightBox.getCenterPoint().x, currentBoxCenterPoint.y, 50, 'alignment');
       } else {
         this.yAlignLine.strokeAlpha(0);
       }
       if (yAlignFlag) {
-        Logger.dev("[updateAlignGroup]: y align add: topBox" + (topBox.getTitleName()) + ": " + (topBox.getCenterPoint().y) + ", bottomBox" + (bottomBox.getTitleName()) + ": " + (bottomBox.getCenterPoint().y));
+        Logger.debug("[updateAlignGroup]: y align add: topBox" + (topBox.getTitleName()) + ": " + (topBox.getCenterPoint().y) + ", bottomBox" + (bottomBox.getTitleName()) + ": " + (bottomBox.getCenterPoint().y));
         this.updateXAlignLine(topBox.getCenterPoint().y, bottomBox.getCenterPoint().y, currentBoxCenterPoint.x, 50, 'alignment');
       } else {
         this.xAlignLine.strokeAlpha(0);
       }
-      Logger.dev("[updateAlignGroup] after: box" + (this.currentBox.getTitleName()));
-      console.log(this.xAlignLine.strokeAlpha());
-      return console.log(this.yAlignLine.strokeAlpha());
+      Logger.dev("[updateAlignGroup] @xAlignLine.strokeAlpha(0) " + (this.xAlignLine.strokeAlpha()));
+      Logger.dev("[updateAlignGroup] @yAlignLine.strokeAlpha(0) " + (this.yAlignLine.strokeAlpha()));
+      Logger.debug("[updateAlignGroup] after: box" + (this.currentBox.getTitleName()));
+      return this.draw();
     };
 
     Boxes.prototype.hideAlignLines = function() {
@@ -724,7 +743,7 @@
     };
 
     Boxes.prototype.updateXAlignLine = function(pointTopY, pointBottomY, pointX, offset, status) {
-      Logger.dev("[updateXAlignLine] pointTop: " + pointTopY + "  pointBottom: " + pointBottomY);
+      Logger.debug("[updateXAlignLine] pointTop: " + pointTopY + "  pointBottom: " + pointBottomY);
       this.xAlignLine.strokeAlpha(1);
       this.xAlignLine.points([pointX, pointTopY - offset, pointX, pointBottomY + offset]);
       if (status === 'approach') {
@@ -818,6 +837,7 @@
       } else {
         this.currentBox.set('settledStatus', true);
         this.currentBox.get('group').setDraggable(false);
+        this.hideAlignLines();
         return this.draw();
       }
     };
@@ -924,10 +944,11 @@
       this.otherCurrentBox.set('box', newBox);
       this.updateBinders();
       this.updateDragStatus(this.currentBox);
-      rivets.bind($('.box'), {
+      Logger.dev("[updateCurrentBox]: beforeupdateAlignGroup");
+      this.updateAlignGroup();
+      return rivets.bind($('.box'), {
         box: newBox
       });
-      return this.updateAlignGroup();
     };
 
     Boxes.prototype.rotate90 = function() {
@@ -1001,7 +1022,7 @@
     };
 
     Boxes.prototype.moveByY = function(direction, flash) {
-      this.currentBox.setYPosition(this.currentBox.getYPosition() - this.currentBox.getMoveOffset() * direction);
+      this.currentBox.setYPosition(Math.round(parseFloat(this.currentBox.getYPosition() - this.currentBox.getMoveOffset() * direction)));
       if (!this.validateZone(this.currentBox)) {
         this.repairCrossZone(this.currentBox);
       }
@@ -1009,7 +1030,7 @@
     };
 
     Boxes.prototype.moveByX = function(direction, flash) {
-      this.currentBox.setXPosition(this.currentBox.getXPosition() + this.currentBox.getMoveOffset() * direction);
+      this.currentBox.setXPosition(Math.round(parseFloat(this.currentBox.getXPosition() + this.currentBox.getMoveOffset() * direction)));
       if (!this.validateZone(this.currentBox)) {
         this.repairCrossZone(this.currentBox);
       }
