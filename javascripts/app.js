@@ -761,6 +761,10 @@
           notCurrentBox = leftBoxApproach;
         } else if (rightBoxApproach.getTitleName() !== this.currentBox.getTitleName()) {
           notCurrentBox = rightBoxApproach;
+        } else {
+          notCurrentBox = _.filter(this.models, (function(aBox) {
+            return aBox.getTitleName() !== this.currentBox.getTitleName();
+          }), this)[0];
         }
         this.updateYAlignLine(leftBoxApproach.getCenterPoint().x, rightBoxApproach.getCenterPoint().x, notCurrentBox.getCenterPoint().y, 50, 'approach');
       } else {
@@ -774,6 +778,10 @@
           notCurrentBox = topBoxApproach;
         } else if (bottomBoxApproach.getTitleName() !== this.currentBox.getTitleName()) {
           notCurrentBox = bottomBoxApproach;
+        } else {
+          notCurrentBox = _.filter(this.models, (function(aBox) {
+            return aBox.getTitleName() !== this.currentBox.getTitleName();
+          }), this)[0];
         }
         this.updateXAlignLine(topBoxApproach.getCenterPoint().y, bottomBoxApproach.getCenterPoint().y, notCurrentBox.getCenterPoint().x, 50, 'approach');
       } else {
@@ -863,9 +871,13 @@
       newBox.box().on("click", (function(_this) {
         return function() {
           Logger.debug("box" + (newBox.getTitleName()) + " clicked!");
-          _this.flash = "box" + (newBox.getTitleName()) + " selected!";
-          _this.updateCurrentBox(newBox);
-          return _this.draw();
+          if (!_this.testCollision()) {
+            _this.flash = "box" + (newBox.getTitleName()) + " selected!";
+            _this.updateCurrentBox(newBox);
+            return _this.draw();
+          } else {
+            return _this.flash = "Collision!";
+          }
         };
       })(this));
       this.add(newBox);
@@ -932,9 +944,7 @@
           return status;
         }
       }), false, this);
-      result;
-      Logger.debug("...Collision result: " + result);
-      return this.draw();
+      return result;
     };
 
     Boxes.prototype.draw = function() {
@@ -1925,6 +1935,21 @@
   $("input").prop("readonly", true);
 
   $("input.dial").prop("readonly", false);
+
+  $("#hide_button").click(function() {
+    $("#right_board").animate({
+      marginLeft: "-100%"
+    }, 1000, function() {
+      return $("#right_board").hide();
+    });
+  });
+
+  $("#show_button").click(function() {
+    $("#right_board").show();
+    $("#right_board").animate({
+      marginLeft: "20%"
+    }, 1000);
+  });
 
 }).call(this);
 

@@ -2,7 +2,7 @@ body {
   background-color: #373C38;
 }
 
-#nav_bar{
+.right_nav_bar{
   text-align: center;
   font-size: 30px;
   margin: 0 auto;
@@ -10,6 +10,23 @@ body {
   background-color: #e0e0e0;
   border: 1px solid; 
 }
+
+.left_nav_bar{
+  text-align: center;
+  font-size: 30px;
+  margin: 0 auto;
+  border: 1px solid; 
+  height: 43px;
+
+}
+
+.left_nav_bar button {
+  width: 230px;
+  background-color: green;
+  color: white;
+  padding-top: 3px;
+}
+
 #other_container {
   margin: 0 auto;
   background-color: white;
@@ -20,6 +37,24 @@ body {
 
 .column {
     padding-bottom: 10px;
+}
+
+#left_board_nav {
+  width: 230px;
+  height: 588px;
+}
+
+#left_board {
+  float: left;
+  
+}
+#left_board_nav button{
+  height: 11%;
+  background-color: #e0e0e0;
+}
+
+#right_board {
+  float: left;
 }
 
 #container {
@@ -37,7 +72,7 @@ body {
 #dashboard{
   width: 220px;
   margin-top: 1%;
-  margin-left: -8.5%;
+  margin-left: -18%;
 }
 
 .label-info {

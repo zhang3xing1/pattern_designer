@@ -623,6 +623,10 @@ class @Boxes extends Backbone.Collection
         notCurrentBox = leftBoxApproach
       else if rightBoxApproach.getTitleName() != @currentBox.getTitleName()
         notCurrentBox = rightBoxApproach
+      else
+        notCurrentBox = _.filter(@models, ((aBox) ->
+                          aBox.getTitleName() != @currentBox.getTitleName()
+                        ), this)[0]
       @updateYAlignLine(leftBoxApproach.getCenterPoint().x, rightBoxApproach.getCenterPoint().x, notCurrentBox.getCenterPoint().y, 50, 'approach')
     else
       @yAlignLine.strokeAlpha(0)
@@ -635,6 +639,10 @@ class @Boxes extends Backbone.Collection
         notCurrentBox = topBoxApproach
       else if bottomBoxApproach.getTitleName() != @currentBox.getTitleName()
         notCurrentBox = bottomBoxApproach 
+      else
+        notCurrentBox = _.filter(@models, ((aBox) ->
+                          aBox.getTitleName() != @currentBox.getTitleName()
+                        ), this)[0]
       @updateXAlignLine(topBoxApproach.getCenterPoint().y, bottomBoxApproach.getCenterPoint().y, notCurrentBox.getCenterPoint().x, 50, 'approach')
     else 
       @xAlignLine.strokeAlpha(0)
@@ -704,9 +712,15 @@ class @Boxes extends Backbone.Collection
     newBox.set('boxId', @availableNewBoxId)
     newBox.box().on "click", =>
       Logger.debug "box#{newBox.getTitleName()} clicked!"
-      @flash =  "box#{newBox.getTitleName()} selected!"
-      @updateCurrentBox(newBox)
-      @draw()
+      unless @testCollision()
+        # newBox.get('collisionStatus')
+        ## test all other box whether in collision status
+        @flash =  "box#{newBox.getTitleName()} selected!"
+        @updateCurrentBox(newBox)
+        @draw()
+      else
+        @flash =  "Collision!"
+
     # newBox.box().on "dblclick", =>
     #   Logger.debug "box#{newBox.getTitleName()} double clicked!"
     #   if @currentBox.get('vectorEnabled')
@@ -776,8 +790,8 @@ class @Boxes extends Backbone.Collection
                         status), 
                     false, this)
     result
-    Logger.debug("...Collision result: #{result}")
-    @draw()
+    # Logger.debug("...Collision result: #{result}")
+    # @draw()
   draw: () ->
     index = 0
     while index < @models.length
@@ -817,6 +831,7 @@ class @Boxes extends Backbone.Collection
       @currentBox.setYPosition( @precisionAdjustment(@currentBox.getYPosition()) )
       @repairCrossZone(@currentBox) unless @validateZone(@currentBox)
       @testCollision())
+
 
     Logger.debug "[updateCurrentBox] width: #{@currentBox.get('rect').getWidth()}, height: #{@currentBox.get('rect').getHeight()}"
     @otherCurrentBox.set('box', newBox)
@@ -1584,6 +1599,19 @@ $("input.dial").prop "readonly", false
 
 
 
+$("#hide_button").click ->
+  $("#right_board").animate
+    marginLeft: "-100%"
+  , 1000, ->
+    $("#right_board").hide()
+  return
+
+$("#show_button").click ->
+  $("#right_board").show()
+  $("#right_board").animate
+    marginLeft: "20%"
+  , 1000
+  return
 
 ########  TEST  #########
 
