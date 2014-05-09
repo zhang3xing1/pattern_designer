@@ -22,7 +22,7 @@
           <button type="button" class="btn btn-default"><h4>Frame</h4></button>
           <button type="button" class="btn btn-default"><h4>Line-In</h4></button>
           <button type="button" class="btn btn-default"><h4>Line-Out</h4></button>
-          <button type="button" class="btn btn-default"><h4>Pattern</h4></button>
+          <button type="button" class="btn btn-default active"><h4>Pattern</h4></button>
           <button type="button" class="btn btn-default"><h4>Mission</h4></button>
         </div>
       </div>
@@ -110,57 +110,11 @@
               </div>
             </div>
 
-
         </div>
     </div>
     
 </body>
-  <script src="javascripts/jquery-2.1.0.min.js" type="text/javascript"></script>
-  <script src="javascripts/jquery.knob.js"></script>
-  <script src='javascripts/underscore-min.js' type="text/javascript"></script>
-  <script src='javascripts/backbone.min.js' type="text/javascript"></script>
-  <script src="javascripts/kinetic-v5.0.1.min.js" type="text/javascript"></script>
-  <script src="javascripts/bootstrap.min.js" type="text/javascript"></script>
+  <script src="javascripts/lib/require.js" data-main="javascripts/app"></script>
 
-
-
-<!-- rivetsjs test -->
-
-<!-- <div id="store1">
-    <h2 rv-text="store:Title"></h2>
-    <ul>
-        <li rv-each-item="storeItems.models">
-            <span rv-text="item.GetText"></span>
-            <span rv-text="item:Price | currency"></span>
-            
-            <a href="#" rv-on-click="item.Edit">Edit</a>
-        </li>
-    </ul>
-</div>
-<div id="holder">
-</div>
-
-<script type="text/template" id="editItemDialog">
-    <div>
-        <hr>
-        <div>
-            <label>name:</label><input rv-value="item:Name"/>
-        </div>
-        <div>
-            <label>price:</label><input rv-value="item:Price"/>
-        </div>
-        <div>
-            <label>description:</label><textarea rv-text="item:Description"></textarea>
-        </div>
-        <hr>
-        <div><a href="#" class="close-link">Close</a></div>
-    </div>
-</script>
-
-
--->
-<script src="javascripts/rivets.min.js" type="text/javascript"></script>
-<!-- <script src='javascripts/configure.js'></script> -->
-<script src='javascripts/app.js' type="text/javascript"></script>
 
 </html>
