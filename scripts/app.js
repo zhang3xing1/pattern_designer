@@ -4,7 +4,7 @@
     __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
 
   require.config({
-    baseUrl: "./javascripts",
+    baseUrl: "./scripts",
     dir: "../dist",
     optimize: "uglify",
     optimizeCss: "standard.keepLines",

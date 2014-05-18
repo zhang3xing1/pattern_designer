@@ -1,5 +1,5 @@
 require.config(
-  baseUrl: "./javascripts"
+  baseUrl: "./scripts"
   dir: "../dist"
   optimize: "uglify"
   optimizeCss: "standard.keepLines"
@@ -38,6 +38,7 @@ require.config(
 require ['jquery', 'underscore', 'backbone', 'rivets', 'kinetic', 'bootstrap'], ($, _, Backbone, rivets, Kinetic) ->
   # "use strict"
 
+  
   console.log Backbone
   ###### rivets adapter configure, below ######
   rivets.adapters[":"] =

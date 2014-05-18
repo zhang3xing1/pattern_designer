@@ -2,19 +2,19 @@
 # More info at https://github.com/guard/guard#readme
 
 guard 'livereload' do
-  watch(%r{javascripts/.+\.js$})
+  watch(%r{scripts/.+\.js$})
   watch(%r{index\.html$})
   watch(%r{css/.+\.css$})
 end
 
-guard 'coffeescript', :output => 'javascripts', :source_map => true do
+guard 'coffeescript', :output => 'scripts', :source_map => true do
   watch(/^coffeescripts\/(.*)\.coffee/)
   callback(:run_on_modifications_end) { 
   	puts '-'*100; 
-  	FileUtils.cp_r('coffeescripts', 'javascripts')
-  	FileUtils.cp_r('javascripts', 'product/')
-    FileUtils.cp_r('css', 'product/')
-    FileUtils.cp('index.html', 'product')
+  	FileUtils.cp_r('coffeescripts', 'scripts')
+  	FileUtils.cp_r('scripts', 'public/')
+    FileUtils.cp_r('styles', 'public/')
+    FileUtils.cp('index.html', 'public')
   }
   callback(:reload_end) { puts '+'*1000}
 end
