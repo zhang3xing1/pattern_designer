@@ -36,6 +36,7 @@ require.config(
 )
 
 
+
 # Load our app module and pass it to our definition function
 require ['rivets', "app"], (rivets, App) ->
   

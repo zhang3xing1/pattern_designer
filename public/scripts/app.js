@@ -3,68 +3,9 @@
     __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
     __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
 
-  require(['jquery', 'underscore', 'backbone', 'rivets', 'kinetic', 'bootstrap'], function($, _, Backbone, rivets, Kinetic) {
+  require(['jquery', 'underscore', 'backbone', 'rivets', 'kinetic', 'logger'], function($, _, Backbone, rivets, Kinetic, Logger) {
     var CollisionPair, CollisionUtil, box, canvasStage, color, pallet, params;
-    this.Logger = (function() {
-      var Horn, instance, statuses;
-
-      function Logger() {}
-
-      instance = null;
-
-      statuses = ['info', 'debug', "dev"];
-
-      statuses = ['dev'];
-
-      Horn = (function() {
-        function Horn() {}
-
-        Horn.prototype.info = function(message) {
-          return 'INFO:\t' + message;
-        };
-
-        Horn.prototype.debug = function(message) {
-          return 'DEBUG:\t' + message;
-        };
-
-        Horn.prototype.dev = function(message) {
-          return 'Dev:\t' + message;
-        };
-
-        return Horn;
-
-      })();
-
-      Logger.info = function(message) {
-        if (_.contains(statuses, 'info')) {
-          if (instance == null) {
-            instance = new Horn;
-          }
-          return console.log(instance.info(message));
-        }
-      };
-
-      Logger.debug = function(message) {
-        if (_.contains(statuses, 'debug')) {
-          if (instance == null) {
-            instance = new Horn;
-          }
-          return console.log(instance.debug(message));
-        }
-      };
-
-      Logger.dev = function(message) {
-        if (_.contains(statuses, 'dev')) {
-          if (instance == null) {
-            instance = new Horn;
-          }
-          return console.log(instance.debug(message));
-        }
-      };
-
-      return Logger;
-
-    })();
+    Logger = Logger.create;
     this.Box = (function(_super) {
       __extends(Box, _super);
 
