@@ -14,17 +14,18 @@ body {
 .left_nav_bar{
   text-align: center;
   font-size: 30px;
-  margin: 0 auto;
+  margin: 10 auto;
   border: 1px solid; 
-  height: 43px;
-
 }
 
-.left_nav_bar button {
+
+.left_nav_bar {
   width: 200px;
   background-color: green;
   color: white;
-  padding-top: 3px;
+  margin: 10 auto;
+  height: 60px;
+  padding: 8px;
 }
 
 #other_container {
