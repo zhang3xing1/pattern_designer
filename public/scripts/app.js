@@ -3,7 +3,7 @@
     __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
     __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
 
-  require(['jquery', 'underscore', 'backbone', 'rivets', 'kinetic', 'logger'], function($, _, Backbone, rivets, Kinetic, Logger) {
+  require(['jquery', 'underscore', 'backbone', 'rivets', 'kinetic', 'logger', 'router'], function($, _, Backbone, rivets, Kinetic, Logger, Router) {
     var CollisionPair, CollisionUtil, box, canvasStage, color, pallet, params;
     Logger = Logger.create;
     this.Box = (function(_super) {

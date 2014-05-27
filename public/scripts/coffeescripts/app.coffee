@@ -1,4 +1,5 @@
-require ['jquery', 'underscore', 'backbone', 'rivets', 'kinetic', 'logger'], ($, _, Backbone, rivets, Kinetic, Logger) ->
+require ['jquery', 'underscore', 'backbone', 'rivets', 'kinetic', 'logger', 'router'], 
+($, _, Backbone, rivets, Kinetic, Logger, Router) ->
   # "use strict"
   # class @Logger
   #   instance = null
@@ -26,7 +27,6 @@ require ['jquery', 'underscore', 'backbone', 'rivets', 'kinetic', 'logger'], ($,
   #       console.log(instance.debug(message))
   Logger = Logger.create
   
-
   class @Box extends Backbone.Model
     defaults: {
       boxId:            '0'

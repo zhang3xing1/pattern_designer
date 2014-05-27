@@ -37,7 +37,7 @@ require.config(
 
 
 # Load our app module and pass it to our definition function
-require ['rivets', "app"], (rivets, App) ->
+require ['rivets', 'router', "app" ], (rivets, Router, App) ->
   
   ###### rivets adapter configure, below ######
   rivets.adapters[":"] =
@@ -66,6 +66,6 @@ require ['rivets', "app"], (rivets, App) ->
       return
 
   ###### rivets adapter configure, above######
-
+  window.router = Router.create  
 
   return

@@ -35,7 +35,7 @@
     }
   });
 
-  require(['rivets', "app"], function(rivets, App) {
+  require(['rivets', 'router', "app"], function(rivets, Router, App) {
     rivets.adapters[":"] = {
       subscribe: function(obj, keypath, callback) {
         obj.on("change:" + keypath, callback);
@@ -50,6 +50,7 @@
         obj.set(keypath, value);
       }
     };
+    window.router = Router.create;
   });
 
 }).call(this);
