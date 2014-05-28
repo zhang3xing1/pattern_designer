@@ -3,10 +3,12 @@
 
 guard 'livereload' do
   watch(%r{app/coffeescripts/.+\.coffee$})
-  watch(%r{app/index\.html$})
-  watch(%r{app/styles/.+\.css$})
-  callback(:run_on_modifications_end) {
+  watch(%r{app/index\.html$}){
     FileUtils.cp('app/index.html', 'public')
+  }
+  watch(%r{app/styles/.+\.css$}){ |css_file|
+    puts css_file
+    FileUtils.cp_r('app/styles', 'public/')
   }
 end
 

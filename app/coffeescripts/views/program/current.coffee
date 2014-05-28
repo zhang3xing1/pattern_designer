@@ -12,7 +12,7 @@ define [
     render: ->
       
       # Using Underscore we can compile our template with data
-      data = {title: "Current Status"}
+      data = {title: "Current Mission"}
       compiledTemplate = _.template(programCurrentTemplate, data)
       
       # Append our compiled template to this Views "el"
