@@ -2,7 +2,7 @@ body {
   /*background-color: #373C38;*/
 }
 
-.right_nav_bar{
+#right_nav_bar{
   text-align: center;
   font-size: 30px;
   margin: 0 auto;
@@ -28,7 +28,7 @@ body {
   padding: 8px;
 }
 
-#other_container {
+#pattern_designer_container {
   margin: 0 auto;
   background-color: white;
   width: 530px;
