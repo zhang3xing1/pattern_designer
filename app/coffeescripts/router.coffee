@@ -2,7 +2,8 @@ define [
   "jquery"
   "underscore"
   "backbone"
-], ($, _, Backbone) ->
+  "views/program/current"
+], ($, _, Backbone, ProgramCurrentView) ->
   class AppRouter extends Backbone.Router
     routes:
       "test1": "index"
@@ -15,6 +16,8 @@ define [
     index: ->
       alert 'yoooo'
       $(document.body).append "Index route has been called.."
+      programCurrentView = new ProgramCurrentView
+      programCurrentView.render()
       return
 
     show: (id) ->
