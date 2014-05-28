@@ -1,4 +1,5 @@
-product
 .idea
 product.zip
-public/scripts
+public/scripts/*.*
+public/scripts/coffeescripts
+public/scripts/views
