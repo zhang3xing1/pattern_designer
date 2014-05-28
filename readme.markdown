@@ -1,1 +1,3 @@
 To do
+
+In Page Pattern Designer, when removing box, approaching lines should be redraw or disappear. But....
