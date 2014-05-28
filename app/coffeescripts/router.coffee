@@ -6,16 +6,16 @@ define [
 ], ($, _, Backbone, ProgramCurrentView) ->
   class AppRouter extends Backbone.Router
     routes:
-      "test1": "index"
+      "program": "programCurrentMission"
       "show/:id": "show"
       "download/*random": "download"
           
     initialize: ->
       Backbone.history.start()
 
-    index: ->
-      alert 'yoooo'
-      $(document.body).append "Index route has been called.."
+    programCurrentMission: ->
+      console.log 'yoooo'
+      $('.right_board').remove()
       programCurrentView = new ProgramCurrentView
       programCurrentView.render()
       return

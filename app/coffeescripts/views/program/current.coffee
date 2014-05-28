@@ -8,11 +8,11 @@ define [
   "text!templates/program/current.html"
 ], ($, _, Backbone, programCurrentTemplate) ->
   ProgramCurrentTemplate = Backbone.View.extend(
-    el: $("#test1")
+    el: $("#right_board")
     render: ->
       
       # Using Underscore we can compile our template with data
-      data = {title: "Mission Status"}
+      data = {title: "Current Status"}
       compiledTemplate = _.template(programCurrentTemplate, data)
       
       # Append our compiled template to this Views "el"
