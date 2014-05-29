@@ -2,7 +2,6 @@ define ['jquery', 'underscore', 'backbone', 'rivets', 'kinetic', 'logger', 'rout
 ($, _, Backbone, rivets, Kinetic, Logger) ->
   Logger = Logger.create
 
-
   class @Box extends Backbone.Model
     defaults: {
       boxId:            '0'

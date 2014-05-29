@@ -7,6 +7,7 @@ define [
   class AppRouter extends Backbone.Router
     routes:
       "program": "programCurrentMission"
+      "pattern": "patternIndex"
       "show/:id": "show"
       "download/*random": "download"
           
@@ -18,6 +19,9 @@ define [
       $('.right_board').remove()
       programCurrentView = new ProgramCurrentView
       programCurrentView.render()
+      return
+    patternIndex: ->
+      console.log 'patternIndex'
       return
 
     show: (id) ->
