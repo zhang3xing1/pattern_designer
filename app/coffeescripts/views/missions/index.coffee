@@ -15,6 +15,7 @@ define [
       data =
         title: "Current Mission"
         cells: ['Name', 'Creator', 'Company', 'Product', 'Code']
+        buttons: ['SALVA', 'SACA', 'Save As', 'Reload']
       compiledTemplate = _.template(MissionsIndexView, data)
       
       # Append our compiled template to this Views "el"

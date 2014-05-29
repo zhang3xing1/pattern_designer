@@ -4,9 +4,10 @@ body {
 
 #right_nav_bar{
   text-align: center;
-  font-size: 30px;
+  /*font-size: 30px;*/
   margin: 0 auto;
   width: 532px; 
+  height: 42px;
   background-color: #e0e0e0;
   /*border: 1px solid; */
 }
