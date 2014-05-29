@@ -2,11 +2,12 @@ define [
   "jquery"
   "underscore"
   "backbone"
-  "views/program/index"
-], ($, _, Backbone, ProgramCurrentView) ->
+  "views/missions/index"
+  "views/pattern/index"
+], ($, _, Backbone, MissionIndexView, PatternIndexView) ->
   class AppRouter extends Backbone.Router
     routes:
-      "program": "programCurrentMission"
+      "program": "missionIndex"
       "pattern": "patternIndex"
       "show/:id": "show"
       "download/*random": "download"
@@ -14,14 +15,17 @@ define [
     initialize: ->
       Backbone.history.start()
 
-    programCurrentMission: ->
-      console.log 'yoooo'
+    missionIndex: ->
+      console.log 'missionIndex'
       $('.right_board').remove()
-      programCurrentView = new ProgramCurrentView
-      programCurrentView.render()
+      missionIndexView = new MissionIndexView
+      missionIndexView.render()
       return
     patternIndex: ->
       console.log 'patternIndex'
+      $('.right_board').remove()
+      patternIndexView = new PatternIndexView
+      patternIndexView.render()
       return
 
     show: (id) ->

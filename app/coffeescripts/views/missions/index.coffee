@@ -5,15 +5,16 @@ define [
 
   # Using the Require.js text! plugin, we are loaded raw text
   # which will be used as our views primary template
-  "text!templates/program/index.html"
-], ($, _, Backbone, programCurrentTemplate) ->
-  ProgramCurrentTemplate = Backbone.View.extend(
+  "text!templates/missions/index.html"
+], ($, _, Backbone, MissionsIndexView) ->
+  MissionsIndexTemplate = Backbone.View.extend(
     el: $("#right_board")
     render: ->
       
+      
       # Using Underscore we can compile our template with data
       data = {title: "Current Mission"}
-      compiledTemplate = _.template(programCurrentTemplate, data)
+      compiledTemplate = _.template(MissionsIndexView, data)
       
       # Append our compiled template to this Views "el"
       @$el.append compiledTemplate
@@ -21,4 +22,4 @@ define [
   )
   
   # Our module now returns our view
-  ProgramCurrentTemplate
+  MissionsIndexTemplate

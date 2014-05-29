@@ -7,8 +7,11 @@ guard 'livereload' do
     FileUtils.cp('app/index.html', 'public')
   }
   watch(%r{app/styles/.+\.css$}){ |css_file|
-    puts css_file
     FileUtils.cp_r('app/styles', 'public/')
+  }
+  watch(%r{app/templates/.+\.html$}){ |html_file|
+    puts html_file
+    FileUtils.cp_r('app/templates/', 'public/scripts')
   }
 end
 
