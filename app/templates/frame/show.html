@@ -1,0 +1,49 @@
+<div class="right_board" id='right_nav_bar'>  
+	<ul class="pager" style="margin: 0 auto;">
+	  <!-- <li class="previous"><a href="#">&larr; Older</a></li> -->
+	  <span><%= title %></span>
+	  <li class="next"><a href="#">Load New Mission &rarr;</a></li>
+	</ul>
+</div>
+
+<div class="right_board" id ='pattern_designer_container'>
+	<div class='left-panel col-sm-9'>
+		<form class="form-horizontal" role="form" >
+		  <div class=" form-group input-group col-sm-7">
+          <span class="input-group-addon label-info colomn-label-info">Line In</span>
+          <input type="text" class="form-control" placeholder="layer name">
+      </div>
+			<% _.each(coordinates, function(axis){ %>
+			  <div class="form-group" >
+		    	<label  class="col-sm-2 control-label"><%= axis %></label>
+			    <div class="col-sm-5">
+			      <input  class="form-control" >
+			    </div>
+		  	</div>		
+			<%	}); %> 	
+			<div class="form-group alert alert-danger col-sm-7">
+  			Programma non in
+			</div>
+		</form>
+	</div>
+  
+  <div class='right-panel col-sm-9', style="float: right; margin-left: -30%; margin-right: -25%">
+		<form class="form-horizontal" role="form" >
+		  <div class="form-group input-group col-sm-7">
+          <span class="input-group-addon label-info colomn-label-info">Line Out</span>
+          <input type="text" class="form-control" placeholder="layer name">
+      </div>
+			<% _.each(coordinates, function(axis){ %>
+			  <div class="form-group" >
+		    	<label  class="col-sm-2 control-label"><%= axis %></label>
+			    <div class="col-sm-5">
+			      <input  class="form-control" >
+			    </div>
+		  	</div>		
+			<%	}); %> 	
+			<div class="form-group alert alert-danger col-sm-7">
+  			Programma non in
+			</div>
+		</form>
+	</div>
+</div>

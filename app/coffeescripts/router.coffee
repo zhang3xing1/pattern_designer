@@ -4,11 +4,13 @@ define [
   "backbone"
   "views/missions/index"
   "views/pattern/index"
-], ($, _, Backbone, MissionIndexView, PatternIndexView) ->
+  "views/frame/show"
+], ($, _, Backbone, MissionIndexView, PatternIndexView, FrameShowView) ->
   class AppRouter extends Backbone.Router
     routes:
       "program": "missionIndex"
       "pattern": "patternIndex"
+      "frame":   "frameShow"
       "show/:id": "show"
       "download/*random": "download"
           
@@ -28,6 +30,11 @@ define [
       patternIndexView.render()
       return
 
+    frameShow: ->
+      console.log 'frameShow'
+      $('.right_board').remove()
+      frameShowView = new FrameShowView
+      frameShowView.render()
     show: (id) ->
       $(document.body).append "Show route has been called.. with id equals : ", id
       return
