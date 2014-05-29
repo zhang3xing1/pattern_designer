@@ -11,9 +11,10 @@ define [
     el: $("#right_board")
     render: ->
       
-      
       # Using Underscore we can compile our template with data
-      data = {title: "Current Mission"}
+      data =
+        title: "Current Mission"
+        cells: ['Name', 'Creator', 'Company', 'Product', 'Code']
       compiledTemplate = _.template(MissionsIndexView, data)
       
       # Append our compiled template to this Views "el"
