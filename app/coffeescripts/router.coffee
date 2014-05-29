@@ -2,7 +2,7 @@ define [
   "jquery"
   "underscore"
   "backbone"
-  "views/program/current"
+  "views/program/index"
 ], ($, _, Backbone, ProgramCurrentView) ->
   class AppRouter extends Backbone.Router
     routes:

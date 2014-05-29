@@ -5,7 +5,7 @@ define [
 
   # Using the Require.js text! plugin, we are loaded raw text
   # which will be used as our views primary template
-  "text!templates/program/current.html"
+  "text!templates/program/index.html"
 ], ($, _, Backbone, programCurrentTemplate) ->
   ProgramCurrentTemplate = Backbone.View.extend(
     el: $("#right_board")
