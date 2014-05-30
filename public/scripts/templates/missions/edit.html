@@ -5,14 +5,41 @@
 </div>
 
 <div class="right_board" id ='pattern_designer_container'>
-	<div class='left-panel col-sm-10'>
-		<select multiple="multiple" id="my-select" name="my-select[]">
-      <option value='elem_1'>elem 1</option>
-      <option value='elem_2'>elem 2</option>
-      <option value='elem_3'>elem 3</option>
-      <option value='elem_4'>elem 4</option>
-      <option value='elem_100'>elem 100</option>
-    </select>
+	<div class='left-panel col-sm-10' >
+    <div>
+      <label class="col-sm-6 control-label">Mission</label>
+      <label class="col-sm-6 control-label">Pattern</label>
+    </div>
+    <div style="margin-left: 16%;">
+      <select multiple="multiple" id="my-select" name="my-select[]">
+        <option value='elem_1' disabled>0 pallet</option>
+        <option value='elem_2'>elem 2</option>
+        <option value='elem_3'>elem 3</option>
+        <option value='elem_4'>elem 4</option>
+        <option value='elem_100'>elem 100</option>
+      </select>  
+    </div>
+
+    <div class="input-group col-sm-6" style="float: left;">
+        <span class="input-group-addon label-info colomn-label-info">Total height</span>
+        <input type="text" class="form-control" >
+    </div>
+    <div class="input-group col-sm-6" style="float: right; margin-right: -15%">
+        <span class="input-group-addon label-info colomn-label-info">Total box</span>
+        <input type="text" class="form-control" >
+    </div>
+    <div class="input-group col-sm-6" style="float: left;">
+        <span class="input-group-addon label-info colomn-label-info">Total weight</span>
+        <input type="text" class="form-control" >
+    </div>
+    <div class="input-group col-sm-6" style="float: right; margin-right: -15%">
+        <span class="input-group-addon label-info colomn-label-info">Block Dim</span>
+        <input type="text" class="form-control" >
+    </div>    
+   
+ 
+  </div>
+
 	</div>
 </div>
 
