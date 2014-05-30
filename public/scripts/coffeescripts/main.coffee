@@ -18,7 +18,7 @@ require.config(
     rivets: "lib/rivets"
     kinetic: "lib/kinetic"
     bootstrap: 'lib/bootstrap'
-    jqueryMultiSelect: 'lib/jquery.multi-select'
+    jqueryMultiSelect: 'lib/jqueryMultiSelect'
 
   shim:
     underscore:
@@ -36,7 +36,7 @@ require.config(
       exports: "Bootstrap"
     jqueryMultiSelect:
       deps: ["jquery"]
-      exports["JqueryMultiSelect"]
+      exports: "JqueryMultiSelect"
 )
 
 

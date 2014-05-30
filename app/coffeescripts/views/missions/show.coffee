@@ -5,7 +5,7 @@ define [
 
   # Using the Require.js text! plugin, we are loaded raw text
   # which will be used as our views primary template
-  "text!templates/missions/index.html"
+  "text!templates/missions/show.html"
 ], ($, _, Backbone, MissionsIndexView) ->
   MissionsIndexTemplate = Backbone.View.extend(
     el: $("#right_board")

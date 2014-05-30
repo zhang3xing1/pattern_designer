@@ -13,7 +13,7 @@
       rivets: "lib/rivets",
       kinetic: "lib/kinetic",
       bootstrap: 'lib/bootstrap',
-      jqueryMultiSelect: 'lib/jquery.multi-select'
+      jqueryMultiSelect: 'lib/jqueryMultiSelect'
     },
     shim: {
       underscore: {
@@ -32,6 +32,10 @@
       bootstrap: {
         deps: ["jquery"],
         exports: "Bootstrap"
+      },
+      jqueryMultiSelect: {
+        deps: ["jquery"],
+        exports: "JqueryMultiSelect"
       }
     }
   });
