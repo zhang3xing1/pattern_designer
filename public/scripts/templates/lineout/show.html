@@ -1,0 +1,24 @@
+<div class="right_board" id='right_nav_bar'>  
+	<!-- <ul class="pager" style="margin: 0 auto;"> -->
+	  <!-- <li class="previous"><a href="#">&larr; Older</a></li> -->
+	  <span><%= title %></span>
+<!-- 	  <li class="next"><a href="#">Load New Mission &rarr;</a></li>
+	</ul> -->
+</div>
+
+<div class="right_board" id ='pattern_designer_container'>
+	<div class='left-panel col-sm-10'>
+		<ul class="nav nav-pills nav-stacked">
+		  <!-- <li class="active"> -->
+		  <% _.each(buttons, function(button){ %>
+			  <li >
+			    <a href="#" class="label label-primary " style="text-align: center; font-size: 18px; margin-bottom: 10%;">
+			      <%= button %> 
+			      <span style="float: right" >&rarr;</span>
+			    </a>
+
+			  </li>
+		  <%	}); %>
+		</ul>
+	</div>
+</div>
