@@ -1802,20 +1802,7 @@
       return "" + (value + 100);
     };
     $("input").prop("readonly", true);
-    $("input.dial").prop("readonly", false);
-    $("#hide_button").click(function() {
-      $("#right_board").animate({
-        marginLeft: "-100%"
-      }, 1000, function() {
-        return $("#right_board").hide();
-      });
-    });
-    return $("#show_button").click(function() {
-      $("#right_board").show();
-      $("#right_board").animate({
-        marginLeft: "20%"
-      }, 1000);
-    });
+    return $("input.dial").prop("readonly", false);
   });
 
 }).call(this);

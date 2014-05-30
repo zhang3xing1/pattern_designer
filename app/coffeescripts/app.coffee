@@ -1547,21 +1547,6 @@ define ['jquery', 'underscore', 'backbone', 'rivets', 'kinetic', 'logger', 'rout
   $("input.dial").prop "readonly", false
 
 
-
-  $("#hide_button").click ->
-    $("#right_board").animate
-      marginLeft: "-100%"
-    , 1000, ->
-      $("#right_board").hide()
-    return
-
-  $("#show_button").click ->
-    $("#right_board").show()
-    $("#right_board").animate
-      marginLeft: "20%"
-    , 1000
-    return
-
   ########  TEST  #########
 
   ## http://jsfiddle.net/EAvXT/8/
