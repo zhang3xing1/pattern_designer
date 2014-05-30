@@ -6,8 +6,8 @@
 <div class="right_board" id ='pattern_designer_container'>
 	<div class='left-panel col-sm-10' >
     <div>
-      <label class="col-sm-6 control-label">Mission</label>
-      <label class="col-sm-6 control-label">Pattern</label>
+      <label class="mission-label col-sm-6 control-label">Mission</label>
+      <label class="mission-label col-sm-6 control-label">Pattern</label>
     </div>
     <div style="margin-left: 16%;">
       <select multiple="multiple" id="my-select" name="my-select[]">
@@ -19,22 +19,25 @@
       </select>  
     </div>
 
-    <div class="input-group col-sm-6" style="float: left;">
-        <span class="input-group-addon label-info colomn-label-info">Total height</span>
-        <input type="text" class="form-control" >
+    <div class='bottom-panel' style="margin-top: 3%">
+        <div class="mission-bottom input-group col-sm-6" style="float: left; ">
+            <span class="input-group-addon label-info colomn-label-info">Total height</span>
+            <input type="text" class="form-control" >
+        </div>
+        <div class="mission-bottom input-group col-sm-6" style="float: right; margin-right: -15%">
+            <span class="input-group-addon label-info colomn-label-info">Total box</span>
+            <input type="text" class="form-control" >
+        </div>
+        <div class="mission-bottom input-group col-sm-6" style="float: left;">
+            <span class="input-group-addon label-info colomn-label-info">Total weight</span>
+            <input type="text" class="form-control" >
+        </div>
+        <div class="mission-bottom input-group col-sm-6" style="float: right; margin-right: -15%">
+            <span class="input-group-addon label-info colomn-label-info">Block Dim</span>
+            <input type="text" class="form-control" >
+        </div>         
     </div>
-    <div class="input-group col-sm-6" style="float: right; margin-right: -15%">
-        <span class="input-group-addon label-info colomn-label-info">Total box</span>
-        <input type="text" class="form-control" >
-    </div>
-    <div class="input-group col-sm-6" style="float: left;">
-        <span class="input-group-addon label-info colomn-label-info">Total weight</span>
-        <input type="text" class="form-control" >
-    </div>
-    <div class="input-group col-sm-6" style="float: right; margin-right: -15%">
-        <span class="input-group-addon label-info colomn-label-info">Block Dim</span>
-        <input type="text" class="form-control" >
-    </div>    
+   
    
  
   </div>

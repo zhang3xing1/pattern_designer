@@ -20,7 +20,7 @@ body {
   float: right;
   padding: 10px;
   margin-right: 1%;
-  width: 18%
+  width: 16%
 }
 
 .left_nav_bar{
@@ -81,6 +81,15 @@ div.left-panel  ul.line{
 
 #right_board {
   float: left;
+}
+
+.mission-bottom {
+  margin-bottom: 2%;
+}
+.mission-label {
+  text-align: center;
+  font-size: 150%;
+  margin-top: -5%;
 }
 
 #container {
