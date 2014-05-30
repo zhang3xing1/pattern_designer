@@ -34,6 +34,9 @@ require.config(
     bootstrap:
       deps: [ "jquery" ]
       exports: "Bootstrap"
+    jqueryMultiSelect:
+      deps: ["jquery"]
+      exports["JqueryMultiSelect"]
 )
 
 

@@ -2,12 +2,12 @@ define [
   "jquery"
   "underscore"
   "backbone"
-  # 'jqueryMultiSelect'
+  'jqueryMultiSelect'
 
   # Using the Require.js text! plugin, we are loaded raw text
   # which will be used as our views primary template
   "text!templates/missions/edit.html"
-], ($, _, Backbone, MissionsEditView) ->
+], ($, _, Backbone, JqueryMultiSelect, MissionsEditView) ->
   MissionsEditTemplate = Backbone.View.extend(
     el: $("#right_board")
     render: ->

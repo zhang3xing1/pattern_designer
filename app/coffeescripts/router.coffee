@@ -60,7 +60,7 @@ define [
       $('.right_board').remove()
       missionEditView = new MissionEditView
       missionEditView.render() 
-      
+      $('#my-select').multiSelect()
     show: (id) ->
       $(document.body).append "Show route has been called.. with id equals : ", id
       return
