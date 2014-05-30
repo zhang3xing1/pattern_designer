@@ -41,6 +41,15 @@ body {
     padding-bottom: 10px;
 }
 
+
+.left-panel, .right-panel{
+  margin-top: 8%
+}
+
+div.left-panel  ul.line{
+  margin-left:  15%;
+}
+
 #left_board_nav {
   width: 200px;
   height: 588px;
