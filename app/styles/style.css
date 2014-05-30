@@ -12,6 +12,17 @@ body {
   /*border: 1px solid; */
 }
 
+.title{
+  font-size: 200%;
+}
+
+.title a{
+  float: right;
+  padding: 10px;
+  margin-right: 1%;
+  width: 18%
+}
+
 .left_nav_bar{
   text-align: center;
   font-size: 30px;
@@ -42,12 +53,16 @@ body {
 }
 
 
-.left-panel, .right-panel{
+.left-panel{
+  margin-top: 8%
+}
+
+.right-panel{
   margin-top: 8%
 }
 
 div.left-panel  ul.line{
-  margin-left:  15%;
+  margin-left:  18%;
 }
 
 #left_board_nav {

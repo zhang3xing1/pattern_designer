@@ -1,13 +1,10 @@
 <div class="right_board" id='right_nav_bar'>  
-	<ul class="pager" style="margin: 0 auto;">
-	  <!-- <li class="previous"><a href="#">&larr; Older</a></li> -->
-	  <span><%= title %></span>
-	  <li class="next"><a href="#">Load New Mission &rarr;</a></li>
-	</ul>
+	<div class='title'><%= title %></div>
 </div>
 
+
 <div class="right_board" id ='pattern_designer_container'>
-	<div class='left-panel col-sm-10'>
+	<div class='left-panel col-sm-10'  style="margin-left: 5%">
 		<form class="form-horizontal" role="form" >
 			<% _.each(cells, function(cell){ %>
 			  <div class="form-group" >
