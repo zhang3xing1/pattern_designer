@@ -14,7 +14,24 @@ define [
       # Using Underscore we can compile our template with data
       data =
         title: "Line In"
-        buttons: ['Box Info', 'Box Place Location', 'Box Pick Location', 'Addtional Info']
+        buttons: [
+          {
+            name: 'Box Info'
+            router: "#boxSetting"
+          }
+          {
+            name: 'Box Place Location'
+            router: "#boxSetting"
+          }
+          {
+            name: 'Box Pick Location'
+            router: "#boxSetting"
+          }
+          {
+            name: 'Addtional Info'
+            router: "#boxSetting"
+          }                    
+        ]
       compiledTemplate = _.template(LineinShowView, data)
       
       # Append our compiled template to this Views "el"

@@ -1,0 +1,27 @@
+<div class="right_board" id='right_nav_bar'>  
+    <div class='title'><%= title %>
+          <a href="#" class="label label-primary " >
+            save
+          </a>
+    </div>
+</div>
+
+
+<div class="right_board" id ='pattern_designer_container'>
+	<div class='left-panel col-sm-10'  style="margin-left: 5%">
+		<form class="form-horizontal" role="form" >
+			<% _.each(cells, function(cell){ %>
+			  <div class="form-group" >
+		    	<label  class="col-sm-2 control-label"><%= cell %></label>
+			    <div class="col-sm-8">
+			      <input  class="form-control" >
+			    </div>
+		  	</div>		
+			<%	}); %> 	
+		</form>
+	</div>
+  
+  <div class='right-panel col-sm-4', style="float: right; margin-left: -40%; margin-right: 5%;">
+
+	</div>
+</div>
