@@ -11,9 +11,11 @@ define [
   "views/missions/index"
   "views/missions/new"  
   "views/linein/boxSetting"
+  "views/linein/placeSetting"
+  "views/linein/pickSetting"
 ], ($, _, Backbone, MissionShowView, PatternIndexView, FrameShowView, 
   LineinShowView, LineoutShowView, MissionEditView, MissionIndexView, MissionNewView,
-  BoxSettingView) ->
+  BoxSettingView, PlaceSettingView, PickSettingView) ->
   class AppRouter extends Backbone.Router
     routes:
       "program": "missionShow"
@@ -25,6 +27,9 @@ define [
       'loadMission':  "missionIndex"
       'createMission':  "missionNew"
       'boxSetting': 'boxSetting'
+      'boxSetting': 'boxSetting'
+      'placeSetting': 'placeSetting'
+      'pickSetting': 'pickSetting'
       
       "show/:id": "show"
       "download/*random": "download"
@@ -87,7 +92,22 @@ define [
       console.log 'boxSetting'
       $('.right_board').remove()
       boxSettingView = new BoxSettingView
-      boxSettingView.render()       
+      boxSettingView.render()  
+
+    pickSetting: ->
+      console.log 'pickSetting'
+      $('.right_board').remove()
+      pickSettingView = new PickSettingView
+      pickSettingView.render() 
+      $("[name='teach']").bootstrapSwitch('onColor', 'success') 
+
+    placeSetting: ->
+      console.log 'placeSetting'
+      $('.right_board').remove()
+      placeSettingView = new PlaceSettingView
+      placeSettingView.render()   
+      $("[name='orient']").bootstrapSwitch('onColor', 'success') 
+
 
     show: (id) ->
       $(document.body).append "Show route has been called.. with id equals : ", id

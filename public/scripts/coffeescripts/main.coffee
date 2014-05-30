@@ -19,6 +19,7 @@ require.config(
     kinetic: "lib/kinetic"
     bootstrap: 'lib/bootstrap'
     jqueryMultiSelect: 'lib/jqueryMultiSelect'
+    bootstrapSwitch: 'lib/bootstrapSwitch'
 
   shim:
     underscore:

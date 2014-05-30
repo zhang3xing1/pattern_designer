@@ -21,11 +21,11 @@ define [
           }
           {
             name: 'Box Place Location'
-            router: "#boxSetting"
+            router: "#placeSetting"
           }
           {
             name: 'Box Pick Location'
-            router: "#boxSetting"
+            router: "#pickSetting"
           }
           {
             name: 'Addtional Info'
