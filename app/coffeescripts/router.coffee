@@ -8,7 +8,8 @@ define [
   "views/linein/show"
   "views/lineout/show"
   "views/missions/edit"
-], ($, _, Backbone, MissionShowView, PatternIndexView, FrameShowView, LineinShowView, LineoutShowView, MissionEditView) ->
+  "views/missions/index"
+], ($, _, Backbone, MissionShowView, PatternIndexView, FrameShowView, LineinShowView, LineoutShowView, MissionEditView, MissionIndexView) ->
   class AppRouter extends Backbone.Router
     routes:
       "program": "missionShow"
@@ -17,6 +18,7 @@ define [
       "linein":  "lineinShow"
       "lineout":  "lineoutShow"
       'mission':  "missionEdit"
+      'loadMission':  "missionIndex"
       
       "show/:id": "show"
       "download/*random": "download"
@@ -30,6 +32,7 @@ define [
       missionShowView = new MissionShowView
       missionShowView.render()
       return
+      
     patternIndex: ->
       console.log 'patternIndex'
       $('.right_board').remove()
@@ -56,11 +59,17 @@ define [
       lineoutShowView.render()  
 
     missionEdit: ->
-      console.log 'lineoutShow' 
+      console.log 'missionEdit' 
       $('.right_board').remove()
       missionEditView = new MissionEditView
       missionEditView.render() 
       $('#my-select').multiSelect()
+
+    missionIndex: ->
+      console.log 'missionIndex'
+      $('.right_board').remove()
+      missionIndexView = new MissionIndexView
+      missionIndexView.render()        
     show: (id) ->
       $(document.body).append "Show route has been called.. with id equals : ", id
       return
