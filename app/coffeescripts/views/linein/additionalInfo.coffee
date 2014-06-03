@@ -12,7 +12,8 @@ define [
     render: ->
       
       # Using Underscore we can compile our template with data
-      
+      data =
+        title: "Additional Info"
       compiledTemplate = _.template(LineinShowView, data)
       
       # Append our compiled template to this Views "el"

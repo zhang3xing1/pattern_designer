@@ -83,6 +83,10 @@ div.left-panel  ul.line{
   float: left;
 }
 
+.info-bottom {
+  margin-bottom: 8%;
+}
+
 .mission-bottom {
   margin-bottom: 2%;
 }
