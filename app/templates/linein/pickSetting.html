@@ -1,93 +1,64 @@
 <div class="right_board" id='right_nav_bar'>  
-	<div class='title'><%= title %></div>
-    <a href="#" class="alert alert-danger col-sm-7" >
-      set
-    </a>    
+    <div class='title'><%= title %>
+      <a href="#" class="label label-primary" s>
+        set
+      </a>   
+<!--       <a href="#" class="label label-primary" s>
+        GO to Place
+      </a>  -->  
+    </div>
+   
 </div>
 
 <div class="right_board" id ='pattern_designer_container'>
-	<div class='left-panel col-sm-10'  style="margin-left: 5%">
-		<div class='top-panel' >
-		    <div class="mission-bottom input-group col-sm-5" >
-		        <span class="input-group-addon label-info colomn-label-info">TCP manual def</span>
-		        <input type="checkbox" name="teach" checked>
-		    </div> 	
-		</div>
+    <div class='left-panel col-sm-10'  style="margin-left: 5%">
+        <div class='top-panel' >
+            <div class="mission-bottom input-group col-sm-5" >
+                <span class="input-group-addon label-info colomn-label-info">TCP manual def</span>
+                <input type="checkbox" name="teach" checked>
 
-        <div class='bottom-panel' style="margin-top: 3%">
-            <div class="mission-bottom input-group col-sm-4" style="float: left; ">
-                <span class="input-group-addon label-info colomn-label-info">X</span>
-                <input type="text" class="form-control" >
-                <span class="input-group-addon">mm</span>
-            </div>
-            <div class="mission-bottom input-group col-sm-4" style="float: right; margin-left: 1%">
-                <span class="input-group-addon label-info colomn-label-info">A</span>
-                <input type="text" class="form-control" >
-                <span class="input-group-addon">°</span>
-            </div>
-            <div class="mission-bottom input-group col-sm-4" style="float: left;">
-                <span class="input-group-addon label-info colomn-label-info">Y</span>
-                <input type="text" class="form-control" >
-                <span class="input-group-addon">mm</span>
-            </div>
-            <div class="mission-bottom input-group col-sm-4" style="float: right; margin-left: 1%">
-                <span class="input-group-addon label-info colomn-label-info">E</span>
-                <input type="text" class="form-control" >
-                <span class="input-group-addon">°</span>
             </div>  
-            <div class="mission-bottom input-group col-sm-4" style="float: left;">
-                <span class="input-group-addon label-info colomn-label-info">Z</span>
-                <input type="text" class="form-control" >
-                <span class="input-group-addon">mm</span>
-            </div>
-            <div class="mission-bottom input-group col-sm-4" style="float: right; margin-left: 1%">
-                <span class="input-group-addon label-info colomn-label-info">R</span>
-                <input type="text" class="form-control" >
-                <span class="input-group-addon">°</span>
-            </div>                   
-        </div>
-
-	</div>
-  
-    <div class='right-panel col-sm-4', style="float: right; margin-left: -50%; margin-right: 10%;">
-        <div class="mission-bottom input-group col-sm-6" style="">
+        <div class="mission-bottom input-group col-sm-4" style="margin-top: -10%;float: right;">
             <span class="input-group-addon label-info colomn-label-info">Table Index</span>
             <input type="text" class="form-control" >
+        </div>
+        </div>
+
+    <div class='bottom-panel' style="margin-top: 3%">
+        <div class="mission-bottom input-group col-sm-4" style="float: left; ">
+            <span class="input-group-addon label-info colomn-label-info">X</span>
+            <input type="text" class="form-control" >
+            <span class="input-group-addon">mm</span>
+        </div>
+        <div class="mission-bottom input-group col-sm-4" style="float: right; margin-left: 1%">
+            <span class="input-group-addon label-info colomn-label-info">A</span>
+            <input type="text" class="form-control" >
+            <span class="input-group-addon">°</span>
+        </div>
+        <div class="mission-bottom input-group col-sm-4" style="float: left;">
+            <span class="input-group-addon label-info colomn-label-info">Y</span>
+            <input type="text" class="form-control" >
+            <span class="input-group-addon">mm</span>
+        </div>
+        <div class="mission-bottom input-group col-sm-4" style="float: right; margin-left: 1%">
+            <span class="input-group-addon label-info colomn-label-info">E</span>
+            <input type="text" class="form-control" >
+            <span class="input-group-addon">°</span>
         </div>  
-        <a href="#" class="alert alert-info col-sm-7" >
-            Go to PLACE
-        </a>
-		
-	</div>
+        <div class="mission-bottom input-group col-sm-4" style="float: left;">
+            <span class="input-group-addon label-info colomn-label-info">Z</span>
+            <input type="text" class="form-control" >
+            <span class="input-group-addon">mm</span>
+        </div>
+        <div class="mission-bottom input-group col-sm-4" style="float: right; margin-left: 1%">
+            <span class="input-group-addon label-info colomn-label-info">R</span>
+            <input type="text" class="form-control" >
+            <span class="input-group-addon">°</span>
+        </div>                   
+    </div>
+
+    </div>
+  
 </div>
 
-<!-- <div class="right_board" id ='pattern_designer_container'>
-	<div class='left-panel col-sm-10' >
-		<div class='top-panel' style="height: 180px">
-			
-		</div>
-    <div class='bottom-panel' style="margin-top: 3%">
-        <div class="mission-bottom input-group col-sm-6" style="float: left; ">
-            <span class="input-group-addon label-info colomn-label-info">Length</span>
-            <input type="text" class="form-control"  >
-            <span class="input-group-addon">mm</span>
-        </div>
-        <div class="mission-bottom input-group col-sm-6" style="float: right; margin-right: -15%">
-            <span class="input-group-addon label-info colomn-label-info">Width</span>
-            <input type="text" class="form-control"  >
-            <span class="input-group-addon">mm</span>
-        </div>
-        <div class="mission-bottom input-group col-sm-6" style="float: left;">
-            <span class="input-group-addon label-info colomn-label-info">Height</span>
-            <input type="text" class="form-control"  >
-            <span class="input-group-addon">mm</span>
-        </div>
-        <div class="mission-bottom input-group col-sm-6" style="float: right; margin-right: -15%">
-            <span class="input-group-addon label-info colomn-label-info">Weight</span>
-            <input type="text" class="form-control"  >
-            <span class="input-group-addon">kg</span>
-        </div>         
-    </div>
-  </div>
-  <input type="checkbox" name="orient" checked>
-</div> -->
+
