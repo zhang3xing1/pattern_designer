@@ -14,7 +14,20 @@ define [
       # Using Underscore we can compile our template with data
       data =
         title: "Line Out"
-        buttons: ['Pallet Setting', 'Constraints', 'Layout']
+        buttons: [
+          {
+            name: 'Pallet Setting'
+            router: "#palletSetting"
+          }
+          {
+            name: 'Constraints'
+            router: "#constraintSetting"
+          }
+          {
+            name: 'Layout'
+            router: "#layout"
+          }                   
+        ]
       compiledTemplate = _.template(LineoutShowView, data)
       
       # Append our compiled template to this Views "el"

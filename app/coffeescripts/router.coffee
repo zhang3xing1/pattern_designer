@@ -13,9 +13,13 @@ define [
   "views/linein/boxSetting"
   "views/linein/placeSetting"
   "views/linein/pickSetting"
+  "views/linein/additionalInfo"
+  "views/lineout/palletSetting"
+  "views/lineout/constraintSetting"
 ], ($, _, Backbone, MissionShowView, PatternIndexView, FrameShowView, 
   LineinShowView, LineoutShowView, MissionEditView, MissionIndexView, MissionNewView,
-  BoxSettingView, PlaceSettingView, PickSettingView) ->
+  BoxSettingView, PlaceSettingView, PickSettingView, AdditionalInfoView,
+  PalletSettingView, ConstraintSettingView) ->
   class AppRouter extends Backbone.Router
     routes:
       "program": "missionShow"
@@ -30,7 +34,12 @@ define [
       'boxSetting': 'boxSetting'
       'placeSetting': 'placeSetting'
       'pickSetting': 'pickSetting'
-      
+      'additionalInfo': 'additionalInfo'
+      'palletSetting' : 'palletSetting'
+      'constraintSetting': 'constraintSetting'
+
+
+
       "show/:id": "show"
       "download/*random": "download"
           
@@ -108,6 +117,24 @@ define [
       placeSettingView.render()   
       $("[name='orient']").bootstrapSwitch('onColor', 'success') 
 
+    additionalInfo: ->
+      console.log 'additionalInfo'
+      $('.right_board').remove()
+      additionalInfoView = new AdditionalInfoView
+      additionalInfoView.render()   
+      $("[name='teach']").bootstrapSwitch('onColor', 'success')  
+
+    palletSetting: ->
+      console.log 'palletSetting'
+      $('.right_board').remove()
+      palletSettingView = new PalletSettingView
+      palletSettingView.render()           
+
+    constraintSetting: ->
+      console.log 'constraintSetting'
+      $('.right_board').remove()
+      constraintSettingView = new ConstraintSettingView
+      constraintSettingView.render()     
 
     show: (id) ->
       $(document.body).append "Show route has been called.. with id equals : ", id
