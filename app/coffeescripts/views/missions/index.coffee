@@ -2,11 +2,12 @@ define [
   "jquery"
   "underscore"
   "backbone"
+  "jqueryEditable"
 
   # Using the Require.js text! plugin, we are loaded raw text
   # which will be used as our views primary template
   "text!templates/missions/index.html"
-], ($, _, Backbone, MissionsIndexView) ->
+], ($, _, Backbone, JqueryEditable, MissionsIndexView) ->
   MissionsIndexTemplate = Backbone.View.extend(
     el: $("#right_board")
     render: ->

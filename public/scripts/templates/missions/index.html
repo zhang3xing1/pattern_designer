@@ -16,7 +16,7 @@
 		  </div>
 			  <!-- List group -->
 			  <ul class="list-group" style="height: 204px; overflow: scroll;">
-			    <li class="list-group-item">Cras justo odio</li>
+			    <li class="list-group-item" id="mission_0001">Cras justo odio</li>
 			    <li class="list-group-item">Dapibus ac facilisis in</li>
 			    <li class="list-group-item">Morbi leo risus</li>
 			    <li class="list-group-item">Porta ac consectetur ac</li>
@@ -32,7 +32,7 @@
 		  <!-- <li class="active"> -->
 		  <% _.each(buttons, function(button){ %>
 			  <li >
-			    <a href="#" class="label label-primary " style="text-align: center; font-size: 18px; margin-bottom: 14px;">
+			    <a href="#" id="<%= button %>"class="label label-primary " style="text-align: center; font-size: 18px; margin-bottom: 14px;">
 			      <%= button %>
 			    </a>
 			  </li>

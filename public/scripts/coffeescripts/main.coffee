@@ -20,6 +20,7 @@ require.config(
     bootstrap: 'lib/bootstrap'
     jqueryMultiSelect: 'lib/jqueryMultiSelect'
     bootstrapSwitch: 'lib/bootstrapSwitch'
+    jqueryEditable: 'lib/jqueryEditable'
 
   shim:
     underscore:
@@ -38,6 +39,9 @@ require.config(
     jqueryMultiSelect:
       deps: ["jquery"]
       exports: "JqueryMultiSelect"
+    jqueryEditable:
+      deps: ["jquery"]
+      exports: "JqueryEditable"      
 )
 
 

@@ -90,6 +90,16 @@ define [
       $('.right_board').remove()
       missionIndexView = new MissionIndexView
       missionIndexView.render()    
+      
+      option =
+        trigger: $("#Rename")
+        action: "click"
+
+      console.log option
+
+      $("#mission_0001").editable option, (e) ->
+        console.log "rename worked!"
+        return
 
     missionNew: ->
       console.log 'missionNew'

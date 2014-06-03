@@ -14,7 +14,8 @@
       kinetic: "lib/kinetic",
       bootstrap: 'lib/bootstrap',
       jqueryMultiSelect: 'lib/jqueryMultiSelect',
-      bootstrapSwitch: 'lib/bootstrapSwitch'
+      bootstrapSwitch: 'lib/bootstrapSwitch',
+      jqueryEditable: 'lib/jqueryEditable'
     },
     shim: {
       underscore: {
@@ -37,6 +38,10 @@
       jqueryMultiSelect: {
         deps: ["jquery"],
         exports: "JqueryMultiSelect"
+      },
+      jqueryEditable: {
+        deps: ["jquery"],
+        exports: "JqueryEditable"
       }
     }
   });
