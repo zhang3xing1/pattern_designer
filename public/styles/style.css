@@ -53,6 +53,8 @@ body {
 }
 
 
+/* right zone style */
+
 .left-panel{
   margin-top: 8%
 }
@@ -131,7 +133,6 @@ div.left-panel  ul.line{
 .flash-info{
     margin: auto;
 }
-
 
 /*body {
         margin:   28px;
