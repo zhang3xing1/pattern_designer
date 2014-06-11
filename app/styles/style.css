@@ -134,6 +134,10 @@ div.left-panel  ul.line{
     margin: auto;
 }
 
+.boxsetting{
+    background-image: url(../img/boxSetting.png);
+    background-repeat: no-repeat;
+}
 /*body {
         margin:   28px;
         padding:  0px;
