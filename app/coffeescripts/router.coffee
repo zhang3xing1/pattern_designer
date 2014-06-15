@@ -2,6 +2,7 @@ define [
   "jquery"
   "underscore"
   "backbone"
+  "backboneRoutefilter"
   "views/missions/show"
   "views/pattern/index"
   "views/frame/show"
@@ -16,7 +17,7 @@ define [
   "views/linein/additionalInfo"
   "views/lineout/palletSetting"
   "views/lineout/constraintSetting"
-], ($, _, Backbone, MissionShowView, PatternIndexView, FrameShowView, 
+], ($, _, Backbone, BackboneRoutefilter, MissionShowView, PatternIndexView, FrameShowView, 
   LineinShowView, LineoutShowView, MissionEditView, MissionIndexView, MissionNewView,
   BoxSettingView, PlaceSettingView, PickSettingView, AdditionalInfoView,
   PalletSettingView, ConstraintSettingView) ->
@@ -43,14 +44,25 @@ define [
       "show/:id": "show"
       "download/*random": "download"
           
+    before: (route, params) ->
+      console.log 'before.....'
+      console.log route
+      console.log params
+      console.log @appData
+      console.log 'before end'
     initialize: ->
+      @appData = 
+        debugInfo: "hello, this is app data debug info"
       Backbone.history.start()
 
     missionShow: ->
       console.log 'missionShow'
+      console.log @appData
       $('.right_board').remove()
-      missionShowView = new MissionShowView
+      missionShowView = new MissionShowView({app: @appData})
       missionShowView.render()
+
+
       return
       
     patternIndex: ->

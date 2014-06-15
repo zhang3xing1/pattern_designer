@@ -10,6 +10,7 @@
       jquery: "lib/jquery",
       underscore: "lib/underscore",
       backbone: "lib/backbone",
+      backboneRoutefilter: "lib/backboneRoutefilter",
       rivets: "lib/rivets",
       kinetic: "lib/kinetic",
       bootstrap: 'lib/bootstrap',
@@ -46,21 +47,7 @@
     }
   });
 
-  require(['rivets', 'router', "app"], function(rivets, Router, App) {
-    rivets.adapters[":"] = {
-      subscribe: function(obj, keypath, callback) {
-        obj.on("change:" + keypath, callback);
-      },
-      unsubscribe: function(obj, keypath, callback) {
-        obj.off("change:" + keypath, callback);
-      },
-      read: function(obj, keypath) {
-        return obj.get(keypath);
-      },
-      publish: function(obj, keypath, value) {
-        obj.set(keypath, value);
-      }
-    };
+  require(['router'], function(Router) {
     window.router = Router.create;
   });
 
