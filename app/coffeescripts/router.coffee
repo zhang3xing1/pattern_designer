@@ -41,15 +41,15 @@ define [
 
 
 
-      "show/:id": "show"
-      "download/*random": "download"
+      "": "missionShow"
+      # "download/*random": "download"
           
-    before: (route, params) ->
-      console.log 'before.....'
-      console.log route
-      console.log params
-      console.log @appData
-      console.log 'before end'
+    # before: (route, params) ->
+    #   console.log 'before.....'
+    #   console.log route
+    #   console.log params
+    #   console.log @appData
+    #   console.log 'before end'
     initialize: ->
       @appData = 
         debugInfo: "hello, this is app data debug info"
