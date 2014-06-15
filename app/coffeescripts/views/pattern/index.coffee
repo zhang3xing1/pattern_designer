@@ -9,11 +9,12 @@ define [
   # Using the Require.js text! plugin, we are loaded raw text
   # which will be used as our views primary template
   "text!templates/pattern/index.html" 
-], ($, _, Backbone, rivets, Kinetic, aLogger,PatternIndexView) ->
+], ($, _, Backbone, rivets, Kinetic, aLogger, PatternIndexView) ->
   PatternIndexViewTemplate = Backbone.View.extend(
     el: $("#right_board")
     render: ->
-      
+      Logger = aLogger.create
+
       # Using Underscore we can compile our template with data
       data = {title: "Pattern Designer"}
       compiledTemplate = _.template(PatternIndexView, data)
@@ -48,8 +49,7 @@ define [
           obj.set keypath, value
           return
 
-
-      Logger = aLogger.create
+      
 
       class Box extends Backbone.Model
         defaults: {
@@ -439,6 +439,7 @@ define [
                         "[#{prefix}]: PointC(x:#{@getPointC().x},y:#{@getPointC().y})\n " +
                         "[#{prefix}]: PointD(x:#{@getPointD().x},y:#{@getPointD().y})\n " )
   
+      Logger.dev "run in box"
       class Boxes extends Backbone.Collection
         model: Box
         initialize: (params)->
