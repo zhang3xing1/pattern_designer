@@ -103,15 +103,15 @@ define [
       missionIndexView = new MissionIndexView
       missionIndexView.render()    
       
-      option =
-        trigger: $("#Rename")
-        action: "click"
+      # option =
+      #   trigger: $("#Rename")
+      #   action: "click"
 
-      console.log option
+      # console.log option
 
-      $("#mission_0001").editable option, (e) ->
-        console.log "rename worked!"
-        return
+      # $("#mission_0001").editable option, (e) ->
+      #   console.log "rename worked!"
+      #   return
 
     missionNew: ->
       console.log 'missionNew'
