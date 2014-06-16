@@ -101,6 +101,11 @@ div.left-panel  ul.line{
 #container {
     /*margin-top: 5%;*/
     /*margin: auto;*/
+    margin-left: 0;
+    padding-left: 0;
+    margin-right: 0;
+    padding-right: 0;
+    width: 735px;
 }
 
 #canvas_container{
