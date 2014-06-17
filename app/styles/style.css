@@ -149,6 +149,11 @@ div.left-panel  ul.line{
     background-image: url(../img/placeSetting.png);
     background-repeat: no-repeat;
 }
+
+
+.selected-item {
+  background-color: orangered;
+}
 /*body {
         margin:   28px;
         padding:  0px;

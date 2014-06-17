@@ -50,6 +50,12 @@ define [
     #   console.log params
     #   console.log @appData
     #   console.log 'before end'
+    after: (route, params) ->
+      # change left nav button color
+      $('.left-nav-list').removeClass('list-group-item-info')
+      # $("[href*='linein']")
+      $("[href*='#{route}']").addClass('list-group-item-info')
+      console.log "after: #{route}"
     initialize: ->
       @appData = 
         debugInfo: "hello, this is app data debug info"

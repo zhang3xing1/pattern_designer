@@ -28,8 +28,6 @@ define [
         trigger: $("#Rename")
         action: "click"
 
-      console.log option
-
       $("[id^='mission-item-']").on('click', (el) ->
         $("[id^='mission-item-']").removeClass('selected-item')
         $(this).addClass('selected-item')
