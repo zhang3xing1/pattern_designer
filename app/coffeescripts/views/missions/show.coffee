@@ -6,9 +6,9 @@ define [
   # Using the Require.js text! plugin, we are loaded raw text
   # which will be used as our views primary template
   "text!templates/missions/show.html"
-], ($, _, Backbone, MissionsIndexView) ->
+], ($, _, Backbone, MissionsShowView) ->
 
-  MissionsIndexTemplate = Backbone.View.extend(
+  MissionsShowTemplate = Backbone.View.extend(
     initialize: (options) ->
       options.app.debugInfo
 
@@ -21,7 +21,7 @@ define [
         title: "Current Mission"
         cells: ['Name', 'Creator', 'Company', 'Product', 'Code']
         buttons: ['SALVA', 'SACA', 'Save As', 'Reload']
-      compiledTemplate = _.template(MissionsIndexView, data)
+      compiledTemplate = _.template(MissionsShowView, data)
       
       # Append our compiled template to this Views "el"
       @$el.append compiledTemplate
@@ -29,4 +29,4 @@ define [
   )
   
   # Our module now returns our view
-  MissionsIndexTemplate
+  MissionsShowTemplate

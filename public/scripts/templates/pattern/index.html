@@ -1,86 +1,43 @@
-<div id="right_board">
-  <div class="right_board" id='right_nav_bar'>
-    <div class='title'><%= title %>
-          <a href="#" class="label label-primary " >
-            save
+<div class="right_board" id='right_nav_bar'>  
+  <div class='title'>
+      <%= title %>
+      <a href="#pattern" class="label label-primary " >
+        create
+      </a>
+  </div>
+
+</div>
+
+
+<div class="right_board" id ='pattern_designer_container'>
+  <div class='left-panel col-sm-6'  style="margin-left: 5%">
+    <div class="panel panel-default">
+      <div class="panel-heading">
+        <h3 class="panel-title">Layer List</h3>
+      </div>
+        <!-- List group -->
+        <ul class="list-group" style="height: 204px; overflow: scroll;">
+          <li class="list-group-item" id="layer-item-1">layer-1</li>
+          <li class="list-group-item" id="layer-item-2">layer-2</li>
+          <li class="list-group-item" id="layer-item-3">layer-3</li>
+          <li class="list-group-item" id="layer-item-4">layer-4</li>
+          <li class="list-group-item" id="layer-item-5">layer-5</li>
+          <li class="list-group-item" id="layer-item-6">layer-6</li>
+        </ul>
+    </div>
+
+  </div>
+  
+  <div class='right-panel col-sm-4', style="float: right; margin-left: -40%; margin-right: 5%;">
+    <ul class="nav nav-pills nav-stacked">
+      <!-- <li class="active"> -->
+      <% _.each(buttons, function(button){ %>
+        <li >
+          <a href="#pattern<%= button %>" id="<%= button %>"class="label label-primary " style="text-align: center; font-size: 18px; margin-bottom: 14px;">
+            <%= button %>
           </a>
-    </div>
+        </li>
+      <%  }); %>
+    </ul>
   </div>
-
-  <div class="right_board" id ='pattern_designer_container'>
-    <div id="canvas_container" class='col-md-4'></div>
-    <div id="dashboard" class='col-md-5'>
-      <div class="input-group row column">
-          <span class="input-group-addon label-info colomn-label-info">Layer :</span>
-          <input type="text" class="form-control" placeholder="layer name">
-      </div>
-      <div id="new_box" class="input-group row column">
-          <span class="input-group-addon label-info">New Box :</span>
-          <input type="text" name="new_box" class="form-control boxes" placeholder="name" readonly="readOnly" rv-value="boxes.availableNewTitle">
-          <span class="input-group-btn">
-            <button class="btn btn-primary boxes" id= "createNewBox" rv-on-click="boxes.createNewBox">Create</button>
-          </span> 
-      </div>
-      <div id="new_box" class="input-group row column">
-          <span class="input-group-addon label-info">Curr Box :</span>
-          <input type="text" name="new_box" class="form-control currentBox" placeholder="name" rv-value="currentBox:title">
-          <span class="input-group-btn">
-            <button class="btn btn-primary boxes placeCurrentBox"  id= "placeCurrentBox" rv-on-click="boxes.settleCurrentBox">Place</button>
-          </span> 
-      </div>
-    
-      <div class="box input-group row column" >
-        <div class="input-group col-md-6" style="float: left">
-            <span class="input-group-addon label-info">X</span>
-            <input type="text" class="form-control" rv-value="box.getXPositionByRatio | suffix_cm">
-        </div>
-
-        <div class="input-group col-md-6" style="float: left">
-            <span class="input-group-addon label-info">Y</span>
-            <input type="text" class="form-control" rv-value="box.getYPositionByRatio | suffix_cm">
-        </div>
-      
-      </div>
-
-      <div class="input-group row column" style="width: 220px" >
-        <div class="input-group col-md-3"  style="float: right">
-           <button type="button" class="btn btn-primary boxes placeCurrentBox" id="rotateButton" rv-on-click="boxes.rotate90">
-                Rotate
-          </button>
-        </div>
-
-        <div class="btn-group boxes" style="float: left">
-            <button type="button" class="btn btn-primary placeCurrentBox" rv-on-click="boxes.left">←</button>
-            <button type="button" class="btn btn-primary placeCurrentBox" rv-on-click="boxes.right">→</button>
-            <button type="button" class="btn btn-primary placeCurrentBox" rv-on-click="boxes.up">↑</button>
-            <button type="button" class="btn btn-primary placeCurrentBox" rv-on-click="boxes.down">↓</button>
-        </div> 
-      </div>
-
-      <div class="input-group row column" >
-        <div class="input-group col-md-20" style="float: right">
-            <span class="input-group-addon label-info">Offset</span>
-            <input type="radio" class= "box" name = 'moveOffset' style="margin-left: 4px" rv-checked="box:moveOffset"  value="1" >1
-            <input type="radio" class= "box" name = 'moveOffset' style="margin-left: 4px" rv-checked="box:moveOffset"  value="4" >4
-            <input type="radio" class= "box" id='moveOffset' name = 'moveOffset' style="margin-left: 4px" rv-checked="box:moveOffset"  value="10" checked="checked">10
-            <!-- <button type="button" class="btn btn-warning placeCurrentBox boxes" rv-on-click="boxes.rotateByVector">Vector</button> -->
-        </div>      
-      </div>
-
-      <div class="input-group row column"  style="width: 220px" >
-        <div class="input-group col-md-20" style="float: right">
-          <!-- <button type="button" class="btn btn-primary boxes placeCurrentBox" id="rotateButton" rv-on-click="boxes.rotate90">
-                Rotate
-          </button> -->
-          <button type="button" class="btn btn-warning placeCurrentBox boxes" rv-on-click="boxes.rotateByVector">Arrow</button>
-        </div>
-        <div class="input-group col-md-20" style="float: left">
-           <button type="button" class="btn btn-danger boxes placeCurrentBox" rv-on-click="boxes.removeCurrentBox">Delete</button>
-        </div>
-      </div>
-      <span class="flash-info boxes " rv-text="boxes.flash"></span>
-
-    </div>
-  </div>
-
 </div>

@@ -16,7 +16,6 @@ define [
         title: "Box Pick Setting"
         buttons: ['Box Info', 'Box Place Location', 'Box Pick Location', 'Addtional Info']
 
-
       compiledTemplate = _.template(PickSettingView, data)
       
       # Append our compiled template to this Views "el"

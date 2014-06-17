@@ -17,14 +17,15 @@ define [
   "views/linein/additionalInfo"
   "views/lineout/palletSetting"
   "views/lineout/constraintSetting"
+  "views/pattern/show"
 ], ($, _, Backbone, BackboneRoutefilter, MissionShowView, PatternIndexView, FrameShowView, 
   LineinShowView, LineoutShowView, MissionEditView, MissionIndexView, MissionNewView,
   BoxSettingView, PlaceSettingView, PickSettingView, AdditionalInfoView,
-  PalletSettingView, ConstraintSettingView) ->
+  PalletSettingView, ConstraintSettingView, PatternShowView) ->
   class AppRouter extends Backbone.Router
     routes:
       "program": "missionShow"
-      "pattern": "patternIndex"
+      "pattern": "patternShow"
       "frame":   "frameShow"
       "linein":  "lineinShow"
       "lineout":  "lineoutShow"
@@ -38,6 +39,7 @@ define [
       'additionalInfo': 'additionalInfo'
       'palletSetting' : 'palletSetting'
       'constraintSetting': 'constraintSetting'
+      "patterns": "patternIndex"
 
 
 
@@ -54,7 +56,7 @@ define [
       # change left nav button color
       $('.left-nav-list').removeClass('list-group-item-info')
       # $("[href*='linein']")
-      $("[href*='#{route}']").addClass('list-group-item-info')
+      $("#left_board [href*='#{route}']").addClass('list-group-item-info')
       console.log "after: #{route}"
     initialize: ->
       @appData = 
@@ -67,8 +69,6 @@ define [
       $('.right_board').remove()
       missionShowView = new MissionShowView({app: @appData})
       missionShowView.render()
-
-
       return
       
     patternIndex: ->
@@ -76,6 +76,13 @@ define [
       $('.right_board').remove()
       patternIndexView = new PatternIndexView
       patternIndexView.render()
+      return
+
+    patternShow: ->
+      console.log 'patternShow'
+      $('.right_board').remove()
+      patternShowView = new PatternShowView
+      patternShowView.render()
       return
 
     frameShow: ->
