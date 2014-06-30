@@ -1,4 +1,3 @@
-# Use this as a quick template for future modules
 define ->
   class Logger
     instance = null

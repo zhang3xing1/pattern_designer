@@ -47,8 +47,8 @@
     }
   });
 
-  require(['router'], function(Router) {
-    window.router = Router.create;
+  require(['router', 'appController'], function(Router, AppController) {
+    alert(Router);
   });
 
 }).call(this);

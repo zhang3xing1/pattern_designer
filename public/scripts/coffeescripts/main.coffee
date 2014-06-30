@@ -47,6 +47,6 @@ require.config(
 
 
 # Load our app module and pass it to our definition function
-require [ 'router' ], (Router) ->
-  window.router = Router.create    
+require [ 'router', 'appController' ], (Router, AppController) ->
+  alert Router
   return

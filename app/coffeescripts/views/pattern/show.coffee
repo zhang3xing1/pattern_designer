@@ -23,6 +23,14 @@ define [
       @$el.append compiledTemplate
 
 
+      ##
+      #
+      #
+      # This is all about pattern desiger code
+      #
+      #
+      ##
+
       # ###### rivets adapter configure, below ######
       rivets.adapters[":"] =
         subscribe: (obj, keypath, callback) ->
