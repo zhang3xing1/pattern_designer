@@ -3,6 +3,7 @@ define [
   "underscore"
   "backbone"
   "backboneRoutefilter"
+  "tinybox"
   "logger"
   "views/missions/show"
   "views/pattern/index"
@@ -19,7 +20,7 @@ define [
   "views/lineout/palletSetting"
   "views/lineout/constraintSetting"
   "views/pattern/show"
-], ($, _, Backbone, BackboneRoutefilter, Logger, MissionShowView, PatternIndexView, FrameShowView, 
+], ($, _, Backbone, BackboneRoutefilter, Tinybox, Logger, MissionShowView, PatternIndexView, FrameShowView, 
   LineinShowView, LineoutShowView, MissionEditView, MissionIndexView, MissionNewView,
   BoxSettingView, PlaceSettingView, PickSettingView, AdditionalInfoView,
   PalletSettingView, ConstraintSettingView, PatternShowView) ->
@@ -160,7 +161,8 @@ define [
 
     before: (route, params) ->
       @logger.dev("[Before] - route: #{route}, params: #{params}")
-
+      if route == 'program'
+        
 
     after: (route, params) ->
       ## Change left nav button color

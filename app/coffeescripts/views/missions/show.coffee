@@ -2,11 +2,11 @@ define [
   "jquery"
   "underscore"
   "backbone"
-  "jqueryModal"
+  "tinybox"
   # Using the Require.js text! plugin, we are loaded raw text
   # which will be used as our views primary template
   "text!templates/missions/show.html"
-], ($, _, Backbone, jqueryModal, MissionsShowView) ->
+], ($, _, Backbone, Tinybox, MissionsShowView) ->
   
   MissionsShowTemplate = Backbone.View.extend(
     initialize: (options) ->

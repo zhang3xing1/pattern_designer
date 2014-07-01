@@ -22,7 +22,7 @@ require.config(
     jqueryMultiSelect: 'lib/jqueryMultiSelect'
     bootstrapSwitch: 'lib/bootstrapSwitch'
     jqueryEditable: 'lib/jqueryEditable'
-    tinybox: "lib/tinybox"
+    tinybox: "lib/jqueryModal"
 
   shim:
     underscore:
@@ -43,11 +43,13 @@ require.config(
       exports: "JqueryMultiSelect"
     jqueryEditable:
       deps: ["jquery"]
-      exports: "JqueryEditable"         
+      exports: "JqueryEditable"     
+    tinybox:
+      deps: ["jquery"]
+      exports: "Tinybox"     
 )
 
 
 # Load our app module and pass it to our definition function
-require [ 'router', 'appController', 'tinybox'], (Router, AppController, tinybox) ->
-  console.log tinybox
+require [ 'router', 'appController'], (Router, AppController) ->
   return
