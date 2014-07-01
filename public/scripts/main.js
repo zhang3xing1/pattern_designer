@@ -16,7 +16,8 @@
       bootstrap: 'lib/bootstrap',
       jqueryMultiSelect: 'lib/jqueryMultiSelect',
       bootstrapSwitch: 'lib/bootstrapSwitch',
-      jqueryEditable: 'lib/jqueryEditable'
+      jqueryEditable: 'lib/jqueryEditable',
+      tinybox: "lib/tinybox"
     },
     shim: {
       underscore: {
@@ -47,8 +48,8 @@
     }
   });
 
-  require(['router', 'appController'], function(Router, AppController) {
-    alert(Router);
+  require(['router', 'appController', 'tinybox'], function(Router, AppController, tinybox) {
+    console.log(tinybox);
   });
 
 }).call(this);

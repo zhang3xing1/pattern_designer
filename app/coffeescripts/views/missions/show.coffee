@@ -2,12 +2,12 @@ define [
   "jquery"
   "underscore"
   "backbone"
-
+  "jqueryModal"
   # Using the Require.js text! plugin, we are loaded raw text
   # which will be used as our views primary template
   "text!templates/missions/show.html"
-], ($, _, Backbone, MissionsShowView) ->
-
+], ($, _, Backbone, jqueryModal, MissionsShowView) ->
+  
   MissionsShowTemplate = Backbone.View.extend(
     initialize: (options) ->
       options.app.debugInfo
@@ -15,7 +15,6 @@ define [
     el: $("#right_board")
 
     render: ->
-      
       # Using Underscore we can compile our template with data
       data =
         title: "Current Mission"

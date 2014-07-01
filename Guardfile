@@ -16,7 +16,7 @@ guard 'livereload' do
 end
 
 guard 'coffeescript', :output => 'public/scripts', :source_map => true do
-  watch(/^app\/coffeescripts\/(.*)\.coffee/)
+  watch(/^app\/coffeescripts\/.+\.coffee$/)
   callback(:run_on_modifications_end) { 
   	puts '-'*100
     FileUtils.cp_r('app/coffeescripts', 'public/scripts')

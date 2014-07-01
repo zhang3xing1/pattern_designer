@@ -10,7 +10,7 @@
 
       statuses = ['info', 'debug', "dev"];
 
-      statuses = ['dev'];
+      statuses = ['dev', 'info'];
 
       Horn = (function() {
         function Horn() {}

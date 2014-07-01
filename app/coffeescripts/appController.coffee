@@ -27,22 +27,22 @@ define ->
 		      callback data, varName
 		      return		
 
-		# integer
-		$("button.get." + "integer").click ->
-		  aGetRequest "gui_" + "integer", (data) ->
-		    $("label.get." + "integer").html data
-		    $("#flash").html "Get " + varName + " done!"
-		    return
+		# # integer
+		# $("button.get." + "integer").click ->
+		#   aGetRequest "gui_" + "integer", (data) ->
+		#     $("label.get." + "integer").html data
+		#     $("#flash").html "Get " + varName + " done!"
+		#     return
 
-		  return
+		#   return
 
-		$("button.set." + "integer").click ->
-		  setValue = $("input.set.integer").val()
-		  aSetRequest "gui_" + "integer", setValue, (data, varName) ->
-		    $("#flash").html "Set " + varName + " done!"
-		    return
+		# $("button.set." + "integer").click ->
+		#   setValue = $("input.set.integer").val()
+		#   aSetRequest "gui_" + "integer", setValue, (data, varName) ->
+		#     $("#flash").html "Set " + varName + " done!"
+		#     return
 
-		  return
+		#   return
 
-create: new AppController
+	create: new AppController
 

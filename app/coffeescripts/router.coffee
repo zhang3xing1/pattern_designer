@@ -3,6 +3,7 @@ define [
   "underscore"
   "backbone"
   "backboneRoutefilter"
+  "logger"
   "views/missions/show"
   "views/pattern/index"
   "views/frame/show"
@@ -18,7 +19,7 @@ define [
   "views/lineout/palletSetting"
   "views/lineout/constraintSetting"
   "views/pattern/show"
-], ($, _, Backbone, BackboneRoutefilter, MissionShowView, PatternIndexView, FrameShowView, 
+], ($, _, Backbone, BackboneRoutefilter, Logger, MissionShowView, PatternIndexView, FrameShowView, 
   LineinShowView, LineoutShowView, MissionEditView, MissionIndexView, MissionNewView,
   BoxSettingView, PlaceSettingView, PickSettingView, AdditionalInfoView,
   PalletSettingView, ConstraintSettingView, PatternShowView) ->
@@ -41,77 +42,57 @@ define [
       'constraintSetting': 'constraintSetting'
       "patterns": "patternIndex"
 
-
-
+      # default root router
       "": "missionShow"
       # "download/*random": "download"
           
-    # before: (route, params) ->
-    #   console.log 'before.....'
-    #   console.log route
-    #   console.log params
-    #   console.log @appData
-    #   console.log 'before end'
-    after: (route, params) ->
-      # change left nav button color
-      $('.left-nav-list').removeClass('list-group-item-info')
-      # $("[href*='linein']")
-      $("#left_board [href*='#{route}']").addClass('list-group-item-info')
-      console.log "after: #{route}"
     initialize: ->
       @appData = 
         debugInfo: "hello, this is app data debug info"
+      @logger = Logger.create  
       Backbone.history.start()
 
     missionShow: ->
-      console.log 'missionShow'
-      console.log @appData
       $('.right_board').remove()
       missionShowView = new MissionShowView({app: @appData})
       missionShowView.render()
       return
       
     patternIndex: ->
-      console.log 'patternIndex'
       $('.right_board').remove()
       patternIndexView = new PatternIndexView
       patternIndexView.render()
       return
 
     patternShow: ->
-      console.log 'patternShow'
       $('.right_board').remove()
       patternShowView = new PatternShowView
       patternShowView.render()
       return
 
     frameShow: ->
-      console.log 'frameShow'
+      
       $('.right_board').remove()
       frameShowView = new FrameShowView
       frameShowView.render()
 
     lineinShow: ->
-      console.log 'lineinShow' 
       $('.right_board').remove()
       lineinShowView = new LineinShowView
       lineinShowView.render()
 
-    lineoutShow: ->
-      console.log 'lineoutShow' 
+    lineoutShow: -> 
       $('.right_board').remove()
       lineoutShowView = new LineoutShowView
       lineoutShowView.render()  
 
     missionEdit: ->
-      console.log 'missionEdit' 
       $('.right_board').remove()
       missionEditView = new MissionEditView
       missionEditView.render() 
       $('#my-select').multiSelect()
 
     missionIndex: ->
-      console.log 'missionIndex'
       $('.right_board').remove()
       missionIndexView = new MissionIndexView
       missionIndexView.render()    
@@ -120,9 +101,7 @@ define [
       #   trigger: $("#Rename")
       #   action: "click"
 
-      # console.log option
-
-      # $("#mission_0001").editable option, (e) ->
+      #    # $("#mission_0001").editable option, (e) ->
       #   console.log "rename worked!"
       #   return
 
@@ -171,13 +150,25 @@ define [
       constraintSettingView = new ConstraintSettingView
       constraintSettingView.render()     
 
-    show: (id) ->
-      $(document.body).append "Show route has been called.. with id equals : ", id
-      return
+    ######################################################
+    #
+    #
+    # Route callback for validating and filtering data.
+    #
+    #
+    ######################################################
 
-    download: (random) ->
-      $(document.body).append "download route has been called.. with random equals : ", random
-      return
+    before: (route, params) ->
+      @logger.dev("[Before] - route: #{route}, params: #{params}")
 
+
+    after: (route, params) ->
+      ## Change left nav button color
+      $('.left-nav-list').removeClass('list-group-item-info')
+      # $("[href*='linein']")
+      $("#left_board [href*='#{route}']").addClass('list-group-item-info')
+
+      #
+      @logger.dev("[After] - route: #{route}, params: #{params}")
 
   initialize: new AppRouter
