@@ -189,7 +189,7 @@
     clickClose: true,
     closeText: 'Close',
     closeClass: '',
-    modalClass: "modal",
+    modalClass: "modal2",
     spinnerHtml: null,
     showSpinner: true,
     showClose: true,

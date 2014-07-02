@@ -1258,6 +1258,9 @@ define [
         constructor:(params) ->
           #background_color: rgb(255,​ 228,​ 196)
           pallet = params.pallet
+
+          console.log params
+
           longerEdge = Math.max(pallet.width, pallet.height)
           shorterEdge = Math.min(pallet.width, pallet.height)
           # margin = pallet.overhang + box.minDistance
@@ -1434,119 +1437,7 @@ define [
           @boxes = new Boxes(boxes_params)
           @boxes.shift()
 
-
-      #### Params ####
-      # unit: pixal
-      # canvas available paiting zone
-      canvasStage =  
-        width:      280
-        height:     360 
-        stage_zoom: 1.5
-
-      # color: RGB
-      color = 
-          stage:   
-              red:    255
-              green:  255
-              blue:   255
-          pallet: 
-              red:    251
-              green:  209
-              blue:   175
-          overhang: 
-              stroke:
-                red:    238
-                green:  49
-                blue:   109
-                alpha:  0.5
-          boxPlaced:
-            inner:
-              red:    79
-              green:  130
-              blue:   246
-              alpha:  0.8
-              stroke:
-                red:    147
-                green:  218
-                blue:   87
-                alpha:  0.5
-            outer:
-              red:    0
-              green:  0
-              blue:   0
-              alpha:  0
-              stroke:
-                red:    0
-                green:  0
-                blue:   0
-                alpha:  0
-          boxSelected:
-            collision:
-              inner:
-                red:    255
-                green:  0
-                blue:   0
-                alpha:  1
-                stroke:
-                  red:    147
-                  green:  218
-                  blue:   87
-                  alpha:  0.5
-              outer:
-                red:    255
-                green:  0
-                blue:   0
-                alpha:  0.5
-                stroke:
-                  red:    255
-                  green:  0
-                  blue:   0
-                  alpha:  0.5           
-            uncollision:
-              inner:
-                red:    108
-                green:  153
-                blue:   57
-                alpha:  1
-                stroke:
-                  red:    72
-                  green:  82
-                  blue:   38
-                  alpha:  0.5
-              outer:
-                red:    0
-                green:  0
-                blue:   0
-                alpha:  0
-                stroke:
-                  red:    70
-                  green:  186
-                  blue:   3
-                  alpha:  0.5
-
-
-      pallet =  
-        width:    200
-        height:   250 
-        overhang: 10
-      box  =      
-        x:      0 
-        y:      0
-        width:  60  
-        height: 20  
-        minDistance: 10
-          
-      params = 
-        pallet: pallet
-        box: box
-        stage: canvasStage
-        color: color
-        # knob:  vectorKnob
-
-      ################
-
-
-      board = new StackBoard(params)
+      board = new StackBoard(window.appController.default_pattern_params())
 
       rivets.formatters.suffix_cm = (value) ->
          "#{Math.abs(value.toFixed(0))}"

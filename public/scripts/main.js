@@ -52,7 +52,9 @@
     }
   });
 
-  require(['router', 'appController'], function(Router, AppController) {});
+  require(['router'], function(Router) {
+    window.router = Router.initialize;
+  });
 
 }).call(this);
 

@@ -2,6 +2,7 @@ define [
   "jquery"
   "underscore"
   "backbone"
+  "appController"
   "backboneRoutefilter"
   "tinybox"
   "logger"
@@ -20,7 +21,7 @@ define [
   "views/lineout/palletSetting"
   "views/lineout/constraintSetting"
   "views/pattern/show"
-], ($, _, Backbone, BackboneRoutefilter, Tinybox, Logger, MissionShowView, PatternIndexView, FrameShowView, 
+], ($, _, Backbone, AppController, BackboneRoutefilter, Tinybox, Logger, MissionShowView, PatternIndexView, FrameShowView, 
   LineinShowView, LineoutShowView, MissionEditView, MissionIndexView, MissionNewView,
   BoxSettingView, PlaceSettingView, PickSettingView, AdditionalInfoView,
   PalletSettingView, ConstraintSettingView, PatternShowView) ->
@@ -51,6 +52,11 @@ define [
       @appData = 
         debugInfo: "hello, this is app data debug info"
       @logger = Logger.create  
+
+      # initialize only one appController
+      window.appController = AppController.create
+      console.log window.appController
+
       Backbone.history.start()
 
     missionShow: ->
@@ -161,9 +167,11 @@ define [
 
     before: (route, params) ->
       @logger.dev("[Before] - route: #{route}, params: #{params}")
-      if route == 'program'
-        
+      # if route == 'program'
 
+      # if route == 'loadMission'
+        # return false
+      # window.appController.before_action()
     after: (route, params) ->
       ## Change left nav button color
       $('.left-nav-list').removeClass('list-group-item-info')

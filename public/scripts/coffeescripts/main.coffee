@@ -51,5 +51,6 @@ require.config(
 
 
 # Load our app module and pass it to our definition function
-require [ 'router', 'appController'], (Router, AppController) ->
+require ['router'], ( Router) ->
+  window.router = Router.initialize
   return
