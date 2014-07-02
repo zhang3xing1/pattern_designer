@@ -1,8 +1,10 @@
 #every share data of single mission will be store here
-define ->
+define ["logger", "tinybox", 'jquery', 'backbone', 'mission'], (Logger, Tinybox, $, Backbone, Mission) ->
   class AppController
-    init: (@programName) ->
-      alert("in AppController #{@programName}" )
+    constructor: ->
+      @logger = Logger.create 
+      @mission = Mission.create
+
 
     aGetRequest: (varName, callback, programName) ->
       programName = "gui_example_test_2"  unless programName?
@@ -28,8 +30,34 @@ define ->
           return    
 
     # decide if router be valid
-    before_action: (route= '' ) ->
-      console.log 'this is in appController before_action'
+    before_action: (route, params) ->
+      @logger.dev "[appController before_action]: #{route}"
+
+    after_action: (route, params) ->
+      @logger.dev "[appController after_action]: #{route}"
+      if route == 'program'
+        $($('.form-control')[0]).val(@mission.get('info').name)
+        $($('.form-control')[1]).val(@mission.get('info').creator)
+        $($('.form-control')[2]).val(@mission.get('info').company)
+        $($('.form-control')[3]).val(@mission.get('info').product)
+        $($('.form-control')[4]).val(@mission.get('info').code)
+        
+    ## 
+    #
+    # Pattern show page
+    #
+    ##
+
+    setBoard: (newBoard) ->
+      @board = newBoard
+
+    saveBoard: ->
+      # todo validator
+      new_layer = @board.saveLayer()
+      @mission.addLayer(new_layer)
+
+      console.log @mission.get('available_layers')
+      @logger.dev "[appController] - saveBoard"
 
     default_pattern_params: ->
       canvasStage =  
@@ -119,7 +147,7 @@ define ->
                   alpha:  0.5
 
 
-      a_pallet =  
+      pallet =  
             width:    200
             height:   250 
             overhang: 10
@@ -133,7 +161,7 @@ define ->
 
 
       params = 
-          pallet: a_pallet
+          pallet: pallet
           box: box
           stage: canvasStage
           color: color  

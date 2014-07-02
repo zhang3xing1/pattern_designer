@@ -184,7 +184,7 @@
   $.modal.defaults = {
     overlay: "#000",
     opacity: 0.75,
-    zIndex: 1,
+    zIndex: 100,
     escapeClose: true,
     clickClose: true,
     closeText: 'Close',

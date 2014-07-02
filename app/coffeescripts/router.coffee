@@ -28,7 +28,7 @@ define [
   class AppRouter extends Backbone.Router
     routes:
       "program": "missionShow"
-      "pattern": "patternShow"
+      "pattern/*action": "pattern"
       "frame":   "frameShow"
       "linein":  "lineinShow"
       "lineout":  "lineoutShow"
@@ -46,9 +46,11 @@ define [
 
       # default root router
       "": "missionShow"
-      # "download/*random": "download"
+
+
           
     initialize: ->
+      # other router will not refresh view
       @appData = 
         debugInfo: "hello, this is app data debug info"
       @logger = Logger.create  
@@ -71,10 +73,14 @@ define [
       patternIndexView.render()
       return
 
-    patternShow: ->
-      $('.right_board').remove()
-      patternShowView = new PatternShowView
-      patternShowView.render()
+    pattern: (action)->
+      if action == 'new'
+        $('.right_board').remove()
+        patternShowView = new PatternShowView
+        patternShowView.render()
+      if action == 'save'
+        window.appController.saveBoard()
+        @navigate("patterns", {trigger: true});
       return
 
     frameShow: ->
@@ -167,18 +173,18 @@ define [
 
     before: (route, params) ->
       @logger.dev("[Before] - route: #{route}, params: #{params}")
-      # if route == 'program'
-
-      # if route == 'loadMission'
-        # return false
-      # window.appController.before_action()
+      window.appController.before_action(route, params)
+      
     after: (route, params) ->
       ## Change left nav button color
       $('.left-nav-list').removeClass('list-group-item-info')
       # $("[href*='linein']")
       $("#left_board [href*='#{route}']").addClass('list-group-item-info')
 
-      #
       @logger.dev("[After] - route: #{route}, params: #{params}")
+
+      window.appController.after_action(route, params)
+      # $('#app-flash').modal()
+      # @navigate("loadMission", {trigger: true});
 
   initialize: new AppRouter

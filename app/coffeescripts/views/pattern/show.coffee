@@ -447,7 +447,7 @@ define [
                         "[#{prefix}]: PointC(x:#{@getPointC().x},y:#{@getPointC().y})\n " +
                         "[#{prefix}]: PointD(x:#{@getPointD().x},y:#{@getPointD().y})\n " )
   
-      Logger.dev "run in box"
+
       class Boxes extends Backbone.Collection
         model: Box
         initialize: (params)->
@@ -1259,8 +1259,6 @@ define [
           #background_color: rgb(255,​ 228,​ 196)
           pallet = params.pallet
 
-          console.log params
-
           longerEdge = Math.max(pallet.width, pallet.height)
           shorterEdge = Math.min(pallet.width, pallet.height)
           # margin = pallet.overhang + box.minDistance
@@ -1437,7 +1435,25 @@ define [
           @boxes = new Boxes(boxes_params)
           @boxes.shift()
 
-      board = new StackBoard(window.appController.default_pattern_params())
+        saveLayer: ->
+          # some validator
+          # todo
+          layer_data = 
+            name: $('#layer-name').val()
+            boxes: _.map(@boxes.models,((a_box) ->
+              {
+                x: a_box.getXPositionByRatio(),
+                y: a_box.getYPositionByRatio(),
+                rotate: a_box.get('rotate'),
+                arrow: a_box.get('vectorDegree')
+              }
+            ), this)
+
+
+
+
+      # window.board = new StackBoard(window.appController.default_pattern_params())
+      window.appController.setBoard(new StackBoard(window.appController.default_pattern_params()))
 
       rivets.formatters.suffix_cm = (value) ->
          "#{Math.abs(value.toFixed(0))}"
@@ -1446,22 +1462,8 @@ define [
         "#{value + 100}"
 
       $("input").prop "readonly", true
-
-
-      # vector degree
-      $("input.dial").prop "readonly", false
-
-
-
-
-
-
-
-
-
-
-
-
+      # layer name input
+      $("input#layer-name").prop "readonly", false
 
 
       # stage = new Kinetic.Stage(
