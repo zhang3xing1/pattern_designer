@@ -31,9 +31,9 @@ define [
       $("[id^='mission-item-']").on('click', (el) ->
         $("[id^='mission-item-']").removeClass('selected-item')
         $(this).addClass('selected-item')
-        $(".selected-item").editable option, (e) ->
-          console.log "rename worked!"
-          return
+        # $(".selected-item").editable option, (e) ->
+        #   console.log "rename worked!"
+        #   return
         return
         )
 

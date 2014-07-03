@@ -22,19 +22,19 @@ define [
       @$el.append compiledTemplate
 
 
-      # Rename Function
-      option =
-        trigger: $("#Rename")
-        action: "click"
+      # # Rename Function
+      # option =
+      #   trigger: $("#Rename")
+      #   action: "click"
 
-      $("[id^='layer-item-']").on('click', (el) ->
-        $("[id^='layer-item-']").removeClass('selected-item')
-        $(this).addClass('selected-item')
-        $(".selected-item").editable option, (e) ->
-          console.log "rename worked!"
-          return
-        return
-        )
+      # $("[id^='layer-item-']").on('click', (el) ->
+      #   $("[id^='layer-item-']").removeClass('selected-item')
+      #   $(this).addClass('selected-item')
+      #   $(".selected-item").editable option, (e) ->
+      #     console.log "rename worked!"
+      #     return
+      #   return
+      #   )
 
 
       # $("select").editable option, (e) ->

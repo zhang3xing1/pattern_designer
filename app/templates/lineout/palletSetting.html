@@ -3,14 +3,8 @@
     <a href="#lineout" class="label label-primary" style="float: left" >
         Back
     </a>
-	<%= title %>
-<!--       <a href="#" class="label label-primary" s>
-        SET
-      </a>   --> 
-<!--       <a href="#" class="label label-primary" s>
-        Go to place
-      </a>   --> 
-    </div>
+		<%= title %>
+   </div>
    
 </div>
 
@@ -20,7 +14,7 @@
 		  <% _.each(inputs, function(input){ %>
 	      <div class="input-group col-sm-8" style="margin-bottom: 5%; margin-left: 18%">
 	          <span class="input-group-addon label-info colomn-label-info"><%= input.label %></span>
-	          <input type="text" class="form-control" >
+	          <input type="text" class="form-control mission_" rv-value="mission:<%= input.rv%>">
 	          <span class="input-group-addon"><%= input.unit %></span>
 	      </div> 
 		  <%	}); %>

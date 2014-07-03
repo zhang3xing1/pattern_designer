@@ -15,8 +15,6 @@ define [
       # Using Underscore we can compile our template with data
       data =
         title: "Edit Mission"
-        cells: ['Name', 'Creator', 'Company', 'Product', 'Code']
-        buttons: ['SALVA', 'SACA', 'Save As', 'Reload']
       compiledTemplate = _.template(MissionsEditView, data)
       
       # Append our compiled template to this Views "el"

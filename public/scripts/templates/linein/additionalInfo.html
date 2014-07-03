@@ -4,12 +4,6 @@
       Back
     </a>
     <%= title %>
-<!--       <a href="#" class="label label-primary" s>
-        SET
-      </a>   --> 
-<!--       <a href="#" class="label label-primary" s>
-        Go to place
-      </a>   --> 
     </div>
    
 </div>
@@ -19,23 +13,23 @@
 		<div class='top-panel' >
 		    <div class="info-bottom input-group col-sm-10" >
 		        <span class="input-group-addon label-info colomn-label-info">Length Wise:</span>
-		        <input type="checkbox" name="teach" checked>
+		        <input type="checkbox" name="teach" class='mission_' rv-checked='mission:length_wise'>
 
 		    </div> 	
             <div class="info-bottom input-group col-sm-5" >
                 <span class="input-group-addon label-info colomn-label-info">Cross   Wise:</span>
-                <input type="checkbox" name="teach" checked>
+                <input type="checkbox" name="teach"  class='mission_' rv-checked='mission:cross_wise'>
 
             </div>    
 		</div>
         <div class="info-bottom input-group col-sm-6" >
             <span class="input-group-addon label-info colomn-label-info">Distance</span>
-            <input type="text" class="form-control" >
+            <input type="text" class="form-control mission_" rv-value="mission:distance">
             <span class="input-group-addon">mm</span>
         </div>
         <div class="info-bottom input-group col-sm-6" >
             <span class="input-group-addon label-info colomn-label-info">Box per Pick</span>
-            <input type="text" class="form-control" >
+            <input type="text" class="form-control mission_" rv-value="mission:box_per_pick">
         </div>        
 
 	</div>

@@ -57,8 +57,6 @@ define [
 
       # initialize only one appController
       window.appController = AppController.create
-      console.log window.appController
-
       Backbone.history.start()
 
     missionShow: ->
@@ -103,7 +101,7 @@ define [
       $('.right_board').remove()
       missionEditView = new MissionEditView
       missionEditView.render() 
-      $('#my-select').multiSelect()
+      # $('#my-select').multiSelect()
 
     missionIndex: ->
       $('.right_board').remove()

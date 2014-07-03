@@ -2,11 +2,11 @@ define [
   "jquery"
   "underscore"
   "backbone"
-
+  "rivets"
   # Using the Require.js text! plugin, we are loaded raw text
   # which will be used as our views primary template
   "text!templates/linein/show.html"
-], ($, _, Backbone, LineinShowView) ->
+], ($, _, Backbone, rivets, LineinShowView) ->
   LineinShowTemplate = Backbone.View.extend(
     el: $("#right_board")
     render: ->

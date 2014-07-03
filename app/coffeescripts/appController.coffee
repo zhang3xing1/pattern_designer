@@ -1,5 +1,5 @@
 #every share data of single mission will be store here
-define ["logger", "tinybox", 'jquery', 'backbone', 'mission'], (Logger, Tinybox, $, Backbone, Mission) ->
+define ["logger", "tinybox", 'jquery', 'backbone', 'mission','rivets'], (Logger, Tinybox, $, Backbone, Mission, rivets) ->
   class AppController
     constructor: ->
       @logger = Logger.create 
@@ -14,7 +14,6 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission'], (Logger, Tinybox,
         success: (data) ->
           callback data
           return
-
       return
 
     aSetRequest: (varName, newVarValue, callback, programName) ->
@@ -32,22 +31,85 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission'], (Logger, Tinybox,
     # decide if router be valid
     before_action: (route, params) ->
       @logger.dev "[appController before_action]: #{route}"
+      rivets.adapters[":"] =
+        subscribe: (obj, keypath, callback) ->
+          # console.log("1.subscribe:\t #{obj} ||\t #{keypath}")
+          obj.on "change:" + keypath, callback
+          return
+
+        unsubscribe: (obj, keypath, callback) ->
+          # console.log("2.unsubscribe:\t #{obj} ||\t #{keypath}")
+          obj.off "change:" + keypath, callback
+          return
+
+        read: (obj, keypath) ->
+          # console.log("3.read:\t\t\t #{obj} ||\t #{keypath}")
+          # if((obj.get keypath) == undefined)
+          #   console.log("3.read:++ #{obj[keypath]()} \t #{(obj.get keypath)}")
+          #   obj[keypath]()
+          # else
+          #   obj.get keypath
+          obj.get keypath
+
+        publish: (obj, keypath, value) ->
+          # console.log("4.publish:\t\t #{obj} ||\t #{keypath}")
+          obj.set keypath, value
+          return      
 
     after_action: (route, params) ->
       @logger.dev "[appController after_action]: #{route}"
       if route == 'program'
-        $($('.form-control')[0]).val(@mission.get('info').name)
-        $($('.form-control')[1]).val(@mission.get('info').creator)
-        $($('.form-control')[2]).val(@mission.get('info').company)
-        $($('.form-control')[3]).val(@mission.get('info').product)
-        $($('.form-control')[4]).val(@mission.get('info').code)
-        
-    ## 
-    #
-    # Pattern show page
-    #
-    ##
+        rivets.bind $('.mission_'),{mission: @mission}
+        # window.mission = @mission 
+        # window.rivets = rivets 
+        # console.log $('.mission_')
+        # window.rivets.bind $('.mission_'),{mission: @mission}
+      if route == 'boxSetting'
+        rivets.bind $('.mission_'),{mission: @mission}
 
+      if route == 'placeSetting'
+        rivets.bind $('.mission_'),{mission: @mission}   
+
+      if route == 'additionalInfo' 
+        rivets.bind $('.mission_'),{mission: @mission} 
+
+      if route == 'palletSetting'
+        rivets.bind $('.mission_'),{mission: @mission}   
+
+      if route == 'constraintSetting'
+        rivets.bind $('.mission_'),{mission: @mission}   
+                       
+      if route == 'patterns'
+        console.log @mission.get('available_layers')
+        _.each(@mission.get('available_layers'),((a_layer) ->
+            $('#patterns').append( "<li class=\"list-group-item\" id=\"layer-item-1\">#{a_layer.name}</li>" )
+          ),this)
+
+        $("[id^='layer-item-']").on('click', (el) ->
+          $("[id^='layer-item-']").removeClass('selected-item')
+          $(this).addClass('selected-item')
+          return
+        )
+
+      if route == 'mission'
+        _.each(@mission.get('available_layers'),((a_layer) ->
+            $('#my-select').prepend( "<option value='#{a_layer.name}-----#{Math.random()*10e16}'>#{a_layer.name}</option>" )
+          ),this)        
+        $('#my-select').multiSelect
+          afterSelect: (values) ->
+            # alert "Select value: " + values
+            # copy select item 
+            #$('#my-select').prepend( "<option value='#{a_layer.name}-----#{Math.random()*10e15}'>#{a_layer.name}</option>" )
+            console.log values
+            $('#my-select').prepend( "<option value='-----#{Math.random()*10e16}'>EXAMPLE</option>" )
+            $('#my-select').multiSelect()
+            return
+
+          afterDeselect: (values) ->
+            console.log values
+            # remove selected item
+            # alert "Deselect value: " + values
+            return        
     setBoard: (newBoard) ->
       @board = newBoard
 
@@ -56,7 +118,6 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission'], (Logger, Tinybox,
       new_layer = @board.saveLayer()
       @mission.addLayer(new_layer)
 
-      console.log @mission.get('available_layers')
       @logger.dev "[appController] - saveBoard"
 
     default_pattern_params: ->
