@@ -58,7 +58,7 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission','rivets'], (Logger,
 
     after_action: (route, params) ->
       @logger.dev "[appController after_action]: #{route}"
-      if route == 'program'
+      if route == 'program' || route == ''
         rivets.bind $('.mission_'),{mission: @mission}
         # window.mission = @mission 
         # window.rivets = rivets 
@@ -78,7 +78,7 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission','rivets'], (Logger,
 
       if route == 'constraintSetting'
         rivets.bind $('.mission_'),{mission: @mission}   
-                       
+
       if route == 'patterns'
         console.log @mission.get('available_layers')
         _.each(@mission.get('available_layers'),((a_layer) ->
@@ -96,19 +96,32 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission','rivets'], (Logger,
             $('#my-select').prepend( "<option value='#{a_layer.name}-----#{Math.random()*10e16}'>#{a_layer.name}</option>" )
           ),this)        
         $('#my-select').multiSelect
-          afterSelect: (values) ->
+          afterSelect: (option_value) =>
             # alert "Select value: " + values
             # copy select item 
             #$('#my-select').prepend( "<option value='#{a_layer.name}-----#{Math.random()*10e15}'>#{a_layer.name}</option>" )
-            console.log values
-            $('#my-select').prepend( "<option value='-----#{Math.random()*10e16}'>EXAMPLE</option>" )
-            $('#my-select').multiSelect()
-            return
+            
+            # get select layer value
+            regex = /\s*-----\s*/
+            value = option_value[0].split(regex)
+            value_name = value[0]
 
-          afterDeselect: (values) ->
-            console.log values
+            new_option_value = "#{value_name}-----#{Math.random()*10e15}"
+            $('#my-select').prepend( "<option value='#{new_option_value}'>#{value_name}</option>" )
+            $('#my-select').multiSelect('refresh')
+            @logger.dev "[afterSelect]: old: #{option_value}"
+            @logger.dev "[afterSelect]: new: #{new_option_value}"
+            return 
+          afterDeselect: (option_value) =>
             # remove selected item
-            # alert "Deselect value: " + values
+            regex = /\s*-----\s*/
+            value = option_value[0].split(regex)
+            value_name = value[0]
+
+            $("option[value='" + option_value + "']").remove()
+            @logger.dev "[afterDeselect]: #{option_value}"
+            $('#my-select').multiSelect('refresh')
+
             return        
     setBoard: (newBoard) ->
       @board = newBoard
