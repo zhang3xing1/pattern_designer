@@ -10,7 +10,7 @@ define [
 			creator: '',
 			product: '',
 			company: '',
-			code: 'X', 
+			code: 'Code X', 
 
 			#setting
 			frame_line_in: '',
@@ -50,7 +50,9 @@ define [
 			available_layers: [],
 			used_layers: [],
 	 
-			program_name: 'pg_db' 		
+	 		# HTML side data
+			program_name: 'pg_db' 	
+			selected_layer_name: ''	
 
 	  }
 	  initialize: (params) ->
@@ -62,5 +64,6 @@ define [
 	  	to_updated_available_layers[to_updated_available_layers.length] = layer_data
 	  	@set('available_layers', to_updated_available_layers) 
 
-
+	  layers: ->
+	  	@get("available_layers")
 	create: new Mission

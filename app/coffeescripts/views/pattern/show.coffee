@@ -531,6 +531,13 @@ define [
 
           @layer.add @alignGroup
 
+
+          # to edit an exist layer, then load each box data on the stage board.
+          to_edit_layer_name = window.appController.selectedLayer()
+          if to_edit_layer_name
+            $('#layer-name').val(to_edit_layer_name)
+            #window.appController.getLayerDataByName(to_edit_layer_name)
+
         precisionAdjustment: (floatNumber, digitNumber = 0) ->
           ratioBy10 = 1 * Math.pow(10,digitNumber)
           Math.round(parseFloat(floatNumber)*ratioBy10)/ratioBy10
@@ -751,7 +758,7 @@ define [
           @testCollision()
           @repairCrossZone(@currentBox) unless @validateZone(@currentBox)  
 
-          Logger.debug("create button clicked!")
+          Logger.debug("create new box completed!")
         settleCurrentBox: =>
           if @currentBox.get('collisionStatus')
             @flash = "Box#{@currentBox.getTitleName()} cannot be placed in collision status!"
@@ -1448,8 +1455,6 @@ define [
                 arrow: a_box.get('vectorDegree')
               }
             ), this)
-
-
 
 
       # window.board = new StackBoard(window.appController.default_pattern_params())

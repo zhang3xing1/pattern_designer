@@ -49,7 +49,6 @@ define [
 
       'saveNewMission' : "saveNewMission"
 
-          
     initialize: ->
       # other router will not refresh view
       @appData = 
@@ -78,10 +77,50 @@ define [
         patternShowView = new PatternShowView
         patternShowView.render()
       if action == 'save'
-        window.appController.saveBoard()
+        window.appController.saveLayer()
         @navigate("patterns", {trigger: true})
-      return
-
+      # if action == 'update'
+        # to do 
+      if action == 'edit'
+        selected_layer_name = $('.list-group-item.selected-item').html()
+        if selected_layer_name != '' and selected_layer_name != undefined
+          window.appController.setSelectedLayer(selected_layer_name)
+          $('.right_board').remove()
+          patternShowView = new PatternShowView
+          patternShowView.render()
+        else
+          @navigate("patterns", {trigger: true})
+          return false
+      if action == 'clone'
+        selected_layer_name = $('.list-group-item.selected-item').html()
+        if selected_layer_name != '' and selected_layer_name != undefined
+          # window.appController.setSelectedLayer(selected_layer_name)
+          # $('.right_board').remove()
+          # patternShowView = new PatternShowView
+          # patternShowView.render()
+        else
+          @navigate("patterns", {trigger: true})
+          return false
+      if action == 'delete'
+        selected_layer_name = $('.list-group-item.selected-item').html()
+        if selected_layer_name != '' and selected_layer_name != undefined
+          # window.appController.setSelectedLayer(selected_layer_name)
+          # $('.right_board').remove()
+          # patternShowView = new PatternShowView
+          # patternShowView.render()
+        else
+          @navigate("patterns", {trigger: true})
+          return false    
+      if action == 'info'
+        selected_layer_name = $('.list-group-item.selected-item').html()
+        if selected_layer_name != '' and selected_layer_name != undefined
+          # window.appController.setSelectedLayer(selected_layer_name)
+          # $('.right_board').remove()
+          # patternShowView = new PatternShowView
+          # patternShowView.render()
+        else
+          @navigate("patterns", {trigger: true})
+          return false                 
     frameShow: ->
       
       $('.right_board').remove()

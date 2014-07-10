@@ -33,7 +33,7 @@
       <!-- <li class="active"> -->
       <% _.each(buttons, function(button){ %>
         <li >
-          <a href="#pattern<%= button %>" id="<%= button %>"class="label label-primary " style="text-align: center; font-size: 18px; margin-bottom: 14px;">
+          <a href="#pattern/<%= button.toLowerCase()%>" id="<%= button %>"class="label label-primary " style="text-align: center; font-size: 18px; margin-bottom: 14px;">
             <%= button %>
           </a>
         </li>

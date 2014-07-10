@@ -5,6 +5,7 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission','rivets'], (Logger,
       @logger = Logger.create 
       @mission = Mission.create
       @new_mission = Mission.create
+      @last_action = undefined
 
     aGetRequest: (varName, callback, programName) ->
       programName = @mission.get('program_name') unless programName?
@@ -59,16 +60,15 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission','rivets'], (Logger,
       if route == 'saveNewMission'
         # to do: test unsaved mission exist
         @mission = @new_mission
-        console.log 'ddddddd'
         # window.router.navigate("loadMission", {trigger: true});
     after_action: (route, params) ->
-      @logger.dev "[appController after_action]: #{route}"
+      @last_action = {route: route, params: params}
+      @logger.dev "[appController after_action]:last_action-> #{@last_action.route}|#{@last_action.params}"
       if route == 'program' || route == ''
         window.appController.aGetRequest('test_var', (data)->
-          console.log("in aGetRequest: #{data}")
+          @logger.dev("in aGetRequest: #{data}")
           return
           )
-
 
         rivets.bind $('.mission_'),{mission: @mission}
         # window.mission = @mission 
@@ -142,22 +142,29 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission','rivets'], (Logger,
             $('#my-select').multiSelect('refresh')
 
             return        
-    
-
-
-
-
 
     setBoard: (newBoard) ->
       @board = newBoard
 
-    saveBoard: ->
+    setSelectedLayer: (layer_name) ->
+      @mission.set('selected_layer_name', layer_name)
+    selectedLayer: ->
+      layer_name = @mission.get('selected_layer_name')
+      if layer_name == undefined
+        return false
+      else
+        return layer_name
+    saveLayer: ->
       # todo validator
       new_layer = @board.saveLayer()
       @mission.addLayer(new_layer)
 
-      @logger.dev "[appController] - saveBoard"
+      @logger.dev "[appController] - saveLayer"
 
+      console.log @mission.layers()
+    getLayerDataByName: (layer_name) ->
+      # todo
+      return
     default_pattern_params: ->
       canvasStage =  
             width:      280
