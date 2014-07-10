@@ -77,14 +77,17 @@ define [
         patternShowView = new PatternShowView
         patternShowView.render()
       if action == 'save'
-        window.appController.saveLayer()
+        @logger.dev "[route - pattern]: last_action.params #{window.appController.last_action.params}"
+        # if  window.appController.last_action.params == 'edit' 
+        window.appController.saveLayer(window.appController.last_action.params)
         @navigate("patterns", {trigger: true})
       # if action == 'update'
         # to do 
       if action == 'edit'
-        selected_layer_name = $('.list-group-item.selected-item').html()
-        if selected_layer_name != '' and selected_layer_name != undefined
-          window.appController.setSelectedLayer(selected_layer_name)
+        selected_layer_id = $('.list-group-item.selected-item').attr('id')
+        selected_layer = window.appController.getLayers()[selected_layer_id]
+        if selected_layer != undefined
+          window.appController.setSelectedLayer(selected_layer)
           $('.right_board').remove()
           patternShowView = new PatternShowView
           patternShowView.render()
@@ -92,9 +95,9 @@ define [
           @navigate("patterns", {trigger: true})
           return false
       if action == 'clone'
-        selected_layer_name = $('.list-group-item.selected-item').html()
-        if selected_layer_name != '' and selected_layer_name != undefined
-          # window.appController.setSelectedLayer(selected_layer_name)
+        selected_layer_id = $('.list-group-item.selected-item').attr('id')
+        if selected_layer_id != '' and selected_layer_id != undefined
+          # window.appController.setSelectedLayer(selected_layer_id)
           # $('.right_board').remove()
           # patternShowView = new PatternShowView
           # patternShowView.render()
@@ -102,9 +105,9 @@ define [
           @navigate("patterns", {trigger: true})
           return false
       if action == 'delete'
-        selected_layer_name = $('.list-group-item.selected-item').html()
-        if selected_layer_name != '' and selected_layer_name != undefined
-          # window.appController.setSelectedLayer(selected_layer_name)
+        selected_layer_id = $('.list-group-item.selected-item').attr('id')
+        if selected_layer_id != '' and selected_layer_id != undefined
+          # window.appController.setSelectedLayer(selected_layer_id)
           # $('.right_board').remove()
           # patternShowView = new PatternShowView
           # patternShowView.render()
@@ -112,9 +115,9 @@ define [
           @navigate("patterns", {trigger: true})
           return false    
       if action == 'info'
-        selected_layer_name = $('.list-group-item.selected-item').html()
-        if selected_layer_name != '' and selected_layer_name != undefined
-          # window.appController.setSelectedLayer(selected_layer_name)
+        selected_layer_id = $('.list-group-item.selected-item').html()
+        if selected_layer_id != '' and selected_layer_id != undefined
+          # window.appController.setSelectedLayer(selected_layer_id)
           # $('.right_board').remove()
           # patternShowView = new PatternShowView
           # patternShowView.render()

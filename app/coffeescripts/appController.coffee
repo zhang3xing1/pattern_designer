@@ -62,8 +62,8 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission','rivets'], (Logger,
         @mission = @new_mission
         # window.router.navigate("loadMission", {trigger: true});
     after_action: (route, params) ->
-      @last_action = {route: route, params: params}
-      @logger.dev "[appController after_action]:last_action-> #{@last_action.route}|#{@last_action.params}"
+      @last_action = {route: route, params: params[0]}
+      @logger.dev "[appController after_action last_action]: #{@last_action.route}|#{@last_action.params}"
       if route == 'program' || route == ''
         window.appController.aGetRequest('test_var', (data)->
           @logger.dev("in aGetRequest: #{data}")
@@ -94,9 +94,8 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission','rivets'], (Logger,
         rivets.bind $('.mission_'),{mission: @new_mission}   
 
       if route == 'patterns'
-        console.log @mission.get('available_layers')
         _.each(@mission.get('available_layers'),((a_layer) ->
-            $('#patterns').append( "<li class=\"list-group-item\" id=\"layer-item-1\">#{a_layer.name}</li>" )
+            $('#patterns').append( "<li class=\"list-group-item\" id=\"#{a_layer.id}\">#{a_layer.name}</li>" )
           ),this)
 
         $("[id^='layer-item-']").on('click', (el) ->
@@ -109,7 +108,6 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission','rivets'], (Logger,
         window.appController.aSetRequest "test_var", "new code", (data, varName) ->
           console.log("in aSetRequest: new code")
           return
-
 
         _.each(@mission.get('available_layers'),((a_layer) ->
             $('#my-select').prepend( "<option value='#{a_layer.name}-----#{Math.random()*10e16}'>#{a_layer.name}</option>" )
@@ -146,25 +144,29 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission','rivets'], (Logger,
     setBoard: (newBoard) ->
       @board = newBoard
 
-    setSelectedLayer: (layer_name) ->
-      @mission.set('selected_layer_name', layer_name)
+    setSelectedLayer: (layer) ->
+      @mission.set('selected_layer', layer)
     selectedLayer: ->
-      layer_name = @mission.get('selected_layer_name')
-      if layer_name == undefined
+      layer = @mission.get('selected_layer')
+      if layer == undefined
         return false
       else
-        return layer_name
-    saveLayer: ->
+        return layer
+    getLayers: ->
+      @mission.get('available_layers')    
+    saveLayer: (action) ->
       # todo validator
-      new_layer = @board.saveLayer()
+      new_layer = @board.saveLayer(action)
       @mission.addLayer(new_layer)
 
-      @logger.dev "[appController] - saveLayer"
-
-      console.log @mission.layers()
-    getLayerDataByName: (layer_name) ->
-      # todo
-      return
+      @logger.dev "[appController] saveLayer -> #{action}"
+    # getLayerByName: (layer_name) ->
+    #   # todo
+    #   @logger.dev '[appController] - getLayerByName'
+    #   result = @mission.getLayerByName(layer_name)
+    #   console.log result
+    #   @logger.dev '[appController] - getLayerByName done!'
+    #   result
     default_pattern_params: ->
       canvasStage =  
             width:      280

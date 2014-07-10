@@ -533,10 +533,10 @@ define [
 
 
           # to edit an exist layer, then load each box data on the stage board.
-          to_edit_layer_name = window.appController.selectedLayer()
+          to_edit_layer_name = window.appController.selectedLayer().name
           if to_edit_layer_name
             $('#layer-name').val(to_edit_layer_name)
-            #window.appController.getLayerDataByName(to_edit_layer_name)
+            console.log window.appController.getLayerByName(to_edit_layer_name)
 
         precisionAdjustment: (floatNumber, digitNumber = 0) ->
           ratioBy10 = 1 * Math.pow(10,digitNumber)
@@ -1442,10 +1442,11 @@ define [
           @boxes = new Boxes(boxes_params)
           @boxes.shift()
 
-        saveLayer: ->
+        saveLayer: (action = 'new') ->
           # some validator
           # todo
           layer_data = 
+            # id: "layer-item-#{Math.random()*10e17}"
             name: $('#layer-name').val()
             boxes: _.map(@boxes.models,((a_box) ->
               {
@@ -1456,7 +1457,13 @@ define [
               }
             ), this)
 
+          if action == 'new'
+            layer_data.id = "layer-item-#{Math.random()*10e17}"
+          if action == 'save'
+            # alert "#{action} #{window.appController.selectedLayer()}"
+            layer_data.id = window.appController.selectedLayer().id
 
+          layer_data
       # window.board = new StackBoard(window.appController.default_pattern_params())
       window.appController.setBoard(new StackBoard(window.appController.default_pattern_params()))
 
