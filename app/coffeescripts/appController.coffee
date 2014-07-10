@@ -4,10 +4,10 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission','rivets'], (Logger,
     constructor: ->
       @logger = Logger.create 
       @mission = Mission.create
-
+      @new_mission = Mission.create
 
     aGetRequest: (varName, callback, programName) ->
-      programName = "gui_example_test_2"  unless programName?
+      programName = @mission.get('program_name') unless programName?
       $.ajax
         url: "get?var=" + varName + "&prog=" + programName
         cache: false
@@ -17,7 +17,7 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission','rivets'], (Logger,
       return
 
     aSetRequest: (varName, newVarValue, callback, programName) ->
-      programName = "gui_example_test_2"  unless programName?
+      programName = @mission.get('program_name') unless programName?
       if newVarValue is ""
         alert varName + "new value is Empty!"
         return
@@ -27,6 +27,7 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission','rivets'], (Logger,
         success: (data) ->
           callback data, varName
           return    
+      return
 
     # decide if router be valid
     before_action: (route, params) ->
@@ -55,10 +56,20 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission','rivets'], (Logger,
           # console.log("4.publish:\t\t #{obj} ||\t #{keypath}")
           obj.set keypath, value
           return      
-
+      if route == 'saveNewMission'
+        # to do: test unsaved mission exist
+        @mission = @new_mission
+        console.log 'ddddddd'
+        # window.router.navigate("loadMission", {trigger: true});
     after_action: (route, params) ->
       @logger.dev "[appController after_action]: #{route}"
       if route == 'program' || route == ''
+        window.appController.aGetRequest('test_var', (data)->
+          console.log("in aGetRequest: #{data}")
+          return
+          )
+
+
         rivets.bind $('.mission_'),{mission: @mission}
         # window.mission = @mission 
         # window.rivets = rivets 
@@ -79,6 +90,9 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission','rivets'], (Logger,
       if route == 'constraintSetting'
         rivets.bind $('.mission_'),{mission: @mission}   
 
+      if route == 'createMission'
+        rivets.bind $('.mission_'),{mission: @new_mission}   
+
       if route == 'patterns'
         console.log @mission.get('available_layers')
         _.each(@mission.get('available_layers'),((a_layer) ->
@@ -92,6 +106,11 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission','rivets'], (Logger,
         )
 
       if route == 'mission'
+        window.appController.aSetRequest "test_var", "new code", (data, varName) ->
+          console.log("in aSetRequest: new code")
+          return
+
+
         _.each(@mission.get('available_layers'),((a_layer) ->
             $('#my-select').prepend( "<option value='#{a_layer.name}-----#{Math.random()*10e16}'>#{a_layer.name}</option>" )
           ),this)        
@@ -106,7 +125,7 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission','rivets'], (Logger,
             value = option_value[0].split(regex)
             value_name = value[0]
 
-            new_option_value = "#{value_name}-----#{Math.random()*10e15}"
+            new_option_value = "#{value_name}-----#{Math.random()*10e16}"
             $('#my-select').prepend( "<option value='#{new_option_value}'>#{value_name}</option>" )
             $('#my-select').multiSelect('refresh')
             @logger.dev "[afterSelect]: old: #{option_value}"
@@ -123,6 +142,12 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission','rivets'], (Logger,
             $('#my-select').multiSelect('refresh')
 
             return        
+    
+
+
+
+
+
     setBoard: (newBoard) ->
       @board = newBoard
 

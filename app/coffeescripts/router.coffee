@@ -47,6 +47,7 @@ define [
       # default root router
       "": "missionShow"
 
+      'saveNewMission' : "saveNewMission"
 
           
     initialize: ->
@@ -78,7 +79,7 @@ define [
         patternShowView.render()
       if action == 'save'
         window.appController.saveBoard()
-        @navigate("patterns", {trigger: true});
+        @navigate("patterns", {trigger: true})
       return
 
     frameShow: ->
@@ -161,6 +162,8 @@ define [
       constraintSettingView = new ConstraintSettingView
       constraintSettingView.render()     
 
+    saveNewMission: ->
+      @navigate("", {trigger: true});
     ######################################################
     #
     #

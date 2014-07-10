@@ -6,11 +6,11 @@ define [
 ], ($, _, Backbone, aLogger) ->  
 	class Mission extends Backbone.Model
 	  defaults: {
-			name: 'new mission',
-			creator: 'COMAU',
-			product: 'COMAU',
-			company: 'COMAU China',
-			code_: '', 
+			name: '',
+			creator: '',
+			product: '',
+			company: '',
+			code: 'X', 
 
 			#setting
 			frame_line_in: '',
@@ -49,11 +49,8 @@ define [
 
 			available_layers: [],
 			used_layers: [],
-			name: 'new mission',
-			creator: 'COMAU',
-			product: 'COMAU',
-			company: 'COMAU China'
-			code_: ''	  		
+	 
+			program_name: 'pg_db' 		
 
 	  }
 	  initialize: (params) ->

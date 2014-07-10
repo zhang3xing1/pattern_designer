@@ -4,7 +4,7 @@
   	Back
 		</a>	
 		<%= title %>
-    <a href="#" class="label label-primary " >
+    <a href="#saveNewMission" class="label label-primary " >
       Save
     </a>
   </div>
@@ -18,7 +18,7 @@
 			  <div class="form-group" >
 		    	<label  class="col-sm-2 control-label"><%= cell %></label>
 			    <div class="col-sm-8">
-			      <input  class="form-control" >
+			      <input  class="form-control mission_" rv-value="mission:<%= cell.toLowerCase()%>">
 			    </div>
 		  	</div>		
 			<%	}); %> 	
