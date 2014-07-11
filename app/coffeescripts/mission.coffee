@@ -50,14 +50,10 @@ define [
       available_layers: {},
       used_layers: [],
    
-       # HTML side data
-      program_name: 'pg_db'   
-      selected_layer: undefined  
-
     }
     initialize: (params) ->
       @aLogger = aLogger.create
-      @aLogger.dev "this is in mission"
+      @aLogger.debug "this is in mission"
 
     addLayer: (layer_data) ->
       to_updated_available_layers = @get("available_layers")
@@ -66,10 +62,5 @@ define [
 
     layers: ->
       @get("available_layers")
-
-    getLayerByName: (layer_name) ->
-      available_layers = @get('available_layers')
-      result =  _.filter(available_layers, ((a_layer) ->
-        a_layer.name == layer_name), this)
          
   create: new Mission

@@ -77,23 +77,32 @@ define [
         patternShowView = new PatternShowView
         patternShowView.render()
       if action == 'save'
-        @logger.dev "[route - pattern]: last_action.params #{window.appController.last_action.params}"
-        # if  window.appController.last_action.params == 'edit' 
-        window.appController.saveLayer(window.appController.last_action.params)
+        @logger.dev "route-save"
+        @logger.dev "previous_action.params #{window.appController.previous_action.params}"
+        @logger.dev "current_action.params #{window.appController.current_action.params}"
+        if window.appController.previous_action.params == 'edit'
+          window.appController.saveLayer(window.appController.selected_layer.id)
+        else
+          window.appController.saveLayer('')
         @navigate("patterns", {trigger: true})
       # if action == 'update'
         # to do 
       if action == 'edit'
+        layers = window.appController.getLayers()
         selected_layer_id = $('.list-group-item.selected-item').attr('id')
-        selected_layer = window.appController.getLayers()[selected_layer_id]
-        if selected_layer != undefined
-          window.appController.setSelectedLayer(selected_layer)
+        @logger.dev("route-edit: selected_layer_id->#{selected_layer_id}; layers-> #{Object.keys(layers)} ")
+        if Object.keys(layers).length == 0 or selected_layer_id == undefined
+          @navigate("patterns", {trigger: true})
+          return false
+        selected_layer = layers[selected_layer_id]          
+        if selected_layer == undefined
+          @navigate("patterns", {trigger: true})
+          return false
+        else
+          window.appController.selected_layer = selected_layer
           $('.right_board').remove()
           patternShowView = new PatternShowView
           patternShowView.render()
-        else
-          @navigate("patterns", {trigger: true})
-          return false
       if action == 'clone'
         selected_layer_id = $('.list-group-item.selected-item').attr('id')
         if selected_layer_id != '' and selected_layer_id != undefined
@@ -215,7 +224,7 @@ define [
     ######################################################
 
     before: (route, params) ->
-      @logger.dev("[Before] - route: #{route}, params: #{params}")
+      @logger.debug("[Before] - route: #{route}, params: #{params}")
       window.appController.before_action(route, params)
       
     after: (route, params) ->
@@ -224,7 +233,7 @@ define [
       # $("[href*='linein']")
       $("#left_board [href*='#{route}']").addClass('list-group-item-info')
 
-      @logger.dev("[After] - route: #{route}, params: #{params}")
+      @logger.debug("[After] - route: #{route}, params: #{params}")
 
       window.appController.after_action(route, params)
       # $('#app-flash').modal()

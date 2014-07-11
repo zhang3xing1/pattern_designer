@@ -5,7 +5,11 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission','rivets'], (Logger,
       @logger = Logger.create 
       @mission = Mission.create
       @new_mission = Mission.create
-      @last_action = undefined
+      @previous_action = undefined
+      @current_action = undefined
+
+      ## view shared
+      @selected_layer = undefined
 
     aGetRequest: (varName, callback, programName) ->
       programName = @mission.get('program_name') unless programName?
@@ -32,7 +36,10 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission','rivets'], (Logger,
 
     # decide if router be valid
     before_action: (route, params) ->
-      @logger.dev "[appController before_action]: #{route}"
+      @previous_action = @current_action
+      @current_action = {route: route, params: params[0]}
+      @logger.dev "[before_action]: @previous_action #{@previous_action.route} #{@previous_action.params}" if @previous_action != undefined
+      @logger.dev "[before_action]: @current_action #{@current_action.route} #{@current_action.params}" if @previous_action != undefined
       rivets.adapters[":"] =
         subscribe: (obj, keypath, callback) ->
           # console.log("1.subscribe:\t #{obj} ||\t #{keypath}")
@@ -62,11 +69,11 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission','rivets'], (Logger,
         @mission = @new_mission
         # window.router.navigate("loadMission", {trigger: true});
     after_action: (route, params) ->
-      @last_action = {route: route, params: params[0]}
-      @logger.dev "[appController after_action last_action]: #{@last_action.route}|#{@last_action.params}"
+      # @previous_action = {route: route, params: params[0]}
+      # @logger.debug "[appController after_action previous_action]: #{@previous_action.route}|#{@previous_action.params}"
       if route == 'program' || route == ''
         window.appController.aGetRequest('test_var', (data)->
-          @logger.dev("in aGetRequest: #{data}")
+          @logger.debug("in aGetRequest: #{data}")
           return
           )
 
@@ -126,8 +133,8 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission','rivets'], (Logger,
             new_option_value = "#{value_name}-----#{Math.random()*10e16}"
             $('#my-select').prepend( "<option value='#{new_option_value}'>#{value_name}</option>" )
             $('#my-select').multiSelect('refresh')
-            @logger.dev "[afterSelect]: old: #{option_value}"
-            @logger.dev "[afterSelect]: new: #{new_option_value}"
+            @logger.debug "[afterSelect]: old: #{option_value}"
+            @logger.debug "[afterSelect]: new: #{new_option_value}"
             return 
           afterDeselect: (option_value) =>
             # remove selected item
@@ -136,7 +143,7 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission','rivets'], (Logger,
             value_name = value[0]
 
             $("option[value='" + option_value + "']").remove()
-            @logger.dev "[afterDeselect]: #{option_value}"
+            @logger.debug "[afterDeselect]: #{option_value}"
             $('#my-select').multiSelect('refresh')
 
             return        
@@ -144,28 +151,20 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission','rivets'], (Logger,
     setBoard: (newBoard) ->
       @board = newBoard
 
-    setSelectedLayer: (layer) ->
-      @mission.set('selected_layer', layer)
-    selectedLayer: ->
-      layer = @mission.get('selected_layer')
-      if layer == undefined
-        return false
-      else
-        return layer
     getLayers: ->
-      @mission.get('available_layers')    
-    saveLayer: (action) ->
+      @mission.get('available_layers') 
+
+    saveLayer: (layer_id) ->
       # todo validator
-      new_layer = @board.saveLayer(action)
+      new_layer = @board.saveLayer(layer_id)
       @mission.addLayer(new_layer)
 
-      @logger.dev "[appController] saveLayer -> #{action}"
     # getLayerByName: (layer_name) ->
     #   # todo
-    #   @logger.dev '[appController] - getLayerByName'
+    #   @logger.debug '[appController] - getLayerByName'
     #   result = @mission.getLayerByName(layer_name)
     #   console.log result
-    #   @logger.dev '[appController] - getLayerByName done!'
+    #   @logger.debug '[appController] - getLayerByName done!'
     #   result
     default_pattern_params: ->
       canvasStage =  

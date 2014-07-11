@@ -57,8 +57,6 @@ define [
           obj.set keypath, value
           return
 
-      
-
       class Box extends Backbone.Model
         defaults: {
           boxId:            '0'
@@ -533,10 +531,14 @@ define [
 
 
           # to edit an exist layer, then load each box data on the stage board.
-          to_edit_layer_name = window.appController.selectedLayer().name
-          if to_edit_layer_name
-            $('#layer-name').val(to_edit_layer_name)
-            console.log window.appController.getLayerByName(to_edit_layer_name)
+          # to_edit_layer_name = window.appController.selectedLayer().name
+          # alert ("in pattern show #{window.appController.last_action.p}")
+          # if to_edit_layer_name
+          #   $('#layer-name').val(to_edit_layer_name)
+          #   console.log window.appController.getLayerByName(to_edit_layer_name)
+          Logger.dev "window.appController.previous_action.params"
+          if window.appController.current_action.params == 'edit'
+            $('#layer-name').val(window.appController.selected_layer.name)
 
         precisionAdjustment: (floatNumber, digitNumber = 0) ->
           ratioBy10 = 1 * Math.pow(10,digitNumber)
@@ -1420,7 +1422,7 @@ define [
           @layer.add xLabel
           @layer.add yLabel
 
-          Logger.dev("stage: #{@stage}" )
+          Logger.debug("stage: #{@stage}" )
           @stage.add @layer
 
           #### flip context
@@ -1442,7 +1444,7 @@ define [
           @boxes = new Boxes(boxes_params)
           @boxes.shift()
 
-        saveLayer: (action = 'new') ->
+        saveLayer: (layer_id = '') ->
           # some validator
           # todo
           layer_data = 
@@ -1455,13 +1457,12 @@ define [
                 rotate: a_box.get('rotate'),
                 arrow: a_box.get('vectorDegree')
               }
-            ), this)
-
-          if action == 'new'
+            ), this)  
+          #  edit_layer_id = ..... 
+          if layer_id == ''
             layer_data.id = "layer-item-#{Math.random()*10e17}"
-          if action == 'save'
-            # alert "#{action} #{window.appController.selectedLayer()}"
-            layer_data.id = window.appController.selectedLayer().id
+          else
+            layer_data.id = layer_id
 
           layer_data
       # window.board = new StackBoard(window.appController.default_pattern_params())

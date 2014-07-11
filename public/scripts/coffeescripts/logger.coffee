@@ -1,7 +1,7 @@
 define ->
   class Logger
     instance = null
-    statuses = ['info', 'debug', "dev"]
+    # statuses = ['info', 'debug', "dev"]
     # statuses = ['info']
     statuses = ['dev', 'info']
     class Horn
