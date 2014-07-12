@@ -47,7 +47,7 @@ define [
       overhang_wid: 10,
       max_pack: 200,
 
-      available_layers: {},
+      available_layers: {}, # layer_data.id : layer_data
       used_layers: [],
    
     }
@@ -62,5 +62,10 @@ define [
 
     layers: ->
       @get("available_layers")
+
+    getAvailableLayersOrder: ->
+      result = _.map(_.values(@get("available_layers")), (layer) ->
+        layer.name) 
+      # result.reverse()
          
   create: new Mission

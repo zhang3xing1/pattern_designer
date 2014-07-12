@@ -9,7 +9,11 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission','rivets'], (Logger,
       @current_action = undefined
 
       ## view shared
+      # pattern index -> for edit layer
       @selected_layer = undefined
+
+      ## mission edit page -> for order of layers
+      @id_selected_layer_neighbor_bottom = ''
 
     aGetRequest: (varName, callback, programName) ->
       programName = @mission.get('program_name') unless programName?
@@ -133,8 +137,45 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission','rivets'], (Logger,
             new_option_value = "#{value_name}-----#{Math.random()*10e16}"
             $('#my-select').prepend( "<option value='#{new_option_value}'>#{value_name}</option>" )
             $('#my-select').multiSelect('refresh')
+
+            selectable_layers = $(".ms-selectable li:visible span")
+            available_layers = window.appController.getAvailableLayersOrder()
+            ## to keep orgin order
+
+            order_index = 0
+            while order_index < available_layers.length
+              to_ordered_layer = available_layers[order_index]
+              selectable_layers.each (index) ->
+                if $(this).html() == to_ordered_layer
+                  $(this).parent().insertBefore($(selectable_layers[order_index]).parent())
+                  return
+              selectable_layers = $(".ms-selectable li:visible span")
+              order_index++
+
+            # # find the index of new_option_value in orgin order
+            # if selectable_layers.length >= 1
+            #   console.log 'selectable_layers:'
+            #   console.log selectable_layers
+            #   console.log window.appController.getAvailableLayersOrder()
+            #   index = _.indexOf(window.appController.getAvailableLayersOrder(), value_name)
+            #   console.log "selected_layer: -> #{value_name}, index: #{index}"
+            #   get_new_option_value = $(selectable_layers[0])
+            #   console.log "get_new_option_value: "
+            #   console.log get_new_option_value
+            #   get_new_option_value.insertAfter($(selectable_layers[index]))
+
+            
+
+            # # all avaiable layers
+            # $(".ms-selectable li:visible")
+
+            # # all used layers
+            # console.log _.map($(".ms-selection li:visible span"), (layer)->
+            #   ($(layer).html()))
+
             @logger.debug "[afterSelect]: old: #{option_value}"
             @logger.debug "[afterSelect]: new: #{new_option_value}"
+
             return 
           afterDeselect: (option_value) =>
             # remove selected item
@@ -158,6 +199,9 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission','rivets'], (Logger,
       # todo validator
       new_layer = @board.saveLayer(layer_id)
       @mission.addLayer(new_layer)
+
+    getAvailableLayersOrder: ->
+      @mission.getAvailableLayersOrder()
 
     # getLayerByName: (layer_name) ->
     #   # todo

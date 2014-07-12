@@ -1460,7 +1460,7 @@ define [
             ), this)  
           #  edit_layer_id = ..... 
           if layer_id == ''
-            layer_data.id = "layer-item-#{Math.random()*10e17}"
+            layer_data.id = "layer-item-#{layer_data.name}-#{Math.random()*10e17}"
           else
             layer_data.id = layer_id
 
