@@ -48,8 +48,8 @@ define [
       max_pack: 200,
 
       available_layers: {}, # layer_data.id : layer_data
-      used_layers: [],
-   
+      used_layers: [], # {name: layer_name, id: layer_name_random_name},
+      used_layers_created_number: 0, # for count
     }
     initialize: (params) ->
       @aLogger = aLogger.create
@@ -67,5 +67,22 @@ define [
       result = _.map(_.values(@get("available_layers")), (layer) ->
         layer.name) 
       # result.reverse()
-         
+    used_layers: ->
+      @get("used_layers")
+       
+
+    addToUsedLayers: (layer_name, layer_option_value) ->
+      to_updated_used_layers = @get("used_layers") 
+      current_number = @get('used_layers_created_number')
+      new_used_layer = {name: layer_name, option_value: layer_option_value, id: "#{layer_name}-----#{current_number}-----#{Math.random()*10e16}"} 
+      @set('used_layers_created_number', current_number+1)
+      to_updated_used_layers.push(new_used_layer)
+    removeFromUsedLayers: (layer_option_value) ->
+      to_updated_used_layers = @get("used_layers") 
+      result = _.reject(to_updated_used_layers, (used_layer) ->
+        String(used_layer.option_value) == String(layer_option_value)) 
+      @aLogger.dev "used_layer_length: #{result.length}"
+      @set('used_layers', result)
+    getUsedLayersOrder: ->
+      @get('used_layers')
   create: new Mission
