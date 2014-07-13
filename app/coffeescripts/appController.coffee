@@ -120,10 +120,23 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission','rivets'], (Logger,
           console.log("in aSetRequest: new code")
           return
 
+        # init avaiable layers
         _.each(@mission.get('available_layers'),((a_layer) ->
             $('#my-select').prepend( "<option value='#{a_layer.name}-----#{Math.random()*10e16}'>#{a_layer.name}</option>" )
-          ),this)        
+          ),this) 
+        # init used layers    
+        _.each(window.appController.getUsedLayersOrder().reverse(),((a_layer) ->
+            $('#my-select').prepend( "<option value=#{a_layer.option_value} selected>#{a_layer.name}</option>" )
+          ),this) 
+
         $('#my-select').multiSelect
+          afterInit: =>
+            used_layers = window.appController.getUsedLayersOrder()
+            if $(".ms-selection li:visible span") > 1
+              $(".ms-selection li:visible span").each (index) ->
+                if index > used_layers.length
+                  return false
+                $(this).attr('layer_id', used_layers[index].id)
           afterSelect: (option_value) =>
             @logger.dev "afterSelect: #{option_value}"
 
@@ -139,7 +152,7 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission','rivets'], (Logger,
 
             # add this select layer to used_layers
             window.appController.addToUsedLayers(value_name, option_value[0])
-            console.log window.appController.getUsedLayersOrder()
+            # console.log window.appController.getUsedLayersOrder()
 
             ## to keep orgin order, left
             selectable_layers = $(".ms-selectable li:visible span")
