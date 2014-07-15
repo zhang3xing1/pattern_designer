@@ -26,8 +26,12 @@ define [
       box_z_off: '0',
       box_orient: false,
 
-      tool_postion: '',
-
+      tool_postion_x: '999',
+      tool_postion_y: '999',
+      tool_postion_z: '999',
+      tool_postion_a: '999',
+      tool_postion_e: '999',
+      tool_postion_r: '999',
 
       length_wise: false,
       cross_wise: true,

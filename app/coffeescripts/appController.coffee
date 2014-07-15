@@ -93,6 +93,7 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission','rivets'], (Logger,
 
       
     after_action: (route, params) ->
+      action = params[0]
       if route == 'program' || route == ''
         window.appController.aGetRequest('index', (data)->
           alert data
@@ -120,7 +121,7 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission','rivets'], (Logger,
       if route == 'constraintSetting'
         rivets.bind $('.mission_'),{mission: @mission}   
 
-      if route == 'createMission'
+      if route == 'pickSetting'
         rivets.bind $('.mission_'),{mission: @new_mission}   
 
       if route == 'patterns'
@@ -135,165 +136,170 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission','rivets'], (Logger,
         )
 
       if route == 'mission/*action'
-        window.appController.aSetRequest "test_var", "new code", (data, varName) ->
-          console.log("in aSetRequest: new code")
-          return
+        if action == 'save'
+          window.router.navigate("#mission/index", {trigger: true})
+          alert window.appController.mission.toJSON
+          console.log window.appController.mission.toJSON()
+        if action == 'edit'
+          window.appController.aSetRequest "test_var", "new code", (data, varName) ->
+            console.log("in aSetRequest: new code")
+            return
 
-        # init avaiable layers
-        _.each(@mission.get('available_layers'),((a_layer) ->
-            $('#my-select').prepend( "<option value='#{a_layer.name}-----#{Math.random()*10e16}'>#{a_layer.name}</option>" )
-          ),this) 
-        # init used layers    
-        _.each(window.appController.getUsedLayersOrder().reverse(),((a_layer) ->
-            $('#my-select').prepend( "<option value=#{a_layer.option_value} selected>#{a_layer.name}</option>" )
-          ),this) 
+          # init avaiable layers
+          _.each(@mission.get('available_layers'),((a_layer) ->
+              $('#my-select').prepend( "<option value='#{a_layer.name}-----#{Math.random()*10e16}'>#{a_layer.name}</option>" )
+            ),this) 
+          # init used layers    
+          _.each(window.appController.getUsedLayersOrder().reverse(),((a_layer) ->
+              $('#my-select').prepend( "<option value=#{a_layer.option_value} selected>#{a_layer.name}</option>" )
+            ),this) 
 
-        $('#my-select').multiSelect
-          afterInit: =>
-            used_layers = window.appController.getUsedLayersOrder()
-            if $(".ms-selection li:visible span") > 1
-              $(".ms-selection li:visible span").each (index) ->
-                if index > used_layers.length
-                  return false
-                $(this).attr('layer_id', used_layers[index].id)
-          afterSelect: (option_value) =>
-            @logger.dev "afterSelect: #{option_value}"
+          $('#my-select').multiSelect
+            afterInit: =>
+              used_layers = window.appController.getUsedLayersOrder()
+              if $(".ms-selection li:visible span") > 1
+                $(".ms-selection li:visible span").each (index) ->
+                  if index > used_layers.length
+                    return false
+                  $(this).attr('layer_id', used_layers[index].id)
+            afterSelect: (option_value) =>
+              @logger.dev "afterSelect: #{option_value}"
 
-            # get select layer value
-            regex = /\s*-----\s*/
-            value = option_value[0].split(regex)
-            value_name = value[0]
+              # get select layer value
+              regex = /\s*-----\s*/
+              value = option_value[0].split(regex)
+              value_name = value[0]
 
-            new_option_value = "#{value_name}-----#{Math.random()*10e16}"
-            $('#my-select').prepend( "<option value='#{new_option_value}'>#{value_name}</option>" )
-            $('#my-select').multiSelect('refresh')
+              new_option_value = "#{value_name}-----#{Math.random()*10e16}"
+              $('#my-select').prepend( "<option value='#{new_option_value}'>#{value_name}</option>" )
+              $('#my-select').multiSelect('refresh')
 
 
-            # add this select layer to used_layers
-            window.appController.addToUsedLayers(value_name, option_value[0])
-            # console.log window.appController.getUsedLayersOrder()
+              # add this select layer to used_layers
+              window.appController.addToUsedLayers(value_name, option_value[0])
+              # console.log window.appController.getUsedLayersOrder()
 
-            ## to keep orgin order, left
-            selectable_layers = $(".ms-selectable li:visible span")
-            available_layers = window.appController.getAvailableLayersOrder()
-            
-            order_index = 0
-            while order_index < available_layers.length
-              to_ordered_layer = available_layers[order_index]
-              selectable_layers.each (index) ->
-                if $(this).html() == to_ordered_layer
-                  $(this).parent().insertBefore($(selectable_layers[order_index]).parent())
-                  return false
-              # reset selectable_layers
+              ## to keep orgin order, left
               selectable_layers = $(".ms-selectable li:visible span")
-              order_index++
+              available_layers = window.appController.getAvailableLayersOrder()
+              
+              order_index = 0
+              while order_index < available_layers.length
+                to_ordered_layer = available_layers[order_index]
+                selectable_layers.each (index) ->
+                  if $(this).html() == to_ordered_layer
+                    $(this).parent().insertBefore($(selectable_layers[order_index]).parent())
+                    return false
+                # reset selectable_layers
+                selectable_layers = $(".ms-selectable li:visible span")
+                order_index++
 
 
-            ## to keep orgin order, right
-            ## add name attr for identity
-            # remove old identity
-            $(".ms-selection li:visible span").removeAttr('layer_id')
-            # add identity
-            used_layers = window.appController.getUsedLayersOrder()
-            selection_layers = $(".ms-selection li:visible span")
-            order_index = 0            
-            while order_index < used_layers.length 
-              to_ordered_layer = used_layers[order_index]
-              selection_layers.each (index) ->
-                if $(this).html() == to_ordered_layer.name and $(this).attr('layer_id') == undefined
-                  console.log "#{$(this).html()}, #{$(this).attr('layer_id')},#{$(this).parent().index()}"
-                  console.log "order_index: #{order_index}; to_ordered_layer.id: #{to_ordered_layer.id} "
-                  # $(this).parent().insertBefore($(selection_layers[order_index]).parent())
-                  $(this).attr('layer_id', to_ordered_layer.id)
-                  return false
+              ## to keep orgin order, right
+              ## add name attr for identity
+              # remove old identity
+              $(".ms-selection li:visible span").removeAttr('layer_id')
+              # add identity
+              used_layers = window.appController.getUsedLayersOrder()
               selection_layers = $(".ms-selection li:visible span")
-              order_index++
+              order_index = 0            
+              while order_index < used_layers.length 
+                to_ordered_layer = used_layers[order_index]
+                selection_layers.each (index) ->
+                  if $(this).html() == to_ordered_layer.name and $(this).attr('layer_id') == undefined
+                    console.log "#{$(this).html()}, #{$(this).attr('layer_id')},#{$(this).parent().index()}"
+                    console.log "order_index: #{order_index}; to_ordered_layer.id: #{to_ordered_layer.id} "
+                    # $(this).parent().insertBefore($(selection_layers[order_index]).parent())
+                    $(this).attr('layer_id', to_ordered_layer.id)
+                    return false
+                selection_layers = $(".ms-selection li:visible span")
+                order_index++
 
-            ## rearrange
-            # to keep selected order, right
+              ## rearrange
+              # to keep selected order, right
 
-            order_index = 0
-            while order_index < used_layers.length 
-              to_ordered_layer = used_layers[order_index]
-              selection_layers.each (index) ->
-                if $(this).attr('layer_id') == to_ordered_layer.id
-                  $(this).parent().insertBefore($(selection_layers[order_index]).parent())
-                  return false
-              selection_layers = $(".ms-selection li:visible span")
-              order_index++
+              order_index = 0
+              while order_index < used_layers.length 
+                to_ordered_layer = used_layers[order_index]
+                selection_layers.each (index) ->
+                  if $(this).attr('layer_id') == to_ordered_layer.id
+                    $(this).parent().insertBefore($(selection_layers[order_index]).parent())
+                    return false
+                selection_layers = $(".ms-selection li:visible span")
+                order_index++
 
-            @logger.debug "[afterSelect]: old: #{option_value}"
-            @logger.debug "[afterSelect]: new: #{new_option_value}"
+              @logger.debug "[afterSelect]: old: #{option_value}"
+              @logger.debug "[afterSelect]: new: #{new_option_value}"
 
-            # mission changed
-            window.appController.mission_saved_flag = false
-            return 
-          afterDeselect: (option_value) =>
-            @logger.dev "afterDeselect: #{option_value}"
-            # remove selected item
-            regex = /\s*-----\s*/
-            value = option_value[0].split(regex)
-            value_name = value[0]
+              # mission changed
+              window.appController.mission_saved_flag = false
+              return 
+            afterDeselect: (option_value) =>
+              @logger.dev "afterDeselect: #{option_value}"
+              # remove selected item
+              regex = /\s*-----\s*/
+              value = option_value[0].split(regex)
+              value_name = value[0]
 
-            $("option[value='" + option_value + "']").remove()
-            @logger.debug "[afterDeselect]: #{option_value}"
-            $('#my-select').multiSelect('refresh')
+              $("option[value='" + option_value + "']").remove()
+              @logger.debug "[afterDeselect]: #{option_value}"
+              $('#my-select').multiSelect('refresh')
 
 
-            ## to keep orgin order
-            selectable_layers = $(".ms-selectable li:visible span")
-            available_layers = window.appController.getAvailableLayersOrder()
-            
-            order_index = 0
-            while order_index < available_layers.length
-              to_ordered_layer = available_layers[order_index]
-              selectable_layers.each (index) ->
-                if $(this).html() == to_ordered_layer
-                  $(this).parent().insertBefore($(selectable_layers[order_index]).parent())
-                  return false
+              ## to keep orgin order
               selectable_layers = $(".ms-selectable li:visible span")
-              order_index++
+              available_layers = window.appController.getAvailableLayersOrder()
+              
+              order_index = 0
+              while order_index < available_layers.length
+                to_ordered_layer = available_layers[order_index]
+                selectable_layers.each (index) ->
+                  if $(this).html() == to_ordered_layer
+                    $(this).parent().insertBefore($(selectable_layers[order_index]).parent())
+                    return false
+                selectable_layers = $(".ms-selectable li:visible span")
+                order_index++
 
-            ## to keep orgin order, right
-            ## add name attr for identity
-            # remove old identity
-            $(".ms-selection li:visible span").removeAttr('layer_id')
-            # add identity
-            window.appController.removeFromUsedLayers(option_value)
-            used_layers = window.appController.getUsedLayersOrder()
+              ## to keep orgin order, right
+              ## add name attr for identity
+              # remove old identity
+              $(".ms-selection li:visible span").removeAttr('layer_id')
+              # add identity
+              window.appController.removeFromUsedLayers(option_value)
+              used_layers = window.appController.getUsedLayersOrder()
 
 
-            selection_layers = $(".ms-selection li:visible span")
-            order_index = 0            
-            while order_index < used_layers.length 
-              to_ordered_layer = used_layers[order_index]
-              selection_layers.each (index) ->
-                if $(this).html() == to_ordered_layer.name and $(this).attr('layer_id') == undefined
-                  # console.log "#{$(this).html()}, #{$(this).attr('layer_id')},#{$(this).parent().index()}"
-                  # console.log "order_index: #{order_index}; to_ordered_layer.id: #{to_ordered_layer.id} "
-                  # $(this).parent().insertBefore($(selection_layers[order_index]).parent())
-                  $(this).attr('layer_id', to_ordered_layer.id)
-                  return false
               selection_layers = $(".ms-selection li:visible span")
-              order_index++
+              order_index = 0            
+              while order_index < used_layers.length 
+                to_ordered_layer = used_layers[order_index]
+                selection_layers.each (index) ->
+                  if $(this).html() == to_ordered_layer.name and $(this).attr('layer_id') == undefined
+                    # console.log "#{$(this).html()}, #{$(this).attr('layer_id')},#{$(this).parent().index()}"
+                    # console.log "order_index: #{order_index}; to_ordered_layer.id: #{to_ordered_layer.id} "
+                    # $(this).parent().insertBefore($(selection_layers[order_index]).parent())
+                    $(this).attr('layer_id', to_ordered_layer.id)
+                    return false
+                selection_layers = $(".ms-selection li:visible span")
+                order_index++
 
-            ## rearrange
-            # to keep selected order, right
+              ## rearrange
+              # to keep selected order, right
 
-            order_index = 0
-            while order_index < used_layers.length 
-              to_ordered_layer = used_layers[order_index]
-              selection_layers.each (index) ->
-                if $(this).attr('layer_id') == to_ordered_layer.id
-                  $(this).parent().insertBefore($(selection_layers[order_index]).parent())
-                  return false
-              selection_layers = $(".ms-selection li:visible span")
-              order_index++
+              order_index = 0
+              while order_index < used_layers.length 
+                to_ordered_layer = used_layers[order_index]
+                selection_layers.each (index) ->
+                  if $(this).attr('layer_id') == to_ordered_layer.id
+                    $(this).parent().insertBefore($(selection_layers[order_index]).parent())
+                    return false
+                selection_layers = $(".ms-selection li:visible span")
+                order_index++
 
-            # mission changed
-            window.appController.mission_saved_flag = false
+              # mission changed
+              window.appController.mission_saved_flag = false
 
-            return        
+              return        
 
       @logger.dev("[after_action]: window.appController.mission_saved_flag #{window.appController.mission_saved_flag}")
     setBoard: (newBoard) ->
