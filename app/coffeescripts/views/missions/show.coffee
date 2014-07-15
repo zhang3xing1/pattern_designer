@@ -19,7 +19,24 @@ define [
       data =
         title: "Current Mission"
         cells: ['Name', 'Creator', 'Company', 'Product', 'Code']
-        buttons: ['SALVA', 'SACA', 'Save As', 'Reload']
+        buttons: [
+          {
+            name: 'Save'
+            router: "save"
+          }
+          {
+            name: 'Save Copy'
+            router: "save_copy"
+          }
+          {
+            name: 'Save As'
+            router: "save_as"
+          }
+          {
+            name: 'Reload'
+            router: "reload"
+          }                  
+        ]
       compiledTemplate = _.template(MissionsShowView, data)
       
       # Append our compiled template to this Views "el"

@@ -15,11 +15,18 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission','rivets'], (Logger,
       ## mission edit page -> for order of layers
       @removed_layer_index = -1
 
+      # @remote_url = 'http://172.22.117.38/'
+      @program_name = 'pd_db'
+
+      @mission_saved_flag = true
+      @pattern_saved_flag = true
+    # http://192.168.56.2/set?var=gui_string&prog=gui_example_test_2&value=%27ddddd%27
     aGetRequest: (varName, callback, programName) ->
       programName = @mission.get('program_name') unless programName?
       $.ajax
-        url: "get?var=" + varName + "&prog=" + programName
+        url: "get?var=" + varName + "&prog=" + window.appController.program_name
         cache: false
+        dataType: 'JSONP'
         success: (data) ->
           callback data
           return
@@ -31,19 +38,25 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission','rivets'], (Logger,
         alert varName + "new value is Empty!"
         return
       $.ajax
-        url: "set?var=" + varName + "&prog=" + programName + "&value=" + newVarValue
+        url: "set?var=" + varName + "&prog=" + window.appController.program_name + "&value=" + newVarValue
         cache: false
+        dataType: 'JSONP'
         success: (data) ->
           callback data, varName
           return    
       return
 
+    flash: (options={})->
+      $('#popup').modal() 
+
+
     # decide if router be valid
     before_action: (route, params) ->
+      action = params[0]
       @previous_action = @current_action
-      @current_action = {route: route, params: params[0]}
-      @logger.dev "[before_action]: @previous_action #{@previous_action.route} #{@previous_action.params}" if @previous_action != undefined
-      @logger.dev "[before_action]: @current_action #{@current_action.route} #{@current_action.params}" if @previous_action != undefined
+      @current_action = {route: route, action: params[0]}
+      @logger.dev "[before_action]: @previous_action #{@previous_action.route} #{@previous_action.action}" if @previous_action != undefined
+      @logger.dev "[before_action]: @current_action #{@current_action.route} #{@current_action.action}" if @previous_action != undefined
       rivets.adapters[":"] =
         subscribe: (obj, keypath, callback) ->
           # console.log("1.subscribe:\t #{obj} ||\t #{keypath}")
@@ -68,16 +81,23 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission','rivets'], (Logger,
           # console.log("4.publish:\t\t #{obj} ||\t #{keypath}")
           obj.set keypath, value
           return      
-      if route == 'saveNewMission'
-        # to do: test unsaved mission exist
-        @mission = @new_mission
-        # window.router.navigate("loadMission", {trigger: true});
+      if route == 'mission/*action'
+        if action == 'new'
+          if window.appController.mission_saved_flag == true
+            @mission = @new_mission
+          else
+            @flash()
+            window.router.navigate("#program", {trigger: true})
+            return false
+
+      
     after_action: (route, params) ->
       # @previous_action = {route: route, params: params[0]}
-      # @logger.debug "[appController after_action previous_action]: #{@previous_action.route}|#{@previous_action.params}"
+      # @logger.debug "[appController after_action previous_action]: #{@previous_action.route}|#{@previous_action.action}"
       if route == 'program' || route == ''
-        window.appController.aGetRequest('test_var', (data)->
-          @logger.debug("in aGetRequest: #{data}")
+        window.appController.aGetRequest('index', (data)->
+          alert data
+          @logger.dev("in aGetRequest: #{data}")
           return
           )
 
@@ -115,7 +135,7 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission','rivets'], (Logger,
           return
         )
 
-      if route == 'mission'
+      if route == 'mission/*action'
         window.appController.aSetRequest "test_var", "new code", (data, varName) ->
           console.log("in aSetRequest: new code")
           return
@@ -206,6 +226,8 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission','rivets'], (Logger,
             @logger.debug "[afterSelect]: old: #{option_value}"
             @logger.debug "[afterSelect]: new: #{new_option_value}"
 
+            # mission changed
+            window.appController.mission_saved_flag = false
             return 
           afterDeselect: (option_value) =>
             @logger.dev "afterDeselect: #{option_value}"
@@ -242,7 +264,6 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission','rivets'], (Logger,
             used_layers = window.appController.getUsedLayersOrder()
 
 
-
             selection_layers = $(".ms-selection li:visible span")
             order_index = 0            
             while order_index < used_layers.length 
@@ -270,9 +291,12 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission','rivets'], (Logger,
               selection_layers = $(".ms-selection li:visible span")
               order_index++
 
+            # mission changed
+            window.appController.mission_saved_flag = false
 
             return        
 
+      @logger.dev("[after_action]: window.appController.mission_saved_flag #{window.appController.mission_saved_flag}")
     setBoard: (newBoard) ->
       @board = newBoard
 
@@ -283,6 +307,9 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission','rivets'], (Logger,
       # todo validator
       new_layer = @board.saveLayer(layer_id)
       @mission.addLayer(new_layer)
+
+      # mission changed
+      window.appController.mission_saved_flag = false      
 
     getAvailableLayersOrder: ->
       @mission.getAvailableLayersOrder()
@@ -296,13 +323,9 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission','rivets'], (Logger,
     removeFromUsedLayers: (layer_option_value) ->
       @mission.removeFromUsedLayers(layer_option_value)
 
-    # getLayerByName: (layer_name) ->
-    #   # todo
-    #   @logger.debug '[appController] - getLayerByName'
-    #   result = @mission.getLayerByName(layer_name)
-    #   console.log result
-    #   @logger.debug '[appController] - getLayerByName done!'
-    #   result
+      # mission changed
+      window.appController.mission_saved_flag = false
+
     default_pattern_params: ->
       canvasStage =  
             width:      280

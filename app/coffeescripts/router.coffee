@@ -32,9 +32,8 @@ define [
       "frame":   "frameShow"
       "linein":  "lineinShow"
       "lineout":  "lineoutShow"
-      'mission':  "missionEdit"
-      'loadMission':  "missionIndex"
-      'createMission':  "missionNew"
+      'mission/*action':  "mission_"
+      # 'createMission':  "missionNew"
       'boxSetting': 'boxSetting'
       'boxSetting': 'boxSetting'
       'placeSetting': 'placeSetting'
@@ -149,31 +148,27 @@ define [
       lineoutShowView = new LineoutShowView
       lineoutShowView.render()  
 
-    missionEdit: ->
-      $('.right_board').remove()
-      missionEditView = new MissionEditView
-      missionEditView.render() 
-      # $('#my-select').multiSelect()
+    mission_: (action) ->
+      if action == 'edit'
+        $('.right_board').remove()
+        missionEditView = new MissionEditView
+        missionEditView.render() 
+        # $('#my-select').multiSelect()
 
-    missionIndex: ->
-      $('.right_board').remove()
-      missionIndexView = new MissionIndexView
-      missionIndexView.render()    
-      
-      # option =
-      #   trigger: $("#Rename")
-      #   action: "click"
+      if action == 'new'
+        console.log 'missionNew'
+        $('.right_board').remove()
+        missionNewView = new MissionNewView
+        missionNewView.render() 
 
-      #    # $("#mission_0001").editable option, (e) ->
-      #   console.log "rename worked!"
-      #   return
-
-    missionNew: ->
-      console.log 'missionNew'
-      $('.right_board').remove()
-      missionNewView = new MissionNewView
-      missionNewView.render() 
-
+      if action == 'index'
+        $('.right_board').remove()
+        missionIndexView = new MissionIndexView
+        missionIndexView.render()     
+            
+      if action == 'save'
+        window.appController.mission_saved_flag = true
+        # todo
     boxSetting: ->
       console.log 'boxSetting'
       $('.right_board').remove()
@@ -215,6 +210,7 @@ define [
 
     saveNewMission: ->
       @navigate("", {trigger: true});
+
     ######################################################
     #
     #
@@ -225,7 +221,7 @@ define [
 
     before: (route, params) ->
       @logger.debug("[Before] - route: #{route}, params: #{params}")
-      window.appController.before_action(route, params)
+      return window.appController.before_action(route, params)
       
     after: (route, params) ->
       ## Change left nav button color

@@ -1,7 +1,7 @@
 <div class="right_board" id='right_nav_bar'>  
     <div class='title'>
     			<%= title %>
-          <a href="#loadMission" class="label label-primary " >
+          <a href="#mission/index" class="label label-primary " >
             Load
           </a>
     </div>
@@ -26,8 +26,8 @@
 		  <!-- <li class="active"> -->
 		  <% _.each(buttons, function(button){ %>
 			  <li >
-			    <a href="#" class="label label-primary mission_" style="text-align: center; font-size: 18px; margin-bottom: 28px;">
-			      <%= button %>
+			    <a href="#mission/<%=button.router %>" class="label label-primary mission_" style="text-align: center; font-size: 18px; margin-bottom: 28px;">
+			      <%= button.name %>
 			    </a>
 			  </li>
 		  <%	}); %>
