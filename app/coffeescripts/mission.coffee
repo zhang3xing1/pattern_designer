@@ -60,6 +60,17 @@ define [
       to_updated_available_layers[layer_data.id] = layer_data
       @set('available_layers', to_updated_available_layers) 
 
+    removeLayer: (layer_id) ->
+      to_updated_available_layers = @get("available_layers")
+      to_deleted_layer_name = to_updated_available_layers[layer_id].name
+      delete to_updated_available_layers[layer_id]
+      @set('available_layers', to_updated_available_layers)
+
+      to_updated_used_layers = @get("used_layers")
+      result = _.reject(to_updated_used_layers, (used_layer) ->
+        String(used_layer.name) == String(to_deleted_layer_name)) 
+      @set('used_layers', result)
+
     layers: ->
       @get("available_layers")
 
@@ -85,4 +96,5 @@ define [
       @set('used_layers', result)
     getUsedLayersOrder: ->
       @get('used_layers')
+
   create: new Mission

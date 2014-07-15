@@ -15,7 +15,7 @@ define [
       # Using Underscore we can compile our template with data
       data =
         title: "Pattern"
-        buttons: ['Update', 'Edit', 'Clone', 'Delete', 'Info']
+        buttons: ['Edit', 'Clone', 'Delete', 'Info']
       compiledTemplate = _.template(PatternsIndexView, data)
       
       # Append our compiled template to this Views "el"

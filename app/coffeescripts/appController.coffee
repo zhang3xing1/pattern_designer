@@ -47,6 +47,7 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission','rivets'], (Logger,
       return
 
     flash: (options={})->
+      $('#popup').html(options.message)
       $('#popup').modal() 
 
 
@@ -86,14 +87,12 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission','rivets'], (Logger,
           if window.appController.mission_saved_flag == true
             @mission = @new_mission
           else
-            @flash()
+            @flash({message: 'Do you want to abandon the modification?'})
             window.router.navigate("#program", {trigger: true})
             return false
 
       
     after_action: (route, params) ->
-      # @previous_action = {route: route, params: params[0]}
-      # @logger.debug "[appController after_action previous_action]: #{@previous_action.route}|#{@previous_action.action}"
       if route == 'program' || route == ''
         window.appController.aGetRequest('index', (data)->
           alert data
@@ -320,6 +319,13 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission','rivets'], (Logger,
     getUsedLayersOrder: ->
       @mission.getUsedLayersOrder()
 
+
+    removeLayer: (layer_id) ->
+      @mission.removeLayer(layer_id)
+
+      # mission changed
+      window.appController.mission_saved_flag = false
+        
     removeFromUsedLayers: (layer_option_value) ->
       @mission.removeFromUsedLayers(layer_option_value)
 

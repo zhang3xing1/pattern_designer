@@ -33,7 +33,6 @@ define [
       "linein":  "lineinShow"
       "lineout":  "lineoutShow"
       'mission/*action':  "mission_"
-      # 'createMission':  "missionNew"
       'boxSetting': 'boxSetting'
       'boxSetting': 'boxSetting'
       'placeSetting': 'placeSetting'
@@ -115,13 +114,13 @@ define [
       if action == 'delete'
         selected_layer_id = $('.list-group-item.selected-item').attr('id')
         if selected_layer_id != '' and selected_layer_id != undefined
-          # window.appController.setSelectedLayer(selected_layer_id)
-          # $('.right_board').remove()
-          # patternShowView = new PatternShowView
-          # patternShowView.render()
+          window.appController.removeLayer(selected_layer_id)
+          selected_layer_id = undefined
         else
-          @navigate("patterns", {trigger: true})
-          return false    
+          window.appController.flash(message: 'select a layer to delete first!')
+
+        @navigate("patterns", {trigger: true})
+        return false      
       if action == 'info'
         selected_layer_id = $('.list-group-item.selected-item').html()
         if selected_layer_id != '' and selected_layer_id != undefined
@@ -165,7 +164,7 @@ define [
         $('.right_board').remove()
         missionIndexView = new MissionIndexView
         missionIndexView.render()     
-            
+
       if action == 'save'
         window.appController.mission_saved_flag = true
         # todo
