@@ -536,8 +536,8 @@ define [
           # if to_edit_layer_name
           #   $('#layer-name').val(to_edit_layer_name)
           #   console.log window.appController.getLayerByName(to_edit_layer_name)
-          Logger.dev "window.appController.previous_action.params"
-          if window.appController.current_action.params == 'edit'
+          Logger.dev "window.appController.previous_action.action"
+          if window.appController.current_action.action == 'edit'
             $('#layer-name').val(window.appController.selected_layer.name)
 
         precisionAdjustment: (floatNumber, digitNumber = 0) ->

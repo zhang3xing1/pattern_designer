@@ -76,9 +76,9 @@ define [
         patternShowView.render()
       if action == 'save'
         @logger.dev "route-save"
-        @logger.dev "previous_action.params #{window.appController.previous_action.params}"
-        @logger.dev "current_action.params #{window.appController.current_action.params}"
-        if window.appController.previous_action.params == 'edit'
+        @logger.dev "previous_action.action #{window.appController.previous_action.action}"
+        @logger.dev "current_action.action #{window.appController.current_action.action}"
+        if window.appController.previous_action.action == 'edit'
           window.appController.saveLayer(window.appController.selected_layer.id)
         else
           window.appController.saveLayer('')
@@ -168,12 +168,20 @@ define [
       if action == 'save'
         window.appController.mission_saved_flag = true
         # todo
-      if action == 'update'
-        return false
-        # selected_mission_name = 
-        # if one of exist missions has a same name with the to-updated name mission
-        # we could not allow it happen.
-
+      # if action == 'update'
+      #   window.router.navigate("#mission/index", {trigger: true})
+        # # window.router.navigate("#mission/index", {trigger: true})
+        # selected_mission_name = $('.list-group-item.selected-item').html()
+        # if selected_mission_name != '' and selected_mission_name != undefined
+        #   # check exist
+        #   selected_mission_name = undefined
+        # else
+        #   window.appController.flash(message: 'select a layer to delete first!')        
+        # return false
+        # # selected_mission_name = 
+        # # if one of exist missions has a same name with the to-updated name mission
+        # # we could not allow it happen.
+      # if action == 
 
     boxSetting: ->
       console.log 'boxSetting'

@@ -46,10 +46,12 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission','rivets'], (Logger,
           return    
       return
 
-    flash: (options={})->
+    flash: (options={closable: true})->
       $('#popup').html(options.message)
-      $('#popup').modal() 
-
+      $("#popup").modal
+        escapeClose: options.closable
+        clickClose: options.closable
+        showClose: options.closable
 
     # decide if router be valid
     before_action: (route, params) ->
@@ -138,6 +140,63 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission','rivets'], (Logger,
         )
 
       if route == 'mission/*action'
+        # if action == 'update'
+          # # window.router.navigate("#mission/index", {trigger: true})
+          # selected_mission_name = $('.list-group-item.selected-item').html()
+          # if selected_mission_name != '' and selected_mission_name != undefined
+          #   # check exist
+          #   selected_mission_name = undefined
+          # else
+          #   window.appController.flash(message: 'select a layer to delete first!')        
+          # window.router.navigate("#mission/index", {trigger: true})
+          # return false
+          # selected_mission_name = 
+          # if one of exist missions has a same name with the to-updated name mission
+          # we could not allow it happen.
+        if action == 'update'
+          window.router.navigate("#mission/index", {trigger: true})
+          return false
+        
+        if action == 'rename'
+          selected_mission_name = $('.list-group-item.selected-item').html()
+          window.router.navigate("#mission/index", {trigger: true})
+          new_message = '<form class="navbar-form"> <div class="form-group"> <input type="text" class="form-control" id="to-renamed-mission" placeholder="'\
+            + "#{selected_mission_name}" + '"> </div> <a class="btn btn-default" id="misson_rename">Rename</a> </form>'
+          @flash({message: new_message, closable: false})
+          $('#misson_rename').click ->
+            if ($('#to-renamed-mission').val() != '')
+              ## todo
+              ## rename the mission after validate it if no same name with exists missions
+              console.log "todo -> rename mission in pdl"
+            $.modal.close()
+
+          window.router.navigate("#mission/index", {trigger: true})
+          return false
+          #window.router.navigate("#mission/index", {trigger: true})
+          # # window.router.navigate("#mission/index", {trigger: true})
+          # selected_mission_name = $('.list-group-item.selected-item').html()
+          # if selected_mission_name != '' and selected_mission_name != undefined
+          #   # check exist
+          #   selected_mission_name = undefined
+          # else
+          #   window.appController.flash(message: 'select a layer to delete first!')        
+          # return false
+          # # selected_mission_name = 
+          # # if one of exist missions has a same name with the to-updated name mission
+          # # we could not allow it happen.
+
+        if action == 'index'
+          mission_list = window.appController.get_mission_list()
+          if mission_list.length > 0
+            _.each(mission_list, (a_mission) ->
+              $('#mission_list').append("<li class=\"list-group-item mission_item\" >#{a_mission}</li>"))
+
+            $(".mission_item").on('click', (el) ->
+              $(".mission_item").removeClass('selected-item')
+              $(this).addClass('selected-item')
+              return
+            )
+          return
         if action == 'save'
           window.router.navigate("#mission/index", {trigger: true})
           alert window.appController.mission.toJSON
@@ -303,9 +362,18 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission','rivets'], (Logger,
 
               return        
 
+
+      # if route == 'pattern/*action'
+      #   if action == 'edit'
+                  
       @logger.dev("[after_action]: window.appController.mission_saved_flag #{window.appController.mission_saved_flag}")
     setBoard: (newBoard) ->
       @board = newBoard
+
+    get_mission_list: ->
+      ## ajax todo
+      ## get mission list 
+      ['mission_1', 'mission_2', 'mission_3']
 
     getLayers: ->
       @mission.get('available_layers') 
