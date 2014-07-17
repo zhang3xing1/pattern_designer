@@ -306,7 +306,6 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission','rivets'], (Logger,
               @logger.debug "[afterDeselect]: #{option_value}"
               $('#my-select').multiSelect('refresh')
 
-
               ## to keep orgin order
               selectable_layers = $(".ms-selectable li:visible span")
               available_layers = window.appController.getAvailableLayersOrder()
@@ -363,9 +362,9 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission','rivets'], (Logger,
               return        
 
 
-      # if route == 'pattern/*action'
-      #   if action == 'edit'
-
+      if route == 'pattern/*action'
+        if action == 'edit'
+          @load_pattern_data(window.appController.selected_layer)
       @logger.dev("[after_action]: window.appController.mission_saved_flag #{window.appController.mission_saved_flag}")
     setBoard: (newBoard) ->
       @board = newBoard
@@ -409,9 +408,22 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission','rivets'], (Logger,
       window.appController.mission_saved_flag = false
 
     load_pattern_data: (layer_data)->
-      to_updated_pattern_params = @default_pattern_params()
-
-      to_updated_pattern_params
+      # layer_data = 
+      #   # id: "layer-item-#{Math.random()*10e17}"
+      #   name: $('#layer-name').val()
+      #   boxes: _.map(@boxes.models,((a_box) ->
+      #     {
+      #       x: a_box.getXPositionByRatio(),
+      #       y: a_box.getYPositionByRatio(),
+      #       rotate: a_box.get('rotate'),
+      #       arrow: a_box.get('vectorDegree')
+      #     }
+      #   ), this)    
+      if layer_data != undefined    
+        $('#layer-name').val(layer_data.name)
+        _.each(layer_data.boxes, (a_box) ->
+          window.appController.board.boxes.createNewBox(a_box)
+          )
 
     default_pattern_params: ->
       canvasStage =  

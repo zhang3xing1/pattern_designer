@@ -80,6 +80,7 @@ define [
         @logger.dev "current_action.action #{window.appController.current_action.action}"
         if window.appController.previous_action.action == 'edit'
           window.appController.saveLayer(window.appController.selected_layer.id)
+          window.appController.selected_layer = undefined
         else
           window.appController.saveLayer('')
         @navigate("patterns", {trigger: true})
@@ -92,6 +93,7 @@ define [
         if Object.keys(layers).length == 0 or selected_layer_id == undefined
           @navigate("patterns", {trigger: true})
           return false
+
         selected_layer = layers[selected_layer_id]          
         if selected_layer == undefined
           @navigate("patterns", {trigger: true})

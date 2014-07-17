@@ -64,7 +64,6 @@ define [
           settledStatus:    false   # false: unsettled | true: settled(placed)
           moveOffset:       1
           rotate:           0
-
           vectorDegree:     0
           vectorEnabled:    false
 
@@ -526,8 +525,7 @@ define [
           @yAlignLine = new Kinetic.Line(
                                         points: [
                                           0
-                                          0
-                                          
+                                          0                         
                                           0
                                           0
                                         ]
@@ -729,7 +727,7 @@ define [
 
         testCollisionBetween: (boxA, boxB) ->
           @collisionUtil.testCollisionBetween(boxA, boxB, {collisionType: 'outer-outer'})
-        createNewBox: (to_be_added_box_data = 'null') =>
+        createNewBox: (to_be_added_box_data) =>
           newBox  = new Box(@box_params)
           if @length == 0
             newBox.setXPosition Math.floor((@zone.bound.left + @zone.bound.right - newBox.get('rect').getWidth())/2)
@@ -739,14 +737,15 @@ define [
             newBox.setYPosition(@last().getYPosition())
 
           ## update the new box params with to_be_added_box_data
-          if to_be_added_box_data != 'null'
+          if to_be_added_box_data.x != undefined
+            #keys: x,y,rotate,arrow
+            console.log to_be_added_box_data
+            newBox.rotateWithAngle(to_be_added_box_data.rotate)
+            newBox.rotateArrow(to_be_added_box_data.arrow) if to_be_added_box_data.arrowEnabled
             newBox.setXPosition(to_be_added_box_data.x)
             newBox.setYPosition(to_be_added_box_data.y)
-            newBox.rotateWithAngle(to_be_added_box_data.rotate)
-            newBox.rotateArrow(to_be_added_box_data.arrow)
             # newBox.rotateWithAngle(to_be_added_box_data.rotate)
-            # newBox.
-
+            # newBox.rotateArrow(to_be_added_box_data.arrow) if to_be_added_box_data.arrowEnabled
           
           newBox.setTitleName(@availableNewBoxId)
           newBox.set('boxId', @availableNewBoxId)
@@ -1472,15 +1471,17 @@ define [
         saveLayer: (layer_id = '') ->
           # some validator
           # todo
+          console.log @boxes.models
           layer_data = 
             # id: "layer-item-#{Math.random()*10e17}"
             name: $('#layer-name').val()
             boxes: _.map(@boxes.models,((a_box) ->
               {
-                x: a_box.getXPositionByRatio(),
-                y: a_box.getYPositionByRatio(),
+                x: a_box.getXPosition(),
+                y: a_box.getYPosition(),
                 rotate: a_box.get('rotate'),
                 arrow: a_box.get('vectorDegree')
+                arrowEnabled: a_box.get('vectorEnabled')
               }
             ), this)  
           #  edit_layer_id = ..... 
@@ -1490,7 +1491,7 @@ define [
             layer_data.id = layer_id
 
           layer_data
-      # window.board = new StackBoard(window.appController.default_pattern_params())
+
       window.appController.setBoard(new StackBoard(window.appController.default_pattern_params()))
 
       rivets.formatters.suffix_cm = (value) ->
