@@ -365,7 +365,7 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission','rivets'], (Logger,
 
       # if route == 'pattern/*action'
       #   if action == 'edit'
-                  
+
       @logger.dev("[after_action]: window.appController.mission_saved_flag #{window.appController.mission_saved_flag}")
     setBoard: (newBoard) ->
       @board = newBoard
@@ -407,6 +407,11 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission','rivets'], (Logger,
 
       # mission changed
       window.appController.mission_saved_flag = false
+
+    load_pattern_data: (layer_data)->
+      to_updated_pattern_params = @default_pattern_params()
+
+      to_updated_pattern_params
 
     default_pattern_params: ->
       canvasStage =  
@@ -497,16 +502,16 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission','rivets'], (Logger,
 
 
       pallet =  
-            width:    200
-            height:   250 
-            overhang: 10
+            width:    @mission.get('pallet_width')
+            height:   @mission.get('pallet_height')
+            overhang: @mission.get('overhang_len')
 
       box  =      
             x:      0 
             y:      0
-            width:  60  
-            height: 20  
-            minDistance: 10
+            width:  @mission.get('box_width') 
+            height: @mission.get('box_height')
+            minDistance: @mission.get('distance')
 
 
       params = 

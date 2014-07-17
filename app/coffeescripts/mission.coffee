@@ -13,20 +13,20 @@ define [
       code: '', 
 
       #setting
-      frame_line_in: '2',
-      frame_line_out: '3',
+      frame_line_in:  2,
+      frame_line_out: 3,
 
-      box_length: '0',
-      box_width: '0',
-      box_height: '0',
-      box_weight: '0',
+      box_length: 0,
+      box_width:  60,
+      box_height: 20,
+      box_weight: 10,
 
-      box_x_off: '0',
-      box_y_off: '0',
-      box_z_off: '0',
+      box_x_off:  0,
+      box_y_off:  0,
+      box_z_off:  0,
       box_orient: false,
 
-      tool_index: '2',
+      tool_index: 2,
       tool_position_x: 'N',
       tool_position_y: 'N',
       tool_position_z: 'N',
@@ -37,20 +37,33 @@ define [
       length_wise: false,
       cross_wise: true,
       box_per_pick: 1,
-      distance: 10,
+      distance:     10,
 
       pallet_length: 300,
-      pallet_width: 400,
-      pallet_height: 500,
+      pallet_width: 200,
+      pallet_height: 250,
       pallet_weight: 1000,
       sleepsheet_height: 5,
 
-      tare: 1000,
-      max_gross: 800,
-      max_height: 600,
-      overhang_len: 10,
-      overhang_wid: 10,
-      max_pack: 200,
+      tare:           1000,
+      max_gross:      800,
+      max_height:     600,
+      overhang_len:   10,
+      overhang_wid:   10,
+      max_pack:       200,
+
+      #       pallet =  
+      #       width:    200
+      #       height:   250 
+      #       overhang: 10
+
+      # box  =      
+      #       x:      0 
+      #       y:      0
+      #       width:  60  
+      #       height: 20  
+      #       minDistance: 10
+
 
       available_layers: {}, # layer_data.id : layer_data
       used_layers: [], # {name: layer_name, id: layer_name_random_name},

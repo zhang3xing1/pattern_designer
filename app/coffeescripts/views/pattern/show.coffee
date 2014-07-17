@@ -293,6 +293,22 @@ define [
           Logger.debug("box#{@getTitleName()}: makeUnCollisionStatus")
           @set('collisionStatus', false)
 
+        rotateArrow: (angle) ->
+          vectorDegree = angle
+          if vectorDegree <= 360 
+            @set('vectorEnabled', true)
+            # change dot to arrow
+            @get('dot').setFillAlpha(0)
+            @get('arrow').strokeAlpha(1)
+            @set('vectorDegree', vectorDegree)
+            @get('arrow').rotation(@get('vectorDegree'))
+          else
+            @set('vectorEnabled', false)
+            # change arrow to dot
+            @get('dot').setFillAlpha(1)
+            @get('arrow').strokeAlpha(0)
+            @set('vectorDegree', -45)
+
         rotateWithAngle: (angle) ->
           newRotateAngle = (@get('rotate') + angle) % 360
           centerPointForGroup    = @getCenterPoint()
@@ -713,16 +729,24 @@ define [
 
         testCollisionBetween: (boxA, boxB) ->
           @collisionUtil.testCollisionBetween(boxA, boxB, {collisionType: 'outer-outer'})
-        createNewBox: =>
+        createNewBox: (to_be_added_box_data = 'null') =>
           newBox  = new Box(@box_params)
-
           if @length == 0
             newBox.setXPosition Math.floor((@zone.bound.left + @zone.bound.right - newBox.get('rect').getWidth())/2)
             newBox.setYPosition Math.floor((@zone.bound.top + @zone.bound.bottom - newBox.get('rect').getHeight())/2)
-
           else
             newBox.setXPosition(@last().getXPosition())
             newBox.setYPosition(@last().getYPosition())
+
+          ## update the new box params with to_be_added_box_data
+          if to_be_added_box_data != 'null'
+            newBox.setXPosition(to_be_added_box_data.x)
+            newBox.setYPosition(to_be_added_box_data.y)
+            newBox.rotateWithAngle(to_be_added_box_data.rotate)
+            newBox.rotateArrow(to_be_added_box_data.arrow)
+            # newBox.rotateWithAngle(to_be_added_box_data.rotate)
+            # newBox.
+
           
           newBox.setTitleName(@availableNewBoxId)
           newBox.set('boxId', @availableNewBoxId)
@@ -866,22 +890,23 @@ define [
           Logger.debug "[rotate90] width: #{@currentBox.get('rect').getWidth()}, height: #{@currentBox.get('rect').getHeight()}"
         rotateByVector: () =>
           vectorDegree = @currentBox.get('vectorDegree') + 45
+          @currentBox.rotateArrow(vectorDegree)
 
-          if vectorDegree <= 360 
-            @currentBox.set('vectorEnabled', true)
-            # change dot to arrow
-            @currentBox.get('dot').setFillAlpha(0)
-            @currentBox.get('arrow').strokeAlpha(1)
-            @currentBox.set('vectorDegree', vectorDegree)
-            @currentBox.get('arrow').rotation(@currentBox.get('vectorDegree'))
-          else
-            @currentBox.set('vectorEnabled', false)
-            # change arrow to dot
-            @currentBox.get('dot').setFillAlpha(1)
-            @currentBox.get('arrow').strokeAlpha(0)
-            @currentBox.set('vectorDegree', -45)
+          # if vectorDegree <= 360 
+          #   @currentBox.set('vectorEnabled', true)
+          #   # change dot to arrow
+          #   @currentBox.get('dot').setFillAlpha(0)
+          #   @currentBox.get('arrow').strokeAlpha(1)
+          #   @currentBox.set('vectorDegree', vectorDegree)
+          #   @currentBox.get('arrow').rotation(@currentBox.get('vectorDegree'))
+          # else
+          #   @currentBox.set('vectorEnabled', false)
+          #   # change arrow to dot
+          #   @currentBox.get('dot').setFillAlpha(1)
+          #   @currentBox.get('arrow').strokeAlpha(0)
+          #   @currentBox.set('vectorDegree', -45)
 
-          Logger.debug "box#{@currentBox.getTitleName()} vector #{vectorDegree}"
+          # Logger.debug "box#{@currentBox.getTitleName()} vector #{vectorDegree}"
 
           @updateCurrentBox()
 
