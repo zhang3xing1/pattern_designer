@@ -7,14 +7,14 @@ define [
   class Mission extends Backbone.Model
     defaults: {
       name: '',
-      creator: '',
+      creator: 'Your name',
       product: '',
       company: '',
-      code: 'Code X', 
+      code: '', 
 
       #setting
-      frame_line_in: '',
-      frame_line_out: '',
+      frame_line_in: '2',
+      frame_line_out: '3',
 
       box_length: '0',
       box_width: '0',
@@ -26,12 +26,13 @@ define [
       box_z_off: '0',
       box_orient: false,
 
-      tool_postion_x: '999',
-      tool_postion_y: '999',
-      tool_postion_z: '999',
-      tool_postion_a: '999',
-      tool_postion_e: '999',
-      tool_postion_r: '999',
+      tool_index: '2',
+      tool_position_x: 'N',
+      tool_position_y: 'N',
+      tool_position_z: 'N',
+      tool_position_a: 'N',
+      tool_position_e: 'N',
+      tool_position_r: 'N',
 
       length_wise: false,
       cross_wise: true,
@@ -54,6 +55,7 @@ define [
       available_layers: {}, # layer_data.id : layer_data
       used_layers: [], # {name: layer_name, id: layer_name_random_name},
       used_layers_created_number: 0, # for count
+
     }
     initialize: (params) ->
       @aLogger = aLogger.create
@@ -84,8 +86,7 @@ define [
       # result.reverse()
     used_layers: ->
       @get("used_layers")
-       
-
+      
     addToUsedLayers: (layer_name, layer_option_value) ->
       to_updated_used_layers = @get("used_layers") 
       current_number = @get('used_layers_created_number')
@@ -100,5 +101,14 @@ define [
       @set('used_layers', result)
     getUsedLayersOrder: ->
       @get('used_layers')
+
+    # for statistics in page mission edit
+    get_total_height: ->
+      @get('used_layers').length * @get('box_height')
+    get_total_box: ->
+
+    get_total_weight: ->
+
+    get_total_block_dim: -> 
 
   create: new Mission

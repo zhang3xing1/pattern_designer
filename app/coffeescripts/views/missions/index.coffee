@@ -17,6 +17,28 @@ define [
         title: "Load Mission"
         # cells: ['Name', 'Creator', 'Company', 'Product', 'Code']
         buttons: ['Update', 'Rename', 'Load', 'Delete', 'Info']
+        buttons: [
+          {
+            name: 'Update'
+            router: "update"
+          }
+          {
+            name: 'Rename'
+            router: "rename"
+          }
+          {
+            name: 'Load'
+            router: "load"
+          }
+          {
+            name: 'Delete'
+            router: "delete"
+          }  
+          {
+            name: 'Info'
+            router: "info"
+          }                  
+        ]
       compiledTemplate = _.template(MissionsIndexView, data)
       
       # Append our compiled template to this Views "el"

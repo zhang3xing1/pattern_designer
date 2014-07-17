@@ -20,12 +20,9 @@
 		  </div>
 			  <!-- List group -->
 			  <ul class="list-group" style="height: 204px; overflow: scroll;">
-<!-- 			    <li class="list-group-item" id="mission-item-1">mission-1</li>
+			    <li class="list-group-item" id="mission-item-1">mission-1</li>
 			    <li class="list-group-item" id="mission-item-2">mission-2</li>
 			    <li class="list-group-item" id="mission-item-3">mission-3</li>
-			    <li class="list-group-item" id="mission-item-4">mission-4</li>
-			    <li class="list-group-item" id="mission-item-5">mission-5</li>
-			    <li class="list-group-item" id="mission-item-6">mission-6</li> -->
 			  </ul>
 		</div>
 
@@ -36,8 +33,8 @@
 		  <!-- <li class="active"> -->
 		  <% _.each(buttons, function(button){ %>
 			  <li >
-			    <a href="#mission<%= button %>" id="<%= button %>"class="label label-primary " style="text-align: center; font-size: 18px; margin-bottom: 14px;">
-			      <%= button %>
+			    <a href="#mission/<%= button.router %>" id="<%= button %>"class="label label-primary " style="text-align: center; font-size: 18px; margin-bottom: 14px;">
+			      <%= button.name %>
 			    </a>
 			  </li>
 		  <%	}); %>

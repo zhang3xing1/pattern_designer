@@ -168,6 +168,13 @@ define [
       if action == 'save'
         window.appController.mission_saved_flag = true
         # todo
+      if action == 'update'
+        return false
+        # selected_mission_name = 
+        # if one of exist missions has a same name with the to-updated name mission
+        # we could not allow it happen.
+
+
     boxSetting: ->
       console.log 'boxSetting'
       $('.right_board').remove()

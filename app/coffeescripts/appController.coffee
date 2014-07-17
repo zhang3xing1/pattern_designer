@@ -106,21 +106,23 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission','rivets'], (Logger,
         # window.rivets = rivets 
         # console.log $('.mission_')
         # window.rivets.bind $('.mission_'),{mission: @mission}
-      if route == 'boxSetting'
-        rivets.bind $('.mission_'),{mission: @mission}
+      # if route == 'boxSetting'
+      #   rivets.bind $('.mission_'),{mission: @mission}
 
-      if route == 'placeSetting'
-        rivets.bind $('.mission_'),{mission: @mission}   
+      # if route == 'placeSetting'
+      #   rivets.bind $('.mission_'),{mission: @mission}   
 
-      if route == 'additionalInfo' 
-        rivets.bind $('.mission_'),{mission: @mission} 
+      # if route == 'additionalInfo' 
+      #   rivets.bind $('.mission_'),{mission: @mission} 
 
-      if route == 'palletSetting'
-        rivets.bind $('.mission_'),{mission: @mission}   
+      # if route == 'palletSetting'
+      #   rivets.bind $('.mission_'),{mission: @mission}   
 
-      if route == 'constraintSetting'
-        rivets.bind $('.mission_'),{mission: @mission}   
+      # if route == 'constraintSetting'
+      #   rivets.bind $('.mission_'),{mission: @mission}   
 
+
+      rivets.bind $('.mission_'),{mission: @mission}
       if route == 'pickSetting'
         rivets.bind $('.mission_'),{mission: @new_mission}   
 
