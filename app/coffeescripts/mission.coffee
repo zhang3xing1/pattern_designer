@@ -147,6 +147,6 @@ define [
 
     get_total_block_dim: -> 
       all_layers = @getUsedLayersName()
-      _.reduce(all_layers,((sum, layer) ->
+      _.reduce(all_layers,((sum, layer_name) ->
         sum + @getBoxesNumberByLayerName(layer_name)), 0, this)
   create: new Mission

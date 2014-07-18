@@ -229,6 +229,10 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission','rivets'], (Logger,
 
               # mission changed
               window.appController.mission_saved_flag = false
+
+              # mission binding by rivets
+              rivets.bind $('.mission_'),{mission: window.appController.mission}
+
               return 
             afterDeselect: (option_value) =>
               @logger.dev "afterDeselect: #{option_value}"
@@ -294,12 +298,16 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission','rivets'], (Logger,
               # mission changed
               window.appController.mission_saved_flag = false
 
+              # mission binding by rivets
+              rivets.bind $('.mission_'),{mission: window.appController.mission}
+
               return        
 
 
       if route == 'pattern/*action'
         if action == 'edit'
           @load_pattern_data(window.appController.selected_layer)
+      
       @logger.dev("[after_action]: window.appController.mission_saved_flag #{window.appController.mission_saved_flag}")
     
     keepLeftOrderForMissionEdit:(layers_ordering,selectors)->
