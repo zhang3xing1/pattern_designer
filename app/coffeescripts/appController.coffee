@@ -172,18 +172,6 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission','rivets'], (Logger,
 
           window.router.navigate("#mission/index", {trigger: true})
           return false
-          #window.router.navigate("#mission/index", {trigger: true})
-          # # window.router.navigate("#mission/index", {trigger: true})
-          # selected_mission_name = $('.list-group-item.selected-item').html()
-          # if selected_mission_name != '' and selected_mission_name != undefined
-          #   # check exist
-          #   selected_mission_name = undefined
-          # else
-          #   window.appController.flash(message: 'select a layer to delete first!')        
-          # return false
-          # # selected_mission_name = 
-          # # if one of exist missions has a same name with the to-updated name mission
-          # # we could not allow it happen.
 
         if action == 'index'
           mission_list = window.appController.get_mission_list()
@@ -207,7 +195,8 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission','rivets'], (Logger,
             return
 
           # init avaiable layers
-          _.each(@mission.get('available_layers'),((a_layer) ->
+          _.each(@mission.get('available_layers'),((a_layer, index) ->
+              console.log index
               $('#my-select').prepend( "<option value='#{a_layer.name}-----#{Math.random()*10e16}'>#{a_layer.name}</option>" )
             ),this) 
           # init used layers    
@@ -215,11 +204,15 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission','rivets'], (Logger,
               $('#my-select').prepend( "<option value=#{a_layer.option_value} selected>#{a_layer.name}</option>" )
             ),this) 
 
+
+          selection_selector = ".ms-selection li:visible span"
+          selectable_selector= ".ms-selectable li:visible span"
           $('#my-select').multiSelect
+            
             afterInit: =>
               used_layers = window.appController.getUsedLayersOrder()
-              if $(".ms-selection li:visible span") > 1
-                $(".ms-selection li:visible span").each (index) ->
+              if $(selection_selector) > 1
+                $(selection_selector).each (index) ->
                   if index > used_layers.length
                     return false
                   $(this).attr('layer_id', used_layers[index].id)
@@ -229,19 +222,19 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission','rivets'], (Logger,
               # get select layer value
               regex = /\s*-----\s*/
               value = option_value[0].split(regex)
-              value_name = value[0]
+              selected_layer_name = value[0]
+    
 
-              new_option_value = "#{value_name}-----#{Math.random()*10e16}"
-              $('#my-select').prepend( "<option value='#{new_option_value}'>#{value_name}</option>" )
+              new_option_value = "#{selected_layer_name}-----#{Math.random()*10e16}"
+              $('#my-select').prepend( "<option value='#{new_option_value}'>#{selected_layer_name}</option>" )
               $('#my-select').multiSelect('refresh')
 
-
               # add this select layer to used_layers
-              window.appController.addToUsedLayers(value_name, option_value[0])
+              window.appController.addToUsedLayers(selected_layer_name, option_value[0])
               # console.log window.appController.getUsedLayersOrder()
 
               ## to keep orgin order, left
-              selectable_layers = $(".ms-selectable li:visible span")
+              selectable_layers = $(selectable_selector)
               available_layers = window.appController.getAvailableLayersOrder()
               
               order_index = 0
@@ -252,17 +245,17 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission','rivets'], (Logger,
                     $(this).parent().insertBefore($(selectable_layers[order_index]).parent())
                     return false
                 # reset selectable_layers
-                selectable_layers = $(".ms-selectable li:visible span")
+                selectable_layers = $(selectable_selector)
                 order_index++
 
 
               ## to keep orgin order, right
               ## add name attr for identity
               # remove old identity
-              $(".ms-selection li:visible span").removeAttr('layer_id')
+              $(selection_selector).removeAttr('layer_id')
               # add identity
               used_layers = window.appController.getUsedLayersOrder()
-              selection_layers = $(".ms-selection li:visible span")
+              selection_layers = $(selection_selector)
               order_index = 0            
               while order_index < used_layers.length 
                 to_ordered_layer = used_layers[order_index]
@@ -273,7 +266,7 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission','rivets'], (Logger,
                     # $(this).parent().insertBefore($(selection_layers[order_index]).parent())
                     $(this).attr('layer_id', to_ordered_layer.id)
                     return false
-                selection_layers = $(".ms-selection li:visible span")
+                selection_layers = $(selection_selector)
                 order_index++
 
               ## rearrange
@@ -286,7 +279,7 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission','rivets'], (Logger,
                   if $(this).attr('layer_id') == to_ordered_layer.id
                     $(this).parent().insertBefore($(selection_layers[order_index]).parent())
                     return false
-                selection_layers = $(".ms-selection li:visible span")
+                selection_layers = $(selection_selector)
                 order_index++
 
               @logger.debug "[afterSelect]: old: #{option_value}"
@@ -307,7 +300,7 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission','rivets'], (Logger,
               $('#my-select').multiSelect('refresh')
 
               ## to keep orgin order
-              selectable_layers = $(".ms-selectable li:visible span")
+              selectable_layers = $(selectable_selector)
               available_layers = window.appController.getAvailableLayersOrder()
               
               order_index = 0
@@ -317,19 +310,19 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission','rivets'], (Logger,
                   if $(this).html() == to_ordered_layer
                     $(this).parent().insertBefore($(selectable_layers[order_index]).parent())
                     return false
-                selectable_layers = $(".ms-selectable li:visible span")
+                selectable_layers = $(selectable_selector)
                 order_index++
 
               ## to keep orgin order, right
               ## add name attr for identity
               # remove old identity
-              $(".ms-selection li:visible span").removeAttr('layer_id')
+              $(selection_selector).removeAttr('layer_id')
               # add identity
               window.appController.removeFromUsedLayers(option_value)
               used_layers = window.appController.getUsedLayersOrder()
 
 
-              selection_layers = $(".ms-selection li:visible span")
+              selection_layers = $(selection_selector)
               order_index = 0            
               while order_index < used_layers.length 
                 to_ordered_layer = used_layers[order_index]
@@ -340,7 +333,7 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission','rivets'], (Logger,
                     # $(this).parent().insertBefore($(selection_layers[order_index]).parent())
                     $(this).attr('layer_id', to_ordered_layer.id)
                     return false
-                selection_layers = $(".ms-selection li:visible span")
+                selection_layers = $(selection_selector)
                 order_index++
 
               ## rearrange
@@ -353,7 +346,7 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission','rivets'], (Logger,
                   if $(this).attr('layer_id') == to_ordered_layer.id
                     $(this).parent().insertBefore($(selection_layers[order_index]).parent())
                     return false
-                selection_layers = $(".ms-selection li:visible span")
+                selection_layers = $(selection_selector)
                 order_index++
 
               # mission changed
