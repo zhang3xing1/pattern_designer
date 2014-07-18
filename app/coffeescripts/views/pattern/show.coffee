@@ -1530,14 +1530,6 @@ define [
       # stage.add layer    
 
 
-
-
-
-
-
-
-
-
       return
   )
   

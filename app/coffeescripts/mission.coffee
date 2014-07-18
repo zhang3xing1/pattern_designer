@@ -66,8 +66,10 @@ define [
 
       available_layers: {}, # layer_data.id : layer_data
       used_layers: [], # {name: layer_name, id: layer_name_random_name},
-      used_layers_created_number: 0, # for count
 
+      # available_layers_sequence: 1, # for identity of selectable layers
+      # used_layers_sequence: 1,      # for identity of selection layers
+      used_layers_created_number: 0, # for count
     }
     initialize: (params) ->
       @aLogger = aLogger.create
@@ -103,7 +105,7 @@ define [
       to_updated_used_layers = @get("used_layers") 
       current_number = @get('used_layers_created_number')
       new_used_layer = {name: layer_name, option_value: layer_option_value, id: "#{layer_name}-----#{current_number}-----#{Math.random()*10e16}"} 
-      @set('used_layers_created_number', current_number+1)
+      @set('used_layers_created_number', current_number + 1)
       to_updated_used_layers.push(new_used_layer)
     removeFromUsedLayers: (layer_option_value) ->
       to_updated_used_layers = @get("used_layers") 
@@ -115,12 +117,36 @@ define [
       @get('used_layers')
 
     # for statistics in page mission edit
+    getUsedLayersName: ->
+      _.map @used_layers(), (a_used_layer) ->
+        a_used_layer.name
+    getLayerDataByName:(layer_name) ->
+      all_layers = _.values(@layers())
+      _.find(all_layers, (a_layer) ->
+        a_layer.name == layer_name) 
+    getBoxesNumberByLayerName: (layer_name) ->
+      boxes_number = @getLayerDataByName(layer_name).boxes.length
+      if boxes_number != undefined
+        boxes_number
+      else
+        0
+
     get_total_height: ->
       @get('used_layers').length * @get('box_height')
+
     get_total_box: ->
+      all_layers_name = @getUsedLayersName()
+      _.reduce(all_layers_name,((sum, layer_name) ->
+        sum + @getBoxesNumberByLayerName(layer_name)), 0, this)
 
     get_total_weight: ->
+      all_layers = @getUsedLayersName()
+      box_weight = @get('box_weight')
+      _.reduce(all_layers,((sum, layer_name) ->
+        sum + box_weight * @getBoxesNumberByLayerName(layer_name)), 0, this) 
 
     get_total_block_dim: -> 
-
+      all_layers = @getUsedLayersName()
+      _.reduce(all_layers,((sum, layer) ->
+        sum + @getBoxesNumberByLayerName(layer_name)), 0, this)
   create: new Mission

@@ -341,10 +341,10 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission','rivets'], (Logger,
             return false
         selection_layers = $(selectors)
         order_index++
-
-      $(".ms-selection ul").children().each (i, li) ->
-        ul.prepend li
-        return
+      # ul = $(".ms-selection ul")
+      # ul.children().each (i, li) ->
+      #   ul.prepend li
+      #   return
 
     setBoard: (newBoard) ->
       @board = newBoard
