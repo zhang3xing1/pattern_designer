@@ -96,35 +96,14 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission','rivets'], (Logger,
       
     after_action: (route, params) ->
       action = params[0]
+      rivets.bind $('.mission_'),{mission: @mission}
       if route == 'program' || route == ''
         window.appController.aGetRequest('index', (data)->
           alert data
           @logger.dev("in aGetRequest: #{data}")
           return
           )
-
-        rivets.bind $('.mission_'),{mission: @mission}
-        # window.mission = @mission 
-        # window.rivets = rivets 
-        # console.log $('.mission_')
-        # window.rivets.bind $('.mission_'),{mission: @mission}
-      # if route == 'boxSetting'
-      #   rivets.bind $('.mission_'),{mission: @mission}
-
-      # if route == 'placeSetting'
-      #   rivets.bind $('.mission_'),{mission: @mission}   
-
-      # if route == 'additionalInfo' 
-      #   rivets.bind $('.mission_'),{mission: @mission} 
-
-      # if route == 'palletSetting'
-      #   rivets.bind $('.mission_'),{mission: @mission}   
-
-      # if route == 'constraintSetting'
-      #   rivets.bind $('.mission_'),{mission: @mission}   
-
-
-      rivets.bind $('.mission_'),{mission: @mission}
+        
       if route == 'pickSetting'
         rivets.bind $('.mission_'),{mission: @new_mission}   
 
@@ -234,55 +213,15 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission','rivets'], (Logger,
 
               # 3. rearrange the order of selectable layers
               available_layers = window.appController.getAvailableLayersOrder()
-              
-              # order_index = 0
-              # while order_index < available_layers.length
-              #   to_ordered_layer = available_layers[order_index]
-              #   selectable_layers.each (index) ->
-              #     if $(this).html() == to_ordered_layer
-              #       $(this).parent().insertBefore($(selectable_layers[order_index]).parent())
-              #       return false
-              #   # refresh selectable_layers
-              #   selectable_layers = $(selectable_selector)
-              #   order_index++
               @keepLeftOrderForMissionEdit(available_layers,selectable_selector)  
 
-              ## to keep orgin order, right
-              ## add name attr for identity
-              # remove old identity
+              # 4. keep orgin order, right
+              # set new identity after removing old identity
               $(selection_selector).removeAttr('layer_id')
-              # add identity
               used_layers = window.appController.getUsedLayersOrder()
-              selection_layers = $(selection_selector)
-
-
-              # order_index = 0            
-              # while order_index < used_layers.length 
-              #   to_ordered_layer = used_layers[order_index]
-              #   selection_layers.each (index) ->
-              #     if $(this).html() == to_ordered_layer.name and $(this).attr('layer_id') == undefined
-              #       console.log "#{$(this).html()}, #{$(this).attr('layer_id')},#{$(this).parent().index()}"
-              #       console.log "order_index: #{order_index}; to_ordered_layer.id: #{to_ordered_layer.id} "
-              #       # $(this).parent().insertBefore($(selection_layers[order_index]).parent())
-              #       $(this).attr('layer_id', to_ordered_layer.id)
-              #       return false
-              #   selection_layers = $(selection_selector)
-              #   order_index++   
               @setSelectedLayerIDForMissionEdit(used_layers,selection_selector) 
               
-
-              ## rearrange
-              # to keep selected order, right
-
-              # order_index = 0
-              # while order_index < used_layers.length 
-              #   to_ordered_layer = used_layers[order_index]
-              #   selection_layers.each (index) ->
-              #     if $(this).attr('layer_id') == to_ordered_layer.id
-              #       $(this).parent().insertBefore($(selection_layers[order_index]).parent())
-              #       return false
-              #   selection_layers = $(selection_selector)
-              #   order_index++
+              # 5. rearrange the order selection layers
               @keepRightOrderForMissionEdit(used_layers,selection_selector)   
 
               @logger.debug "[afterSelect]: old: #{option_value}"
@@ -303,7 +242,6 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission','rivets'], (Logger,
               $('#my-select').multiSelect('refresh')
 
               ## to keep orgin order
-              selectable_layers = $(selectable_selector)
               available_layers = window.appController.getAvailableLayersOrder()
               
               # order_index = 0
@@ -403,6 +341,11 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission','rivets'], (Logger,
             return false
         selection_layers = $(selectors)
         order_index++
+
+      $(".ms-selection ul").children().each (i, li) ->
+        ul.prepend li
+        return
+
 
     setBoard: (newBoard) ->
       @board = newBoard
