@@ -79,23 +79,19 @@ define [
         @logger.dev "previous_action.action #{window.appController.previous_action.action}"
         @logger.dev "current_action.action #{window.appController.current_action.action}"
         if window.appController.previous_action.action == 'edit'
-          window.appController.saveLayer(window.appController.selected_layer.id)
+          window.appController.saveLayerByID({id: window.appController.selected_layer.id})
           window.appController.selected_layer = undefined
         else
-          window.appController.saveLayer('')
+          window.appController.saveLayerByID()
         @navigate("patterns", {trigger: true})
       # if action == 'update'
         # to do 
       if action == 'edit'
         layers = window.appController.getLayers()
         selected_layer_id = $('.list-group-item.selected-item').attr('id')
+        selected_layer = layers[selected_layer_id]
         @logger.dev("route-edit: selected_layer_id->#{selected_layer_id}; layers-> #{Object.keys(layers)} ")
-        if Object.keys(layers).length == 0 or selected_layer_id == undefined
-          @navigate("patterns", {trigger: true})
-          return false
-
-        selected_layer = layers[selected_layer_id]          
-        if selected_layer == undefined
+        if Object.keys(layers).length == 0 or selected_layer_id == undefined or selected_layer == undefined
           @navigate("patterns", {trigger: true})
           return false
         else
@@ -104,15 +100,17 @@ define [
           patternShowView = new PatternShowView
           patternShowView.render()
       if action == 'clone'
+        layers = window.appController.getLayers()
         selected_layer_id = $('.list-group-item.selected-item').attr('id')
-        if selected_layer_id != '' and selected_layer_id != undefined
-          # window.appController.setSelectedLayer(selected_layer_id)
-          # $('.right_board').remove()
-          # patternShowView = new PatternShowView
-          # patternShowView.render()
-        else
-          @navigate("patterns", {trigger: true})
-          return false
+        selected_layer = layers[selected_layer_id]
+
+        if Object.keys(layers).length != 0 or selected_layer_id != undefined or selected_layer != undefined
+          # clone it as a new one before renaming this layer
+          clone_layer_name = "#{selected_layer.name} clone" 
+          window.appController.saveLayerByID({name: clone_layer_name})
+
+        @navigate("patterns", {trigger: true})
+        return false
       if action == 'delete'
         selected_layer_id = $('.list-group-item.selected-item').attr('id')
         if selected_layer_id != '' and selected_layer_id != undefined

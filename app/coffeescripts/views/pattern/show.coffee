@@ -1468,7 +1468,7 @@ define [
           @boxes = new Boxes(boxes_params)
           @boxes.shift()
 
-        saveLayer: (layer_id = '') ->
+        saveLayerData: (layer={}) ->
           # some validator
           # todo
           console.log @boxes.models
@@ -1485,11 +1485,13 @@ define [
               }
             ), this)  
           #  edit_layer_id = ..... 
-          if layer_id == ''
+          if layer.id == undefined
             layer_data.id = "layer-item-#{layer_data.name}-#{Math.random()*10e17}"
           else
-            layer_data.id = layer_id
+            layer_data.id = layer.id
 
+          if layer.name != undefined
+            layer_data.name = layer.name
           layer_data
 
       window.appController.setBoard(new StackBoard(window.appController.default_pattern_params()))

@@ -64,7 +64,6 @@ define [
       #       height: 20  
       #       minDistance: 10
 
-
       available_layers: {}, # layer_data.id : layer_data
       used_layers: [], # {name: layer_name, id: layer_name_random_name},
       used_layers_created_number: 0, # for count

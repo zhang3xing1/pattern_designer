@@ -103,7 +103,7 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission','rivets'], (Logger,
           @logger.dev("in aGetRequest: #{data}")
           return
           )
-        
+
       if route == 'pickSetting'
         rivets.bind $('.mission_'),{mission: @new_mission}   
 
@@ -346,7 +346,6 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission','rivets'], (Logger,
         ul.prepend li
         return
 
-
     setBoard: (newBoard) ->
       @board = newBoard
 
@@ -358,11 +357,13 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission','rivets'], (Logger,
     getLayers: ->
       @mission.get('available_layers') 
 
-    saveLayer: (layer_id) ->
-      # todo validator
-      new_layer = @board.saveLayer(layer_id)
+    addLayer: (new_layer) ->
       @mission.addLayer(new_layer)
 
+    saveLayerByID: (layer_id) ->
+      # todo validator
+      new_layer = @board.saveLayerData(layer_id)
+      @addLayer(new_layer)
       # mission changed
       window.appController.mission_saved_flag = false      
 
