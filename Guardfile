@@ -3,8 +3,9 @@
 
 guard 'livereload' do
   watch(%r{app/coffeescripts/.+\.coffee$})
-  watch(%r{app/index\.html$}){
+  watch(%r{app/.*\.html$}){
     FileUtils.cp('app/index.html', 'public')
+    FileUtils.cp('app/SpecRunner.html', 'public')
   }
   watch(%r{app/styles/.+\.css$}){ |css_file|
     FileUtils.cp_r('app/styles', 'public/')
