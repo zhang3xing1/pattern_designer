@@ -202,14 +202,16 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission','rivets'], (Logger,
               regex = /\s*-----\s*/
               selected_layer_info = option_value[0].split(regex)
               selected_layer_name = selected_layer_info[0]
+              selected_layer_ulid = @getUlidByName(selected_layer_name)
 
               # 1. generate new option to selectable layers
-              new_option_value = "#{selected_layer_name}-----#{Math.random()*10e16}"
+              new_option_value = "#{selected_layer_name}-----option#{Math.random()*10e16}"
               $('#my-select').prepend( "<option value='#{new_option_value}'>#{selected_layer_name}</option>" )
               $('#my-select').multiSelect('refresh')
 
               # 2. add this select layer to used_layers
-              window.appController.addToUsedLayers(selected_layer_name, option_value[0])
+              console.log "selected_layer_ulid: #{selected_layer_ulid}"
+              window.appController.addToUsedLayers(selected_layer_name, option_value[0], selected_layer_ulid)
 
               # 3. rearrange the order of selectable layers
               available_layers = window.appController.getAvailableLayersOrder()
@@ -368,9 +370,9 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission','rivets'], (Logger,
     addLayer: (new_layer) ->
       @mission.addLayer(new_layer)
 
-    saveLayerByID: (layer_id) ->
+    saveLayerByID: (layer_data) ->
       # todo validator
-      new_layer = @board.saveLayerData(layer_id)
+      new_layer = @board.saveLayerData(layer_data)
       @addLayer(new_layer)
       # mission changed
       window.appController.mission_saved_flag = false      
@@ -378,8 +380,8 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission','rivets'], (Logger,
     getAvailableLayersOrder: ->
       @mission.getAvailableLayersOrder()
 
-    addToUsedLayers: (layer_name, layer_option_value)->
-      @mission.addToUsedLayers(layer_name, layer_option_value)
+    addToUsedLayers: (layer_name, layer_option_value, layer_ulid)->
+      @mission.addToUsedLayers(layer_name, layer_option_value, layer_ulid)
 
     getUsedLayersOrder: ->
       @mission.getUsedLayersOrder()
@@ -397,24 +399,18 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission','rivets'], (Logger,
       # mission changed
       window.appController.mission_saved_flag = false
 
-    load_pattern_data: (layer_data)->
-      # layer_data = 
-      #   # id: "layer-item-#{Math.random()*10e17}"
-      #   name: $('#layer-name').val()
-      #   boxes: _.map(@boxes.models,((a_box) ->
-      #     {
-      #       x: a_box.getXPositionByRatio(),
-      #       y: a_box.getYPositionByRatio(),
-      #       rotate: a_box.get('rotate'),
-      #       arrow: a_box.get('vectorDegree')
-      #     }
-      #   ), this)    
+    load_pattern_data: (layer_data)->   
       if layer_data != undefined    
         $('#layer-name').val(layer_data.name)
         _.each(layer_data.boxes, (a_box) ->
           window.appController.board.boxes.createNewBox(a_box)
           )
 
+    getUlidByName: (layer_name) ->
+      @mission.getLayerDataByName(layer_name).ulid 
+
+    updateUsedLayersNameByUlid:(new_layer_name, layer_ulid) ->
+      @mission.updateUsedLayersNameByUlid(new_layer_name, layer_ulid)
     default_pattern_params: ->
       canvasStage =  
             width:      280

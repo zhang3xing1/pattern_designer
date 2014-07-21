@@ -6,7 +6,7 @@ define [
 ], ($, _, Backbone, aLogger) ->  
   class Mission extends Backbone.Model
     defaults: {
-      name: '',
+      name: 'MissionName',
       creator: 'Your name',
       product: '',
       company: '',
@@ -72,8 +72,8 @@ define [
       used_layers_created_number: 0, # for count
     }
     initialize: (params) ->
-      @aLogger = aLogger.create
-      @aLogger.debug "this is in mission"
+      @logger = aLogger.create
+      @logger.debug "this is in mission"
 
     addLayer: (layer_data) ->
       to_updated_available_layers = @get("available_layers")
@@ -101,18 +101,19 @@ define [
     used_layers: ->
       @get("used_layers")
       
-    addToUsedLayers: (layer_name, layer_option_value) ->
+    addToUsedLayers: (layer_name, layer_option_value, layer_ulid) ->
       to_updated_used_layers = @get("used_layers") 
       current_number = @get('used_layers_created_number')
-      new_used_layer = {name: layer_name, option_value: layer_option_value, id: "#{layer_name}-----#{current_number}-----#{Math.random()*10e16}"} 
+      new_used_layer = {name: layer_name, option_value: layer_option_value, id: "#{layer_name}-----#{current_number}-----#{Math.random()*10e16}", ulid: layer_ulid} 
       @set('used_layers_created_number', current_number + 1)
       to_updated_used_layers.push(new_used_layer)
     removeFromUsedLayers: (layer_option_value) ->
       to_updated_used_layers = @get("used_layers") 
       result = _.reject(to_updated_used_layers, (used_layer) ->
         String(used_layer.option_value) == String(layer_option_value)) 
-      @aLogger.dev "used_layer_length: #{result.length}"
+      @logger.dev "used_layer_length: #{result.length}"
       @set('used_layers', result)
+
     getUsedLayersOrder: ->
       @get('used_layers')
 
@@ -124,6 +125,17 @@ define [
       all_layers = _.values(@layers())
       _.find(all_layers, (a_layer) ->
         a_layer.name == layer_name) 
+    
+    updateUsedLayersNameByUlid:(new_layer_name, layer_ulid) ->
+      to_updated_used_layers = @get("used_layers") 
+      result = _.map(to_updated_used_layers, (used_layer) ->
+        if layer_ulid == used_layer.ulid
+          used_layer.name = new_layer_name
+          used_layer
+        else
+          used_layer)
+      @set('used_layers', result)  
+  
     getBoxesNumberByLayerName: (layer_name) ->
       boxes_number = @getLayerDataByName(layer_name).boxes.length
       if boxes_number != undefined
@@ -132,8 +144,14 @@ define [
         0
 
     get_total_height: ->
-      @get('used_layers').length * @get('box_height')
-
+      # @get('used_layers').length * @get('box_height')
+      all_layers_name = @getUsedLayersName()
+      _.reduce(all_layers_name,((sum, layer_name) ->
+        if @getBoxesNumberByLayerName(layer_name) > 0 
+          layer_height = @get('box_height')
+        else
+          layer_height = 0
+        sum + layer_height), 0, this)
     get_total_box: ->
       all_layers_name = @getUsedLayersName()
       _.reduce(all_layers_name,((sum, layer_name) ->

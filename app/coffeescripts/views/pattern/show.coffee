@@ -1471,9 +1471,9 @@ define [
         saveLayerData: (layer={}) ->
           # some validator
           # todo
-          console.log @boxes.models
           layer_data = 
             # id: "layer-item-#{Math.random()*10e17}"
+            # ulid: "#{$('#layer-name').val()}------ulid#{Math.random()*10e17}"
             name: $('#layer-name').val()
             boxes: _.map(@boxes.models,((a_box) ->
               {
@@ -1489,6 +1489,11 @@ define [
             layer_data.id = "layer-item-#{layer_data.name}-#{Math.random()*10e17}"
           else
             layer_data.id = layer.id
+
+          if layer.ulid == undefined
+            layer_data.ulid ="#{$('#layer-name').val()}------ulid#{Math.random()*10e17}"  
+          else
+            layer_data.ulid = layer.ulid
 
           if layer.name != undefined
             layer_data.name = layer.name
