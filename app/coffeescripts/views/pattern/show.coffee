@@ -1485,18 +1485,23 @@ define [
               }
             ), this)  
           #  edit_layer_id = ..... 
+          if layer.name == undefined
+            layer_data.name =  $('#layer-name').val()
+          else
+            layer_data.name = layer.name
+
           if layer.id == undefined
             layer_data.id = "layer-item-#{layer_data.name}-#{Math.random()*10e17}"
           else
             layer_data.id = layer.id
 
           if layer.ulid == undefined
-            layer_data.ulid ="#{$('#layer-name').val()}------ulid#{Math.random()*10e17}"  
+            layer_data.ulid ="#{layer_data.name}------ulid#{Math.random()*10e17}"  
           else
             layer_data.ulid = layer.ulid
 
-          if layer.name != undefined
-            layer_data.name = layer.name
+          console.log layer_data
+          
           layer_data
 
       window.appController.setBoard(new StackBoard(window.appController.default_pattern_params()))
