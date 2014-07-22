@@ -45,8 +45,6 @@ define [
       # default root router
       "": "missionShow"
 
-      'saveNewMission' : "saveNewMission"
-
     initialize: ->
       # other router will not refresh view
       @appData = 
@@ -75,9 +73,9 @@ define [
         patternShowView = new PatternShowView
         patternShowView.render()
       if action == 'save'
-        @logger.dev "route-save"
-        @logger.dev "previous_action.action #{window.appController.previous_action.action}"
-        @logger.dev "current_action.action #{window.appController.current_action.action}"
+        @logger.debug "route-save"
+        @logger.debug "previous_action.action #{window.appController.previous_action.action}"
+        @logger.debug "current_action.action #{window.appController.current_action.action}"
         if window.appController.previous_action.action == 'edit'
           window.appController.saveLayerByID({id: window.appController.selected_layer.id, ulid: window.appController.selected_layer.ulid})
           
@@ -96,7 +94,7 @@ define [
         layers = window.appController.getLayers()
         selected_layer_id = $('.list-group-item.selected-item').attr('id')
         selected_layer = layers[selected_layer_id]
-        @logger.dev("route-edit: selected_layer_id->#{selected_layer_id}; layers-> #{Object.keys(layers)} ")
+        @logger.debug("route-edit: selected_layer_id->#{selected_layer_id}; layers-> #{Object.keys(layers)} ")
         if Object.keys(layers).length == 0 or selected_layer_id == undefined or selected_layer == undefined
           @navigate("patterns", {trigger: true})
           return false
@@ -227,9 +225,6 @@ define [
       $('.right_board').remove()
       constraintSettingView = new ConstraintSettingView
       constraintSettingView.render()     
-
-    saveNewMission: ->
-      @navigate("", {trigger: true});
 
     ######################################################
     #

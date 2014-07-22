@@ -13,8 +13,17 @@ define [
       code: '', 
 
       #setting
-      frame_line_in:  2,
-      frame_line_out: 3,
+      frame_line_in:  0,
+      frame_line_in_position_x: 0,
+      frame_line_in_position_y: 0,
+      frame_line_in_position_z: 0,
+      frame_line_in_position_r: 0,
+
+      frame_line_out: 0,
+      frame_line_out_position_x: 0,
+      frame_line_out_position_y: 0,
+      frame_line_out_position_z: 0,
+      frame_line_out_position_r: 0,
 
       box_length: 0,
       box_width:  60,
@@ -27,12 +36,12 @@ define [
       box_orient: false,
 
       tool_index: 2,
-      tool_position_x: 'N',
-      tool_position_y: 'N',
-      tool_position_z: 'N',
-      tool_position_a: 'N',
-      tool_position_e: 'N',
-      tool_position_r: 'N',
+      tool_position_x: 0,
+      tool_position_y: 0,
+      tool_position_z: 0,
+      tool_position_a: 0,
+      tool_position_e: 0,
+      tool_position_r: 0,
 
       length_wise: false,
       cross_wise: true,
@@ -111,7 +120,7 @@ define [
       to_updated_used_layers = @get("used_layers") 
       result = _.reject(to_updated_used_layers, (used_layer) ->
         String(used_layer.option_value) == String(layer_option_value)) 
-      @logger.dev "used_layer_length: #{result.length}"
+      @logger.debug "used_layer_length: #{result.length}"
       @set('used_layers', result)
 
     getUsedLayersOrder: ->

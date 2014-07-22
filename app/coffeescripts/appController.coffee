@@ -21,29 +21,34 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission','rivets'], (Logger,
       @mission_saved_flag = true
       @pattern_saved_flag = true
     # http://192.168.56.2/set?var=gui_string&prog=gui_example_test_2&value=%27ddddd%27
-    aGetRequest: (varName, callback, programName) ->
-      programName = @mission.get('program_name') unless programName?
+    getVarRequest: (varName, callback) ->
+      get_url = "get?var=" + varName + "&prog=" + programName
       $.ajax
-        url: "get?var=" + varName + "&prog=" + window.appController.program_name
+        url: get_url
         cache: false
         dataType: 'JSONP'
         success: (data) ->
           callback data
           return
+        done: () ->
+          window.appController.logger.dev "[get]: #{get_url}"
+        error: () ->
+          window.appController.logger.dev "[get]: error"
       return
 
-    aSetRequest: (varName, newVarValue, callback, programName) ->
-      programName = @mission.get('program_name') unless programName?
-      if newVarValue is ""
-        alert varName + "new value is Empty!"
-        return
+    setVarRequest: (varName, newVarValue, callback) ->
+      set_url = "set?var=" + varName + "&prog=" + programName + "&value=" + newVarValue
       $.ajax
-        url: "set?var=" + varName + "&prog=" + window.appController.program_name + "&value=" + newVarValue
+        url: set_url
         cache: false
         dataType: 'JSONP'
         success: (data) ->
           callback data, varName
-          return    
+          return 
+        done: () ->
+          window.appController.logger.dev "[set]: #{set_url}"
+        error: () ->
+          window.appController.logger.dev "[set]: error"
       return
 
     flash: (options={closable: true})->
@@ -58,8 +63,8 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission','rivets'], (Logger,
       action = params[0]
       @previous_action = @current_action
       @current_action = {route: route, action: params[0]}
-      @logger.dev "[before_action]: @previous_action #{@previous_action.route} #{@previous_action.action}" if @previous_action != undefined
-      @logger.dev "[before_action]: @current_action #{@current_action.route} #{@current_action.action}" if @previous_action != undefined
+      @logger.debug "[before_action]: @previous_action #{@previous_action.route} #{@previous_action.action}" if @previous_action != undefined
+      @logger.debug "[before_action]: @current_action #{@current_action.route} #{@current_action.action}" if @previous_action != undefined
       rivets.adapters[":"] =
         subscribe: (obj, keypath, callback) ->
           # console.log("1.subscribe:\t #{obj} ||\t #{keypath}")
@@ -97,12 +102,12 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission','rivets'], (Logger,
     after_action: (route, params) ->
       action = params[0]
       rivets.bind $('.mission_'),{mission: @mission}
-      if route == 'program' || route == ''
-        window.appController.aGetRequest('index', (data)->
-          alert data
-          @logger.dev("in aGetRequest: #{data}")
-          return
-          )
+      # if route == 'program' || route == ''
+      #   window.appController.aGetRequest('index', (data)->
+      #     alert data
+      #     @logger.debug("in aGetRequest: #{data}")
+      #     return
+      #     )
 
       if route == 'pickSetting'
         rivets.bind $('.mission_'),{mission: @new_mission}   
@@ -169,10 +174,6 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission','rivets'], (Logger,
           alert window.appController.mission.toJSON
           console.log window.appController.mission.toJSON()
         if action == 'edit'
-          window.appController.aSetRequest "test_var", "new code", (data, varName) ->
-            console.log("in aSetRequest: new code")
-            return
-
           # init avaiable layers
           _.each(@mission.get('available_layers'),((a_layer, index) ->
               console.log index
@@ -196,7 +197,7 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission','rivets'], (Logger,
                   $(this).attr('layer_id', used_layers[index].id)
 
             afterSelect: (option_value) =>
-              @logger.dev "afterSelect: #{option_value}"
+              @logger.debug "afterSelect: #{option_value}"
 
               # get select layer value
               regex = /\s*-----\s*/
@@ -237,7 +238,7 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission','rivets'], (Logger,
 
               return 
             afterDeselect: (option_value) =>
-              @logger.dev "afterDeselect: #{option_value}"
+              @logger.debug "afterDeselect: #{option_value}"
               # remove selected item
               regex = /\s*-----\s*/
               value = option_value[0].split(regex)
@@ -310,7 +311,7 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission','rivets'], (Logger,
         if action == 'edit'
           @load_pattern_data(window.appController.selected_layer)
       
-      @logger.dev("[after_action]: window.appController.mission_saved_flag #{window.appController.mission_saved_flag}")
+      @logger.debug("[after_action]: window.appController.mission_saved_flag #{window.appController.mission_saved_flag}")
     
     keepLeftOrderForMissionEdit:(layers_ordering,selectors)->
       order_index = 0
@@ -385,7 +386,6 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission','rivets'], (Logger,
 
     getUsedLayersOrder: ->
       @mission.getUsedLayersOrder()
-
 
     removeLayer: (layer_id) ->
       @mission.removeLayer(layer_id)

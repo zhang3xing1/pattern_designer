@@ -14,13 +14,13 @@
 			  <div class="form-group" >
 		    	<label  class="col-sm-2 control-label"><%= axis %></label>
 			    <div class="col-sm-5">
-			      <input  class="form-control" >
+			      <input  class="form-control mission_" rv-value="mission:frame_line_in_position_<%= axis.toLowerCase() %>" >
 			    </div>
 		  	</div>		
 			<%	}); %> 	
-			<div class="form-group alert alert-danger col-sm-7">
+<!-- 			<div class="form-group alert alert-danger col-sm-7">
   			Programma non in
-			</div>
+			</div> -->
 		</form>
 	</div>
   
@@ -34,13 +34,13 @@
 			  <div class="form-group" >
 		    	<label  class="col-sm-2 control-label"><%= axis %></label>
 			    <div class="col-sm-5">
-			      <input  class="form-control" >
+			      <input  class="form-control mission_" rv-value="mission:frame_line_out_position_<%= axis.toLowerCase() %>" >
 			    </div>
 		  	</div>		
 			<%	}); %> 	
-			<div class="form-group alert alert-danger col-sm-7">
+<!-- 			<div class="form-group alert alert-danger col-sm-7">
   			Programma non in
-			</div>
+			</div> -->
 		</form>
 	</div>
 </div>
