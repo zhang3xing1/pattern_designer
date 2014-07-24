@@ -566,8 +566,8 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission','rivets'], (Logger,
       box  =      
             x:      0 
             y:      0
-            width:  @mission.get('box_width') 
-            height: @mission.get('box_length')
+            width:  @mission.get('box_length') 
+            height: @mission.get('box_width')
             minDistance: @mission.get('distance')
 
 

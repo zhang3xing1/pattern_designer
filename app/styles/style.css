@@ -154,6 +154,11 @@ div.left-panel  ul.line{
 .selected-item {
   background-color: orangered;
 }
+
+.back-button {
+  height: 40px !important;
+  width: 60px !important;
+}
 /*body {
         margin:   28px;
         padding:  0px;

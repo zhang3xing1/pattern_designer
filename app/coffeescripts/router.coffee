@@ -108,7 +108,7 @@ define [
         selected_layer_id = $('.list-group-item.selected-item').attr('id')
         selected_layer = layers[selected_layer_id]
 
-        if Object.keys(layers).length != 0 or selected_layer_id != undefined or selected_layer != undefined
+        if Object.keys(layers).length != 0 and selected_layer_id != undefined and selected_layer != undefined
           # clone it as a new one before renaming this layer
           clone_layer_name = "#{selected_layer.name}_clone" 
           window.appController.saveLayerByID({name: clone_layer_name})

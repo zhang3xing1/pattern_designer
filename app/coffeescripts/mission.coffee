@@ -25,8 +25,8 @@ define [
       frame_line_out_position_z: 0,
       frame_line_out_position_r: 0,
 
-      box_length: 100,
-      box_width:  60,
+      box_length: 60,
+      box_width:  20,
       box_height: 20,
       box_weight: 10,
       box_per_pick: 1,
