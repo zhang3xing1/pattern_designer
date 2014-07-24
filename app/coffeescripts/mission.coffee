@@ -25,10 +25,11 @@ define [
       frame_line_out_position_z: 0,
       frame_line_out_position_r: 0,
 
-      box_length: 0,
+      box_length: 100,
       box_width:  60,
       box_height: 20,
       box_weight: 10,
+      box_per_pick: 1,
 
       box_x_off:  0,
       box_y_off:  0,
@@ -45,7 +46,7 @@ define [
 
       length_wise: false,
       cross_wise: true,
-      box_per_pick: 1,
+      
       distance:     10,
 
       pallet_length: 300,
@@ -83,6 +84,53 @@ define [
     initialize: (params) ->
       @logger = aLogger.create
       @logger.debug "this is in mission"
+
+      @on('all', @validateAttrValue)
+
+    validateAttrValue : (event_name) ->
+      rInteger = /^\+?[1-9][0-9]*$/
+      rReal    = /^([1-9]\d*)(\.{0,1}\d*[1-9])?$/
+     
+      result = event_name.split(':')
+      attr = result[1]
+      console.log "validateAttrValue: #{event_name} #{attr}"
+
+      if attr == undefined
+        return
+
+      if _.contains(['name', 'creator', 'product', 'company', 'code'], attr)
+        return
+
+      # if _.contains(['frame_line_in', 'frame_line_out', 'tool_index'], attr)
+      #   if !rInteger.test(@get(attr))
+      #     @set(attr,  @previous(attr)) 
+      #   return  
+
+      # if attr.search('box_') == 0
+      #   if !rInteger.test(@get(attr))
+      #     @set(attr,  @previous(attr)) 
+      #   return
+      if attr.search('position_') > 0 
+        if !rReal.test(@get(attr))  
+          @set(attr,  @previous(attr))
+          return
+        if parseFloat(@get(attr)) > 720
+            @set(attr,  @previous(attr))
+        return
+
+      if attr == 'length_wise' or attr == 'cross_wise'      
+        return 
+      
+      if !rInteger.test(@get(attr))
+        @set(attr,  @previous(attr)) 
+
+      if attr ==  "box_length" or attr ==  "box_width"
+        if parseInt(@get('box_length')) < parseInt(@get('box_width'))
+          console.log "#{@get('box_length')} < #{@get('box_width')}"
+          @set('box_width',  @previous('box_width')) 
+          @set('box_length', @previous('box_length')) 
+
+          
 
     addLayer: (layer_data) ->
       to_updated_available_layers = @get("available_layers")

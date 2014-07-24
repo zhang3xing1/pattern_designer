@@ -4,6 +4,7 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission','rivets'], (Logger,
     constructor: ->
       @logger = Logger.create 
       @mission = Mission.create
+
       @new_mission = Mission.create
       @previous_action = undefined
       @current_action = undefined
@@ -97,8 +98,29 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission','rivets'], (Logger,
             @flash({message: 'Do you want to abandon the modification?'})
             window.router.navigate("#program", {trigger: true})
             return false
-
       
+      rivets.formatters.currency =
+        read: (value) ->
+          console.log 'rivets read'
+          console.log value
+          (value / 100).toFixed 2
+
+        publish: (value) ->
+          console.log 'rivets publish'
+          console.log value
+          Math.round parseFloat(value) * 100
+
+      # rivets.formatters.integer_ =
+      #   read: (value) ->
+      #     console.log "rivets read #{value}"
+      #     value
+
+      #   publish: (value) ->
+          re = /^\+?[1-9][0-9]*$/
+          isInt = re.test(value)
+      #     console.log "rivets publish #{value} #{isInt}"
+      #     1 
+
     after_action: (route, params) ->
       action = params[0]
       rivets.bind $('.mission_'),{mission: @mission}
@@ -171,8 +193,20 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission','rivets'], (Logger,
           return
         if action == 'save'
           window.router.navigate("#mission/index", {trigger: true})
-          alert window.appController.mission.toJSON
-          console.log window.appController.mission.toJSON()
+          mission_pairs = _.pairs(window.appController.mission.toJSON())
+          _.each(mission_pairs, ((a_pair) ->
+            field = a_pair[0]
+            value = a_pair[1]
+            # mission_data
+            if _.contains(['name','creator','product','company','code'], field)
+              # setVarRequest("mission_data.#{field}", value)
+            # setting_data
+
+            # layers_data
+            field = a_pair[0]
+            value = a_pair[1]
+            console.log "#{field} -> #{value}"
+            ),this)
         if action == 'edit'
           # init avaiable layers
           _.each(@mission.get('available_layers'),((a_layer, index) ->
