@@ -212,7 +212,8 @@ define [
       $('.right_board').remove()
       additionalInfoView = new AdditionalInfoView
       additionalInfoView.render()   
-      $("[name='teach']").bootstrapSwitch('onColor', 'success')  
+      $("[name='length']").bootstrapSwitch('onColor', 'success')  
+      $("[name='cross']").bootstrapSwitch('onColor', 'success') 
 
     palletSetting: ->
       console.log 'palletSetting'

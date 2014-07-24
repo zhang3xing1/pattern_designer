@@ -33,16 +33,17 @@ define [
           $('a.teach').removeClass('label-success')
           $('a.teach').addClass('label-primary')
           $('a.teach').html('Set')
+          $("input").attr "readonly", false
 
         else
           # ...
           $('a.teach').removeClass('label-primary')
           $('a.teach').addClass('label-success')
           $('a.teach').html('Place')
+          $("input").attr "readonly", true
+          $("input#table-index").attr "readonly", false
 
         
-        return
-      return
   )
   
   # Our module now returns our view

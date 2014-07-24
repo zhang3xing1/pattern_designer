@@ -34,7 +34,7 @@ define [
       box_x_off:  0,
       box_y_off:  0,
       box_z_off:  0,
-      box_orient: false,
+      orient: false,
 
       tool_index: 2,
       tool_position_x: 0,
@@ -101,6 +101,8 @@ define [
       if _.contains(['name', 'creator', 'product', 'company', 'code'], attr)
         return
 
+
+
       # if _.contains(['frame_line_in', 'frame_line_out', 'tool_index'], attr)
       #   if !rInteger.test(@get(attr))
       #     @set(attr,  @previous(attr)) 
@@ -118,7 +120,7 @@ define [
             @set(attr,  @previous(attr))
         return
 
-      if attr == 'length_wise' or attr == 'cross_wise'      
+      if attr == 'length_wise' or attr == 'cross_wise'  or attr == 'orient'      
         return 
       
       if !rInteger.test(@get(attr))
@@ -128,9 +130,7 @@ define [
         if parseInt(@get('box_length')) < parseInt(@get('box_width'))
           console.log "#{@get('box_length')} < #{@get('box_width')}"
           @set('box_width',  @previous('box_width')) 
-          @set('box_length', @previous('box_length')) 
-
-          
+          @set('box_length', @previous('box_length'))    
 
     addLayer: (layer_data) ->
       to_updated_available_layers = @get("available_layers")

@@ -134,6 +134,31 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission','rivets'], (Logger,
       if route == 'pickSetting'
         rivets.bind $('.mission_'),{mission: @new_mission}   
 
+      if route == 'placeSetting'
+        orient_value = window.appController.mission.get('orient')
+        $("[name='orient']").bootstrapSwitch('state', orient_value) 
+        $("[name='orient']").on "switchChange.bootstrapSwitch", (event, state) ->
+          # console.log this # DOM element
+          # console.log event # jQuery event
+          # console.log state # true | false
+
+          # state turn to be off, then button 'set' turn to be button 'PLACE'
+          window.appController.mission.set('orient', state)
+      
+      if route == 'additionalInfo'
+        length_wise_value = window.appController.mission.get('length_wise')
+        $("[name='length']").bootstrapSwitch('state', length_wise_value) 
+        $("[name='length']").on "switchChange.bootstrapSwitch", (event, state) ->
+          window.appController.mission.set('length', state)
+          $("[name='cross']").bootstrapSwitch('state', !state) 
+
+        
+        cross_wise_value = window.appController.mission.get('cross_wise')
+        $("[name='cross']").bootstrapSwitch('state', cross_wise_value) 
+        $("[name='cross']").on "switchChange.bootstrapSwitch", (event, state) ->
+          window.appController.mission.set('length', state)
+          $("[name='length']").bootstrapSwitch('state', !state) 
+      
       if route == 'patterns'
         _.each(@mission.get('available_layers'),((a_layer) ->
             $('#patterns').append( "<li class=\"list-group-item\" id=\"#{a_layer.id}\">#{a_layer.name}</li>" )
@@ -198,7 +223,7 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission','rivets'], (Logger,
             field = a_pair[0]
             value = a_pair[1]
             # mission_data
-            if _.contains(['name','creator','product','company','code'], field)
+            # if _.contains(['name','creator','product','company','code'], field)
               # setVarRequest("mission_data.#{field}", value)
             # setting_data
 
@@ -542,7 +567,7 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission','rivets'], (Logger,
             x:      0 
             y:      0
             width:  @mission.get('box_width') 
-            height: @mission.get('box_height')
+            height: @mission.get('box_length')
             minDistance: @mission.get('distance')
 
 
