@@ -21,36 +21,38 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission','rivets'], (Logger,
 
       @mission_saved_flag = true
       @pattern_saved_flag = true
-    # http://192.168.56.2/set?var=gui_string&prog=gui_example_test_2&value=%27ddddd%27
-    getVarRequest: (varName, callback) ->
-      get_url = "get?var=" + varName + "&prog=" + programName
-      $.ajax
-        url: get_url
-        cache: false
-        dataType: 'JSONP'
-        success: (data) ->
-          callback data
-          return
-        done: () ->
-          window.appController.logger.dev "[get]: #{get_url}"
-        error: () ->
-          window.appController.logger.dev "[get]: error"
-      return
 
-    setVarRequest: (varName, newVarValue, callback) ->
-      set_url = "set?var=" + varName + "&prog=" + programName + "&value=" + newVarValue
-      $.ajax
-        url: set_url
-        cache: false
-        dataType: 'JSONP'
-        success: (data) ->
-          callback data, varName
-          return 
-        done: () ->
-          window.appController.logger.dev "[set]: #{set_url}"
-        error: () ->
-          window.appController.logger.dev "[set]: error"
-      return
+      @mission_list = []
+    # http://192.168.56.2/set?var=gui_string&prog=gui_example_test_2&value=%27ddddd%27
+    # getVarRequest: (varName, callback) ->
+    #   get_url = "get?var=" + varName + "&prog=" + programName
+    #   $.ajax
+    #     url: get_url
+    #     cache: false
+    #     dataType: 'JSONP'
+    #     success: (data) ->
+    #       callback data
+    #       return
+    #     done: () ->
+    #       window.appController.logger.dev "[get]: #{get_url}"
+    #     error: () ->
+    #       window.appController.logger.dev "[get]: error"
+    #   return
+
+    # setVarRequest: (varName, newVarValue, callback) ->
+    #   set_url = "set?var=" + varName + "&prog=" + programName + "&value=" + newVarValue
+    #   $.ajax
+    #     url: set_url
+    #     cache: false
+    #     dataType: 'JSONP'
+    #     success: (data) ->
+    #       callback data, varName
+    #       return 
+    #     done: () ->
+    #       window.appController.logger.dev "[set]: #{set_url}"
+    #     error: () ->
+    #       window.appController.logger.dev "[set]: error"
+    #   return
 
     flash: (options={closable: true})->
       $('#popup').html(options.message)
@@ -205,10 +207,15 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission','rivets'], (Logger,
           return false
 
         if action == 'index'
-          mission_list = window.appController.get_mission_list()
-          if mission_list.length > 0
-            _.each(mission_list, (a_mission) ->
-              $('#mission_list').append("<li class=\"list-group-item mission_item\" >#{a_mission}</li>"))
+          url = "get?dirList=UD:/usr/dev/"
+          $.get url, (data) ->
+            window.appController.mission_list = JSON.parse(data)
+
+          if window.appController.mission_list.length > 0
+            _.each(window.appController.mission_list, (a_mission) ->
+              r_var_file = /\w+\.var$/
+              if r_var_file.test(a_mission)
+                $('#mission_list').append("<li class=\"list-group-item mission_item\" >#{a_mission.substring(0,a_mission.length-4)}</li>"))
 
             $(".mission_item").on('click', (el) ->
               $(".mission_item").removeClass('selected-item')
@@ -418,11 +425,6 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission','rivets'], (Logger,
 
     setBoard: (newBoard) ->
       @board = newBoard
-
-    get_mission_list: ->
-      ## ajax todo
-      ## get mission list 
-      ['mission_1', 'mission_2', 'mission_3']
 
     getLayers: ->
       @mission.get('available_layers') 
