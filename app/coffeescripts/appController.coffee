@@ -24,7 +24,7 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission','rivets'], (Logger,
 
       @mission_list = []
 
-      @request_body = undefined
+      # @request_body = undefined
     # http://192.168.56.2/set?var=gui_string&prog=gui_example_test_2&value=%27ddddd%27
     # getVarRequest: (varName, callback) ->
     #   get_url = "get?var=" + varName + "&prog=" + programName
@@ -62,10 +62,8 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission','rivets'], (Logger,
     #
 
     set_request: (var_name, var_value, var_type='not_str') =>
-      if var_type='str'
+      if var_type == 'str'
         var_value = "'#{var_value}'"
-      else
-        var_value = var_value
       $.get("set",
         var:    var_name
         prog:   @program_name
@@ -74,19 +72,41 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission','rivets'], (Logger,
         console.log "set?var=#{var_name}&prog=#{@program_name}&value=#{var_value}"
         console.log data
 
-    get_request: (var_name) =>
+    get_request: (var_name,callback) =>
       $.get("get",
         var: var_name
         prog: @program_name
       ).done (data) =>
         console.log "get?var=#{var_name}&prog=#{@program_name}"
         console.log data
+        # window.appController.request_body = data
+        callback(data)
 
     send_command: (command) =>
       @set_request('command_', command, 'str')
+      @send_lock_off()
 
     send_lock_off: =>
-      @set_request('is_lock', false)
+      @set_request('is_lock', 'false')
+
+    load_mission_data: (mission_data_name) =>
+      console.log "mission load: #{mission_data_name}"  
+      @set_request('mission_data.name',mission_data_name, 'str')
+      @send_command('load')
+      @get_request('mission_data', (data) =>
+        @mission.load_mission_info(JSON.parse(data))  )
+      
+
+      @get_request('setting_data', (data) =>
+        @mission.load_setting_info(JSON.parse(data)) )
+       
+
+      # @get_request('layers')
+
+      # @get_request('used_layers')
+
+      # @get_request('boxes_in_layer')
+      # @mission.load_setting_info(JSON.parse(@request_body))  
     #
     #
     #
@@ -136,7 +156,7 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission','rivets'], (Logger,
         
       # get mission list data    
       @get_mission_list()    
-        
+
       if route == 'mission/*action'
         if action == 'new'
           if window.appController.mission_saved_flag == true
@@ -157,20 +177,8 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission','rivets'], (Logger,
           console.log value
           Math.round parseFloat(value) * 100
 
-      # rivets.formatters.integer_ =
-      #   read: (value) ->
-      #     console.log "rivets read #{value}"
-      #     value
 
-      #   publish: (value) ->
-          re = /^\+?[1-9][0-9]*$/
-          isInt = re.test(value)
-      #     console.log "rivets publish #{value} #{isInt}"
-      #     1 
-
-
-
-    after_action: (route, params) ->
+    after_action: (route, params) =>
       action = params[0]
       rivets.bind $('.mission_'),{mission: @mission}
       # if route == 'program' || route == ''
@@ -266,7 +274,6 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission','rivets'], (Logger,
             $(".mission_item").on('click', (el) ->
               $(".mission_item").removeClass('selected-item')
               $(this).addClass('selected-item')
-              return
             )
 
         if action == 'save'
@@ -418,7 +425,14 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission','rivets'], (Logger,
 
               return        
 
+        if action == 'load'
+          console.log "in mission load......"
+          selected_mission_name = $('.list-group-item.selected-item').html()
+          if selected_mission_name != undefined
+            @load_mission_data(selected_mission_name)
 
+          window.router.navigate("#mission/index", {trigger: true})
+          return false    
       if route == 'pattern/*action'
         if action == 'edit'
           @load_pattern_data(window.appController.selected_layer)
@@ -518,6 +532,7 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission','rivets'], (Logger,
 
     updateUsedLayersNameByUlid:(new_layer_name, layer_ulid) ->
       @mission.updateUsedLayersNameByUlid(new_layer_name, layer_ulid)
+
     default_pattern_params: ->
       canvasStage =  
             width:      280

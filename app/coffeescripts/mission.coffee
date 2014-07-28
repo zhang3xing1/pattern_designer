@@ -13,13 +13,13 @@ define [
       code: '', 
 
       #setting
-      frame_line_in:  0,
+      frame_line_in_index:  0,
       frame_line_in_position_x: 0,
       frame_line_in_position_y: 0,
       frame_line_in_position_z: 0,
       frame_line_in_position_r: 0,
 
-      frame_line_out: 0,
+      frame_line_out_index: 0,
       frame_line_out_position_x: 0,
       frame_line_out_position_y: 0,
       frame_line_out_position_z: 0,
@@ -47,7 +47,7 @@ define [
       length_wise: false,
       cross_wise: true,
       
-      distance:     10,
+      mini_distance:     10,
 
       pallet_length: 300,
       pallet_width: 200,
@@ -58,7 +58,7 @@ define [
       tare:           1000,
       max_gross:      800,
       max_height:     600,
-      overhang_len:   10,
+      overhang_len:   10,  # the value for overhang
       overhang_wid:   10,
       max_pack:       200,
 
@@ -224,4 +224,71 @@ define [
       all_layers = @getUsedLayersName()
       _.reduce(all_layers,((sum, layer_name) ->
         sum + @getBoxesNumberByLayerName(layer_name)), 0, this)
+
+    load_mission_info:(mission_data_from_pdl) =>
+      @set('name',mission_data_from_pdl.name)
+      @set('creator',mission_data_from_pdl.creator)
+      @set('product',mission_data_from_pdl.product)
+      @set('company',mission_data_from_pdl.company)
+      @set('code',mission_data_from_pdl.code)
+
+    load_setting_info:(setting_data_from_pdl) =>
+      # @set('name',setting_data_from_pdl.name)
+      # @set('creator',setting_data_from_pdl.creator)
+      # @set('product',setting_data_from_pdl.product)
+      # @set('company',setting_data_from_pdl.company)
+      # @set('code',setting_data_from_pdl.code)
+      @set('frame_line_in',setting_data_from_pdl.frame_line_in)
+      @set('frame_line_in_position_x',setting_data_from_pdl.frame_line_in_position_x)
+      @set('frame_line_in_position_y',setting_data_from_pdl.frame_line_in_position_y)
+      @set('frame_line_in_position_z',setting_data_from_pdl.frame_line_in_position_z)
+      @set('frame_line_in_position_r',setting_data_from_pdl.frame_line_in_position_r)
+      @set('frame_line_out',setting_data_from_pdl.frame_line_out)
+      @set('frame_line_out_position_x',setting_data_from_pdl.frame_line_out_position_x)
+      @set('frame_line_out_position_y',setting_data_from_pdl.frame_line_out_position_y)
+      @set('frame_line_out_position_z',setting_data_from_pdl.frame_line_out_position_z)
+      @set('frame_line_out_position_r',setting_data_from_pdl.frame_line_out_position_r)
+      @set('box_length',setting_data_from_pdl.box_length)
+      @set('box_width',setting_data_from_pdl.box_width)
+      @set('box_height',setting_data_from_pdl.box_height)
+      @set('box_weight',setting_data_from_pdl.box_weight)
+      @set('box_per_pick',setting_data_from_pdl.box_per_pick)
+      @set('box_x_off',setting_data_from_pdl.box_x_off)
+      @set('box_y_off',setting_data_from_pdl.box_y_off)
+      @set('box_z_off',setting_data_from_pdl.box_z_off)
+      @set('orient',setting_data_from_pdl.orient)
+      @set('tool_index',setting_data_from_pdl.tool_index)
+      @set('tool_position_x',setting_data_from_pdl.tool_position_x)
+      @set('tool_position_y',setting_data_from_pdl.tool_position_y)
+      @set('tool_position_z',setting_data_from_pdl.tool_position_z)
+      @set('tool_position_a',setting_data_from_pdl.tool_position_a)
+      @set('tool_position_e',setting_data_from_pdl.tool_position_e)
+      @set('tool_position_r',setting_data_from_pdl.tool_position_r)
+      @set('length_wise',setting_data_from_pdl.length_wise)
+      @set('cross_wise',setting_data_from_pdl.cross_wise)
+      @set('distance',setting_data_from_pdl.distance)
+      @set('pallet_length',setting_data_from_pdl.pallet_length)
+      @set('pallet_width',setting_data_from_pdl.pallet_width)
+      @set('pallet_height',setting_data_from_pdl.pallet_height)
+      @set('pallet_weight',setting_data_from_pdl.pallet_weight)
+      @set('sleepsheet_height',setting_data_from_pdl.sleepsheet_height)
+      @set('tare',setting_data_from_pdl.tare)
+      @set('max_gross',setting_data_from_pdl.max_gross)
+      @set('max_height',setting_data_from_pdl.max_height)
+      @set('overhang_len',setting_data_from_pdl.overhang_len)
+      @set('overhang_wid',setting_data_from_pdl.overhang_wid)
+      @set('max_pack',setting_data_from_pdl.max_pack)
+      # @set('available_layers',mission_data_from_pdl.available_layers)
+      # @set('used_layers',mission_data_from_pdl.used_layers)
+      # @set('used_layers_created_number',mission_data_from_pdl.used_layers_created_number)
+
+    load_layers_info:(layers_from_pdl) =>
+
+
   create: new Mission
+
+
+
+
+
+
