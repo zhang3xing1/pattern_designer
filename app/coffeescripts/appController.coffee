@@ -23,6 +23,8 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission','rivets'], (Logger,
       @pattern_saved_flag = true
 
       @mission_list = []
+
+      @request_body = undefined
     # http://192.168.56.2/set?var=gui_string&prog=gui_example_test_2&value=%27ddddd%27
     # getVarRequest: (varName, callback) ->
     #   get_url = "get?var=" + varName + "&prog=" + programName
@@ -54,12 +56,52 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission','rivets'], (Logger,
     #       window.appController.logger.dev "[set]: error"
     #   return
 
+
+    #
+    #  ajax request to pdl sever
+    #
+
+    set_request: (var_name, var_value, var_type='not_str') =>
+      if var_type='str'
+        var_value = "'#{var_value}'"
+      else
+        var_value = var_value
+      $.get("set",
+        var:    var_name
+        prog:   @program_name
+        value:  var_value
+      ).done (data) =>
+        console.log "set?var=#{var_name}&prog=#{@program_name}&value=#{var_value}"
+        console.log data
+
+    get_request: (var_name) =>
+      $.get("get",
+        var: var_name
+        prog: @program_name
+      ).done (data) =>
+        console.log "get?var=#{var_name}&prog=#{@program_name}"
+        console.log data
+
+    send_command: (command) =>
+      @set_request('command_', command, 'str')
+
+    send_lock_off: =>
+      @set_request('is_lock', false)
+    #
+    #
+    #
+
     flash: (options={closable: true})->
       $('#popup').html(options.message)
       $("#popup").modal
         escapeClose: options.closable
         clickClose: options.closable
         showClose: options.closable
+
+    get_mission_list: ->
+      url = "get?dirList=UD:/usr/dev/"
+      $.get url, (data) ->
+        window.appController.mission_list = JSON.parse(data)
 
     # decide if router be valid
     before_action: (route, params) ->
@@ -91,7 +133,10 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission','rivets'], (Logger,
         publish: (obj, keypath, value) ->
           # console.log("4.publish:\t\t #{obj} ||\t #{keypath}")
           obj.set keypath, value
-          return      
+        
+      # get mission list data    
+      @get_mission_list()    
+        
       if route == 'mission/*action'
         if action == 'new'
           if window.appController.mission_saved_flag == true
@@ -122,6 +167,8 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission','rivets'], (Logger,
           isInt = re.test(value)
       #     console.log "rivets publish #{value} #{isInt}"
       #     1 
+
+
 
     after_action: (route, params) ->
       action = params[0]
@@ -192,7 +239,10 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission','rivets'], (Logger,
         
         if action == 'rename'
           selected_mission_name = $('.list-group-item.selected-item').html()
-          window.router.navigate("#mission/index", {trigger: true})
+          if selected_mission_name == undefined
+            window.router.navigate("#mission/index", {trigger: true})
+            return false
+
           new_message = '<form class="navbar-form"> <div class="form-group"> <input type="text" class="form-control" id="to-renamed-mission" placeholder="'\
             + "#{selected_mission_name}" + '"> </div> <a class="btn btn-default" id="misson_rename">Rename</a> </form>'
           @flash({message: new_message, closable: false})
@@ -207,10 +257,6 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission','rivets'], (Logger,
           return false
 
         if action == 'index'
-          url = "get?dirList=UD:/usr/dev/"
-          $.get url, (data) ->
-            window.appController.mission_list = JSON.parse(data)
-
           if window.appController.mission_list.length > 0
             _.each(window.appController.mission_list, (a_mission) ->
               r_var_file = /\w+\.var$/
@@ -222,7 +268,7 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission','rivets'], (Logger,
               $(this).addClass('selected-item')
               return
             )
-          return
+
         if action == 'save'
           window.router.navigate("#mission/index", {trigger: true})
           mission_pairs = _.pairs(window.appController.mission.toJSON())
