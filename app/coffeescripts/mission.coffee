@@ -13,13 +13,13 @@ define [
       code: '', 
 
       #setting
-      frame_line_in_index:  0,
+      frame_line_in_index:  16,
       frame_line_in_position_x: 0,
       frame_line_in_position_y: 0,
       frame_line_in_position_z: 0,
       frame_line_in_position_r: 0,
 
-      frame_line_out_index: 0,
+      frame_line_out_index: 7,
       frame_line_out_position_x: 0,
       frame_line_out_position_y: 0,
       frame_line_out_position_z: 0,
@@ -93,7 +93,7 @@ define [
      
       result = event_name.split(':')
       attr = result[1]
-      console.log "validateAttrValue: #{event_name} #{attr}"
+      # console.log "validateAttrValue: #{event_name} #{attr}"
 
       if attr == undefined
         return
@@ -238,12 +238,12 @@ define [
       # @set('product',setting_data_from_pdl.product)
       # @set('company',setting_data_from_pdl.company)
       # @set('code',setting_data_from_pdl.code)
-      @set('frame_line_in',setting_data_from_pdl.frame_line_in)
+      @set('frame_line_in_index',setting_data_from_pdl.frame_line_in_index)
       @set('frame_line_in_position_x',setting_data_from_pdl.frame_line_in_position_x)
       @set('frame_line_in_position_y',setting_data_from_pdl.frame_line_in_position_y)
       @set('frame_line_in_position_z',setting_data_from_pdl.frame_line_in_position_z)
       @set('frame_line_in_position_r',setting_data_from_pdl.frame_line_in_position_r)
-      @set('frame_line_out',setting_data_from_pdl.frame_line_out)
+      @set('frame_line_out_index',setting_data_from_pdl.frame_line_out_index)
       @set('frame_line_out_position_x',setting_data_from_pdl.frame_line_out_position_x)
       @set('frame_line_out_position_y',setting_data_from_pdl.frame_line_out_position_y)
       @set('frame_line_out_position_z',setting_data_from_pdl.frame_line_out_position_z)

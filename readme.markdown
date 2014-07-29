@@ -16,3 +16,10 @@ UI function:
 PDL:
 
 1. cross site request
+
+
+
+Time delay problem:
+
+
+inteval time should be considered.
