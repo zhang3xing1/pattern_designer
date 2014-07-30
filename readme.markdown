@@ -22,4 +22,7 @@ PDL:
 Time delay problem:
 
 
-inteval time should be considered.
+inteval time should be considered. 
+
+if the inteval time of two requesest is too short, the result could be wrong.
+for exapmle: frame line in, frame line out.

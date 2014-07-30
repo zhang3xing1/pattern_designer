@@ -440,6 +440,9 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission','rivets'], (Logger,
         if action == 'edit'
           @load_pattern_data(window.appController.selected_layer)
       
+      if route == 'frame'
+        $("input[rv-value*='position']").attr "readonly", true
+
       rivets.bind $('.mission_'),{mission: @mission}    
 
       if route == 'pickSetting'
