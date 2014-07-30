@@ -166,7 +166,7 @@ define [
 
       # others not str attr
       window.appController.set_request("setting_data.#{attr}", @get(attr))
-      
+
     addLayer: (layer_data) ->
       to_updated_available_layers = @get("available_layers")
       to_updated_available_layers[layer_data.id] = layer_data
@@ -261,6 +261,8 @@ define [
         sum + @getBoxesNumberByLayerName(layer_name)), 0, this)
 
     load_mission_info:(mission_data_from_pdl) =>
+      console.log "[load_mission_info]:"
+      console.log mission_data_from_pdl
       @set('name',mission_data_from_pdl.name)
       @set('creator',mission_data_from_pdl.creator)
       @set('product',mission_data_from_pdl.product)
@@ -269,7 +271,6 @@ define [
 
     load_setting_info:(setting_data_from_pdl) =>
       console.log "[mission: load_setting_info]"
-      console.log "setting_data_from_pdl:"
       console.log setting_data_from_pdl
       @set('frame_line_in_index',setting_data_from_pdl.frame_line_in_index)
       @set('frame_line_in_position_x',setting_data_from_pdl.frame_line_in_position_x)
@@ -312,9 +313,9 @@ define [
       @set('overhang_wid',setting_data_from_pdl.overhang_wid)
       @set('max_pack',setting_data_from_pdl.max_pack)
 
-      console.log "[mission: load_setting_info]"
-      console.log "mission setting:"
-      console.log @attributes
+      # console.log "[mission: load_setting_info]"
+      # console.log "mission setting:"
+      # console.log @attributes
 
     load_layers_info:(layers_from_pdl) =>
 

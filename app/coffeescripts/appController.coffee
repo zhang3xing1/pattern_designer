@@ -16,7 +16,7 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission','rivets'], (Logger,
       ## mission edit page -> for order of layers
       @removed_layer_index = -1
 
-      # @remote_url = 'http://172.22.117.38/'
+      @remote_url = 'http://172.22.117.38/'
       @db_programe = 'pd_db'
       @command_program = 'pd_command'
 
@@ -26,6 +26,7 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission','rivets'], (Logger,
       # mission index page
       @mission_list = []
 
+      # interval of request
       # @request_body = undefined
     # http://192.168.56.2/set?var=gui_string&prog=gui_example_test_2&value=%27ddddd%27
     # getVarRequest: (varName, callback) ->
@@ -58,6 +59,11 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission','rivets'], (Logger,
     #       window.appController.logger.dev "[set]: error"
     #   return
 
+    sleep: (d = 200) ->
+      t = Date.now()
+
+      while Date.now() - t <= d
+        d
 
     #
     #  ajax request to pdl sever
@@ -71,8 +77,9 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission','rivets'], (Logger,
         prog:   @db_programe
         value:  var_value
       ).done (data) =>
-        console.log "set?var=#{var_name}&prog=#{@db_programe}&value=#{var_value}"
-        console.log data
+        console.log "#{window.appController.remote_url}set?var=#{var_name}&prog=#{@db_programe}&value=#{var_value}"
+        # console.log data
+        
 
     set_request2: (var_name, var_value, var_type='not_str') =>
       if var_type == 'str'
@@ -82,20 +89,23 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission','rivets'], (Logger,
         prog:   @command_program
         value:  var_value
       ).done (data) =>
-        console.log "set?var=#{var_name}&prog=#{@command_program}&value=#{var_value}"
-        console.log data        
+        console.log "#{window.appController.remote_url}set?var=#{var_name}&prog=#{@command_program}&value=#{var_value}"
+        # console.log data
+                
 
     get_request: (var_name,callback) =>
       $.get("get",
         var: var_name
         prog: @db_programe
       ).done (data) =>
-        console.log "get?var=#{var_name}&prog=#{@db_programe}"
-        console.log data
+        console.log "#{window.appController.remote_url}get?var=#{var_name}&prog=#{@db_programe}"
         callback(data)
+        
 
     send_command: (command) =>
+      @sleep(100)
       @set_request2('command_', command, 'str')
+      @sleep(100)
       @send_lock_off()
 
     send_lock_off: =>
@@ -106,10 +116,10 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission','rivets'], (Logger,
       @set_request2('new_mission_name',mission_data_name, 'str')
       @send_command('load')
       @get_request('mission_data', (data) =>
-        @mission.load_mission_info(JSON.parse(data))  )
+        window.appController.mission.load_mission_info(JSON.parse(data)) )
       
       @get_request('setting_data', (data) =>
-        @mission.load_setting_info(JSON.parse(data)) )
+        window.appController.mission.load_setting_info(JSON.parse(data)) )
        
     flash: (options={closable: true})->
       $('#popup').html(options.message)
@@ -121,7 +131,6 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission','rivets'], (Logger,
     get_mission_list: =>
       url = "get?dirList=UD:/usr/dev/"
       $.get url, (data) =>
-        console.log 'in get_mission_list'
         @mission_list = JSON.parse(data)
 
 
@@ -173,16 +182,17 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission','rivets'], (Logger,
         @send_command('getFrameIn')
 
         @get_request('setting_data', (data) =>
-          console.log "[from pdl]: "
-          console.log data
           @mission.load_setting_info(JSON.parse(data)) )
 
         @set_request('setting_data.frame_line_out_index', @mission.get('frame_line_out_index'))
         @send_command('getFrameOut')
 
         @get_request('setting_data', (data) =>
-          console.log data
           @mission.load_setting_info(JSON.parse(data)) )
+
+      # if route == 'program'
+      #   if @previous_action.route == "mission/*action" and @previous_action.action == "load"
+      #     @@load_mission_data(@previous_action.selected_mission_name)
 
     after_action: (route, params) =>
       action = params[0]
@@ -298,7 +308,7 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission','rivets'], (Logger,
         if action == 'edit'
           # init avaiable layers
           _.each(@mission.get('available_layers'),((a_layer, index) ->
-              console.log index
+
               $('#my-select').append( "<option value='#{a_layer.name}-----#{Math.random()*10e16}'>#{a_layer.name}</option>" )
             ),this) 
           # init used layers    
@@ -432,7 +442,14 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission','rivets'], (Logger,
           console.log "in mission load......"
           selected_mission_name = $('.list-group-item.selected-item').html()
           if selected_mission_name != undefined
+            @mission.set('name', selected_mission_name)
+            console.log "selected_mission_name: #{selected_mission_name}"
+            console.log "@mission.get('name'): #{@mission.get('name')}"
+
             @load_mission_data(selected_mission_name)
+            window.router.navigate("#program", {trigger: true})
+            rivets.bind $('.mission_'),{mission: @mission} 
+            return false 
 
           window.router.navigate("#mission/index", {trigger: true})
           return false    
