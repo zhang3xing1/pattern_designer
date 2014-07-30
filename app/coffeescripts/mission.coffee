@@ -300,7 +300,6 @@ define [
       @set('tool_position_r',setting_data_from_pdl.tool_position_r)
       @set('length_wise',setting_data_from_pdl.length_wise)
       @set('cross_wise',setting_data_from_pdl.cross_wise)
-      @set('distance',setting_data_from_pdl.distance)
       @set('pallet_length',setting_data_from_pdl.pallet_length)
       @set('pallet_width',setting_data_from_pdl.pallet_width)
       @set('pallet_height',setting_data_from_pdl.pallet_height)

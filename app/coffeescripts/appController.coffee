@@ -16,7 +16,7 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission','rivets'], (Logger,
       ## mission edit page -> for order of layers
       @removed_layer_index = -1
 
-      @remote_url = 'http://172.22.117.38/'
+      @remote_url = 'http://192.168.56.2/'
       @db_programe = 'pd_db'
       @command_program = 'pd_command'
 
@@ -59,9 +59,8 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission','rivets'], (Logger,
     #       window.appController.logger.dev "[set]: error"
     #   return
 
-    sleep: (d = 200) ->
+    sleep: (d = 100) ->
       t = Date.now()
-
       while Date.now() - t <= d
         d
 
@@ -103,9 +102,7 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission','rivets'], (Logger,
         
 
     send_command: (command) =>
-      @sleep(100)
       @set_request2('command_', command, 'str')
-      @sleep(100)
       @send_lock_off()
 
     send_lock_off: =>
@@ -120,7 +117,21 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission','rivets'], (Logger,
       
       @get_request('setting_data', (data) =>
         window.appController.mission.load_setting_info(JSON.parse(data)) )
-       
+
+      
+    load_frame_data: =>
+      @set_request('setting_data.frame_line_in_index', @mission.get('frame_line_in_index'))
+      @send_command('getFrameIn')
+
+      @get_request('setting_data', (data) =>
+        @mission.load_setting_info(JSON.parse(data)) )
+
+      @set_request('setting_data.frame_line_out_index', @mission.get('frame_line_out_index'))
+      @send_command('getFrameOut')
+
+      @get_request('setting_data', (data) =>
+        @mission.load_setting_info(JSON.parse(data)) )      
+
     flash: (options={closable: true})->
       $('#popup').html(options.message)
       $("#popup").modal
@@ -178,17 +189,7 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission','rivets'], (Logger,
             return false
 
       if route == 'frame'
-        @set_request('setting_data.frame_line_in_index', @mission.get('frame_line_in_index'))
-        @send_command('getFrameIn')
-
-        @get_request('setting_data', (data) =>
-          @mission.load_setting_info(JSON.parse(data)) )
-
-        @set_request('setting_data.frame_line_out_index', @mission.get('frame_line_out_index'))
-        @send_command('getFrameOut')
-
-        @get_request('setting_data', (data) =>
-          @mission.load_setting_info(JSON.parse(data)) )
+        @load_frame_data()
 
       # if route == 'program'
       #   if @previous_action.route == "mission/*action" and @previous_action.action == "load"
@@ -292,19 +293,37 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission','rivets'], (Logger,
         if action == 'save'
           window.router.navigate("#mission/index", {trigger: true})
           mission_pairs = _.pairs(window.appController.mission.toJSON())
+
+          #
+          # in validate, single variable have been saved to pdl programe.
+          # so we need to do save composite variables like layers data in here.
+          #
+
+
           _.each(mission_pairs, ((a_pair) ->
             field = a_pair[0]
             value = a_pair[1]
-            # mission_data
-            # if _.contains(['name','creator','product','company','code'], field)
-              # setVarRequest("mission_data.#{field}", value)
-            # setting_data
 
-            # layers_data
-            field = a_pair[0]
-            value = a_pair[1]
-            console.log "#{field} -> #{value}"
+            if _.contains(['available_layers', 'used_layers', 'used_layers_created_number'], field)
+              console.log field
+              console.log value
+
             ),this)
+
+          # _.each(mission_pairs, ((a_pair) ->
+          #   field = a_pair[0]
+          #   value = a_pair[1]
+
+          #   console.log "#{field} -> #{value}"
+          #   if _.contains(['name', 'creator', 'product', 'company', 'code'], field)
+          #     @set_request("mission_data.#{field}", value, 'str')
+          #   else if _.contains(['available_layers', 'used_layers', 'used_layers_created_number'], field)
+          #     console.log "#{field} ->"
+          #     console.log value
+          #   else
+          #     @set_request("setting_data.#{field}", value)
+
+          #   ),this)
         if action == 'edit'
           # init avaiable layers
           _.each(@mission.get('available_layers'),((a_layer, index) ->
@@ -447,6 +466,8 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission','rivets'], (Logger,
             console.log "@mission.get('name'): #{@mission.get('name')}"
 
             @load_mission_data(selected_mission_name)
+
+            @load_frame_data()
             window.router.navigate("#program", {trigger: true})
             rivets.bind $('.mission_'),{mission: @mission} 
             return false 
@@ -650,8 +671,8 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission','rivets'], (Logger,
 
 
       pallet =  
-            width:    @mission.get('pallet_width')
-            height:   @mission.get('pallet_height')
+            width:    @mission.get('pallet_length')
+            height:   @mission.get('pallet_width')
             overhang: @mission.get('overhang_len')
 
       box  =      
