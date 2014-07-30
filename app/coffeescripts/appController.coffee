@@ -111,7 +111,6 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission','rivets'], (Logger,
       @get_request('setting_data', (data) =>
         @mission.load_setting_info(JSON.parse(data)) )
        
-
     flash: (options={closable: true})->
       $('#popup').html(options.message)
       $("#popup").modal
@@ -170,21 +169,20 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission','rivets'], (Logger,
             return false
 
       if route == 'frame'
+        @set_request('setting_data.frame_line_in_index', @mission.get('frame_line_in_index'))
+        @send_command('getFrameIn')
+
         @get_request('setting_data', (data) =>
+          console.log "[from pdl]: "
+          console.log data
           @mission.load_setting_info(JSON.parse(data)) )
 
+        @set_request('setting_data.frame_line_out_index', @mission.get('frame_line_out_index'))
+        @send_command('getFrameOut')
 
-      # rivets.formatters.currency =
-      #   read: (value) ->
-      #     console.log 'rivets read'
-      #     console.log value
-      #     (value / 100).toFixed 2
-
-      #   publish: (value) ->
-      #     console.log 'rivets publish'
-      #     console.log value
-      #     Math.round parseFloat(value) * 100
-
+        @get_request('setting_data', (data) =>
+          console.log data
+          @mission.load_setting_info(JSON.parse(data)) )
 
     after_action: (route, params) =>
       action = params[0]
@@ -195,9 +193,6 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission','rivets'], (Logger,
       #     @logger.debug("in aGetRequest: #{data}")
       #     return
       #     )
-
-      if route == 'pickSetting'
-        rivets.bind $('.mission_'),{mission: @new_mission}   
 
       if route == 'placeSetting'
         orient_value = window.appController.mission.get('orient')
@@ -445,6 +440,10 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission','rivets'], (Logger,
         if action == 'edit'
           @load_pattern_data(window.appController.selected_layer)
       
+      rivets.bind $('.mission_'),{mission: @mission}    
+
+      if route == 'pickSetting'
+        rivets.bind $('.mission_'),{mission: @new_mission}   
 
       @logger.debug("[after_action]: window.appController.mission_saved_flag #{window.appController.mission_saved_flag}")
     

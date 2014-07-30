@@ -87,13 +87,20 @@ define [
 
       @on('all', @validateAttrValue)
 
+    is_real: (value) =>
+      result = (rReal.test(@get(attr)) or @get(attr) == 0)
+      unless result
+        console.log "validateAttrValue: #{attr}value: #{@get(attr)} before: #{@previous(attr)} is_real? #{result}"
+      result
+        
+
     validateAttrValue : (event_name) ->
+
       rInteger = /^\+?[1-9][0-9]*$/
       rReal    = /^([1-9]\d*)(\.{0,1}\d*[1-9])?$/
      
       result = event_name.split(':')
       attr = result[1]
-      # console.log "validateAttrValue: #{event_name} #{attr}"
 
       if attr == undefined
         return
@@ -113,7 +120,7 @@ define [
       #     @set(attr,  @previous(attr)) 
       #   return
       if attr.search('position_') > 0 
-        if !rReal.test(@get(attr))  
+        if !@is_real
           @set(attr,  @previous(attr))
           return
         if parseFloat(@get(attr)) > 720
@@ -128,10 +135,25 @@ define [
 
       if attr ==  "box_length" or attr ==  "box_width"
         if parseInt(@get('box_length')) < parseInt(@get('box_width'))
-          console.log "#{@get('box_length')} < #{@get('box_width')}"
+          @logger.debug "#{@get('box_length')} < #{@get('box_width')}"
           @set('box_width',  @previous('box_width')) 
           @set('box_length', @previous('box_length'))    
 
+      if attr == 'frame_line_in_index'
+        @logger.dev "[mission.coffee]: frame_line_in_index"
+        window.appController.set_request('setting_data.frame_line_in_index', window.appController.mission.get('frame_line_in_index'))
+        window.appController.send_command('getFrameIn')
+
+        window.appController.get_request('setting_data', (data) =>
+          window.appController.mission.load_setting_info(JSON.parse(data)) )
+
+      if attr == 'frame_line_out_index'
+        @logger.dev "[mission.coffee]: frame_line_out_index"
+        window.appController.set_request('setting_data.frame_line_out_index', window.appController.mission.get('frame_line_out_index'))
+        window.appController.send_command('getFrameOut')        
+        
+        window.appController.get_request('setting_data', (data) =>
+          window.appController.mission.load_setting_info(JSON.parse(data)) )
     addLayer: (layer_data) ->
       to_updated_available_layers = @get("available_layers")
       to_updated_available_layers[layer_data.id] = layer_data
@@ -233,11 +255,9 @@ define [
       @set('code',mission_data_from_pdl.code)
 
     load_setting_info:(setting_data_from_pdl) =>
-      # @set('name',setting_data_from_pdl.name)
-      # @set('creator',setting_data_from_pdl.creator)
-      # @set('product',setting_data_from_pdl.product)
-      # @set('company',setting_data_from_pdl.company)
-      # @set('code',setting_data_from_pdl.code)
+      console.log "[mission: load_setting_info]"
+      console.log "setting_data_from_pdl:"
+      console.log setting_data_from_pdl
       @set('frame_line_in_index',setting_data_from_pdl.frame_line_in_index)
       @set('frame_line_in_position_x',setting_data_from_pdl.frame_line_in_position_x)
       @set('frame_line_in_position_y',setting_data_from_pdl.frame_line_in_position_y)
@@ -278,9 +298,10 @@ define [
       @set('overhang_len',setting_data_from_pdl.overhang_len)
       @set('overhang_wid',setting_data_from_pdl.overhang_wid)
       @set('max_pack',setting_data_from_pdl.max_pack)
-      # @set('available_layers',mission_data_from_pdl.available_layers)
-      # @set('used_layers',mission_data_from_pdl.used_layers)
-      # @set('used_layers_created_number',mission_data_from_pdl.used_layers_created_number)
+
+      console.log "[mission: load_setting_info]"
+      console.log "mission setting:"
+      console.log @attributes
 
     load_layers_info:(layers_from_pdl) =>
 
