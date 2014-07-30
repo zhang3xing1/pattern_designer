@@ -209,14 +209,14 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission','rivets'], (Logger,
         length_wise_value = window.appController.mission.get('length_wise')
         $("[name='length']").bootstrapSwitch('state', length_wise_value) 
         $("[name='length']").on "switchChange.bootstrapSwitch", (event, state) ->
-          window.appController.mission.set('length', state)
+          window.appController.mission.set('length_wise', state)
           $("[name='cross']").bootstrapSwitch('state', !state) 
 
         
         cross_wise_value = window.appController.mission.get('cross_wise')
         $("[name='cross']").bootstrapSwitch('state', cross_wise_value) 
         $("[name='cross']").on "switchChange.bootstrapSwitch", (event, state) ->
-          window.appController.mission.set('length', state)
+          window.appController.mission.set('cross_wise', state)
           $("[name='length']").bootstrapSwitch('state', !state) 
       
       if route == 'patterns'

@@ -106,6 +106,7 @@ define [
         return
 
       if _.contains(['name', 'creator', 'product', 'company', 'code'], attr)
+        window.appController.set_request("mission_data.#{attr}", @get(attr), 'str')
         return
 
 
@@ -128,6 +129,7 @@ define [
         return
 
       if attr == 'length_wise' or attr == 'cross_wise'  or attr == 'orient'      
+        window.appController.set_request("setting_data.#{attr}", @get(attr).toString())
         return 
       
       if !rInteger.test(@get(attr))
@@ -137,7 +139,11 @@ define [
         if parseInt(@get('box_length')) < parseInt(@get('box_width'))
           @logger.debug "#{@get('box_length')} < #{@get('box_width')}"
           @set('box_width',  @previous('box_width')) 
-          @set('box_length', @previous('box_length'))    
+          @set('box_length', @previous('box_length'))  
+        else 
+          window.appController.set_request("setting_data.#{attr}", @get(attr))
+        return
+
 
       if attr == 'frame_line_in_index'
         @logger.dev "[mission.coffee]: frame_line_in_index"
@@ -146,6 +152,7 @@ define [
 
         window.appController.get_request('setting_data', (data) =>
           window.appController.mission.load_setting_info(JSON.parse(data)) )
+        return
 
       if attr == 'frame_line_out_index'
         @logger.dev "[mission.coffee]: frame_line_out_index"
@@ -154,6 +161,12 @@ define [
         
         window.appController.get_request('setting_data', (data) =>
           window.appController.mission.load_setting_info(JSON.parse(data)) )
+
+        return
+
+      # others not str attr
+      window.appController.set_request("setting_data.#{attr}", @get(attr))
+      
     addLayer: (layer_data) ->
       to_updated_available_layers = @get("available_layers")
       to_updated_available_layers[layer_data.id] = layer_data
