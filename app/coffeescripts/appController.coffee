@@ -26,6 +26,14 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission','rivets'], (Logger,
       # mission index page
       @mission_list = []
 
+
+      # 
+      # composite layer after loading data from PDL
+      #
+
+      @available_layers_pdl = {}
+      @used_layers_pdl = []
+
       # interval of request
       # @request_body = undefined
     # http://192.168.56.2/set?var=gui_string&prog=gui_example_test_2&value=%27ddddd%27
@@ -141,6 +149,7 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission','rivets'], (Logger,
 
     get_mission_list: =>
       url = "get?dirList=UD:/usr/dev/"
+      console.log url
       $.get url, (data) =>
         @mission_list = JSON.parse(data)
 
@@ -198,12 +207,7 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission','rivets'], (Logger,
     after_action: (route, params) =>
       action = params[0]
       rivets.bind $('.mission_'),{mission: @mission}
-      # if route == 'program' || route == ''
-      #   window.appController.aGetRequest('index', (data)->
-      #     alert data
-      #     @logger.debug("in aGetRequest: #{data}")
-      #     return
-      #     )
+
 
       if route == 'placeSetting'
         orient_value = window.appController.mission.get('orient')
@@ -291,7 +295,7 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission','rivets'], (Logger,
             )
 
         if action == 'save'
-          window.router.navigate("#mission/index", {trigger: true})
+          
           mission_pairs = _.pairs(window.appController.mission.toJSON())
 
           #
@@ -307,23 +311,16 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission','rivets'], (Logger,
             if _.contains(['available_layers', 'used_layers', 'used_layers_created_number'], field)
               console.log field
               console.log value
-
+              # to do
             ),this)
 
-          # _.each(mission_pairs, ((a_pair) ->
-          #   field = a_pair[0]
-          #   value = a_pair[1]
+          @set_request2('new_mission_name', @mission.get('name'), 'str')
+          @send_command('save')
 
-          #   console.log "#{field} -> #{value}"
-          #   if _.contains(['name', 'creator', 'product', 'company', 'code'], field)
-          #     @set_request("mission_data.#{field}", value, 'str')
-          #   else if _.contains(['available_layers', 'used_layers', 'used_layers_created_number'], field)
-          #     console.log "#{field} ->"
-          #     console.log value
-          #   else
-          #     @set_request("setting_data.#{field}", value)
+          # get mission list data    
+          @get_mission_list()
 
-          #   ),this)
+          window.router.navigate("#program", {trigger: true})
         if action == 'edit'
           # init avaiable layers
           _.each(@mission.get('available_layers'),((a_layer, index) ->
@@ -467,7 +464,6 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission','rivets'], (Logger,
 
             @load_mission_data(selected_mission_name)
 
-            @load_frame_data()
             window.router.navigate("#program", {trigger: true})
             rivets.bind $('.mission_'),{mission: @mission} 
             return false 
@@ -582,6 +578,31 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission','rivets'], (Logger,
     updateUsedLayersNameByUlid:(new_layer_name, layer_ulid) ->
       @mission.updateUsedLayersNameByUlid(new_layer_name, layer_ulid)
 
+    #
+    # composite layers data after loading data from pdl
+    #
+
+    compositeALayer: (layer_name, layer_boxes) =>
+      new_key =  "layer-item-#{layer_name}-#{Math.random()*10e16}"
+      new_ulid = 
+      @available_layers_pdl[new_key] = 
+        name: layer_name
+        boxes: layer_boxes
+        id: new_key
+        ulid: "#{layer_name}------ulid#{Math.random()*10e17}"
+
+    compositeAUsedLayer: (layer_name) =>
+      # id: "ddddd-----10001-----27212137775495650"
+      # name: "ddddd"
+      # option_value: "ddddd-----option3679642337374389"
+      # ulid: "ddddd------ulid64922175602987410"
+      new_id = "#{layer_name}-----#{@used_layers_pdl.length}-----#{Math.random()*10e16}"
+      @used_layers_pdl[@used_layers_pdl.length] =
+        id: new_id
+        name: layer_name
+        option_value: "#{layer_name}-----option#{Math.random()*10e16}"
+        ulid: @getUlidByName(layer_name)
+
     default_pattern_params: ->
       canvasStage =  
             width:      280
@@ -680,7 +701,7 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission','rivets'], (Logger,
             y:      0
             width:  @mission.get('box_length') 
             height: @mission.get('box_width')
-            minDistance: @mission.get('distance')
+            minDistance: @mission.get('mini_distance')
 
 
       params = 

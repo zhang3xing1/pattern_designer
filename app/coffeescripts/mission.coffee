@@ -13,13 +13,13 @@ define [
       code: '', 
 
       #setting
-      frame_line_in_index:  16,
+      frame_line_in_index:  1,
       frame_line_in_position_x: 0,
       frame_line_in_position_y: 0,
       frame_line_in_position_z: 0,
       frame_line_in_position_r: 0,
 
-      frame_line_out_index: 7,
+      frame_line_out_index: 1,
       frame_line_out_position_x: 0,
       frame_line_out_position_y: 0,
       frame_line_out_position_z: 0,
@@ -79,7 +79,7 @@ define [
 
       # available_layers_sequence: 1, # for identity of selectable layers
       # used_layers_sequence: 1,      # for identity of selection layers
-      used_layers_created_number: 0, # for count
+      used_layers_created_number: 10000, # for count
     }
     initialize: (params) ->
       @logger = aLogger.create
@@ -88,6 +88,7 @@ define [
       @on('all', @validateAttrValue)
 
     is_real: (value) =>
+      rReal    = /^([1-9]\d*)(\.{0,1}\d*[1-9])?$/
       result = (rReal.test(@get(attr)) or @get(attr) == 0)
       unless result
         console.log "validateAttrValue: #{attr}value: #{@get(attr)} before: #{@previous(attr)} is_real? #{result}"
@@ -97,12 +98,14 @@ define [
     validateAttrValue : (event_name) ->
 
       rInteger = /^\+?[1-9][0-9]*$/
-      rReal    = /^([1-9]\d*)(\.{0,1}\d*[1-9])?$/
      
       result = event_name.split(':')
       attr = result[1]
 
       if attr == undefined
+        return
+
+      if _.contains(['available_layers', 'used_layers', 'used_layers_created_number'], attr)
         return
 
       if _.contains(['name', 'creator', 'product', 'company', 'code'], attr)
