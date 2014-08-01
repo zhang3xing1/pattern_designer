@@ -5,11 +5,7 @@ define [
   'logger'
 ], ($, _, Backbone, aLogger) ->  
   class Mission extends Backbone.Model
-    # 
-    # just layer names for loading the layers from pdl.
-    #
-    @available_layers_names = []
-
+    available_layers_names = []
 
     defaults: {
       name: 'MissionName',
@@ -351,10 +347,16 @@ define [
       available_layers_names = _.select(layers_from_pdl.layers, ((a_layer) =>
         a_layer.is_available == true), this)
 
-      @available_layers_names = _.map(available_layers_names, ((a_layer) =>
+      available_layers_names = _.map(available_layers_names, ((a_layer) =>
         a_layer.name), this)
 
-      @available_layers_names
+      console.log "available_layers_names"
+      console.log available_layers_names
+
+      @available_layers_names = available_layers_names
+
+
+
 
     load_used_layers_info:(used_layers_from_pdl) => 
 
