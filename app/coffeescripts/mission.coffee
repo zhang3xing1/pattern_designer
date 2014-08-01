@@ -5,6 +5,12 @@ define [
   'logger'
 ], ($, _, Backbone, aLogger) ->  
   class Mission extends Backbone.Model
+    # 
+    # just layer names for loading the layers from pdl.
+    #
+    @available_layers_names = []
+
+
     defaults: {
       name: 'MissionName',
       creator: 'Your name',
@@ -321,7 +327,76 @@ define [
 
     load_layers_info:(layers_from_pdl) =>
 
+      # {
+      #   "layers": [{
+      #       "name": "layer_1",
+      #       "is_available": true
+      #     }, {
+      #       "name": "layer_2",
+      #       "is_available": true
+      #     }, {
+      #       "name": "",
+      #       "is_available": false
+      #     }, {
+      #       "name": "",
+      #       "is_available": false
+      #     }, {
+      #       "name": "",
+      #       "is_available": false
+      #     }, {
+      #       "name": "",
+      #       "is_available": false
+      #     }]
+      # }
+      available_layers_names = _.select(layers_from_pdl.layers, ((a_layer) =>
+        a_layer.is_available == true), this)
 
+      @available_layers_names = _.map(available_layers_names, ((a_layer) =>
+        a_layer.name), this)
+
+      @available_layers_names
+
+    load_used_layers_info:(used_layers_from_pdl) => 
+
+      # {
+      #   "used_layers":  [{
+      #       "name": "layer_1",
+      #       "is_available": true
+      #     }, {
+      #       "name": "layer_1",
+      #       "is_available": true
+      #     }, {
+      #       "name": "layer_1",
+      #       "is_available": true
+      #     }, {
+      #       "name": "layer_2",
+      #       "is_available": true
+      #     }, {
+      #       "name": "layer_1",
+      #       "is_available": true
+      #     }, {
+      #       "name": "",
+      #       "is_available": false
+      #     }, {
+      #       "name": "",
+      #       "is_available": false
+      #     }, {
+      #       "name": "",
+      #       "is_available": false
+      #     }, {
+      #       "name": "",
+      #       "is_available": false
+      #     }, {
+      #       "name": "",
+      #       "is_available": false
+      #     }]
+      # }
+
+      used_layers = _.select(used_layers_from_pdl.used_layers, ((a_layer) =>
+        a_layer.is_available == true), this)
+
+      @set('used_layers', used_layers)
+      
   create: new Mission
 
 

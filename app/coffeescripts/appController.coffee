@@ -17,6 +17,7 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission','rivets'], (Logger,
       @removed_layer_index = -1
 
       @remote_url = 'http://192.168.56.2/'
+      # @remote_url = 'http://172.22.117.38/'
       @db_programe = 'pd_db'
       @command_program = 'pd_command'
 
@@ -33,6 +34,13 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission','rivets'], (Logger,
 
       @available_layers_pdl = {}
       @used_layers_pdl = []
+
+
+      #
+      # get boxes from pdl
+      #
+
+      @temp_boxes_count = 0
 
       # interval of request
       # @request_body = undefined
@@ -126,6 +134,93 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission','rivets'], (Logger,
       @get_request('setting_data', (data) =>
         window.appController.mission.load_setting_info(JSON.parse(data)) )
 
+      #
+      # get all layers including boxes
+      #
+
+      # 1. get the name of all layers ,  set the var, the number of layers
+      # console.log "# 1. get the name of all layers ,  set the var, the number of layers"
+      # @get_request('layers', (data) ->
+      #   console.log data
+      #   window.appController.mission.load_layers_info(JSON.parse(data))
+ 
+      #   # 2. start to get all boxes from each layer.
+      #   console.log "# 2. start to get all boxes from each layer."
+      #   layers_name = window.appController.mission.available_layers_names
+      #   # 2.1 set the var, the number of boxes in one layer, after reading the first layer
+      #   console.log "2.1 set the var, the number of boxes in one layer, after reading the first layer"
+      #   _.each(layers_name, ((a_layer_name) =>
+      #     window.appController.set_request2('temp_layer_name', a_layer_name, 'str')
+      #     window.appController.send_command('countOfBoxes')
+      #     window.appController.temp_boxes_count = 0  
+
+      #     window.appController.get_request('temp_boxes_count', (data) =>
+      #       console.log "temp_boxes_count"
+      #       console.log data
+      #       window.appController.temp_boxes_count = Number.parseInt(data))
+      #     window.appController.temp_boxes_count
+      #     ), this)
+
+
+      @get_request('layers', (data) ->
+        window.appController.mission.load_layers_info(JSON.parse(data))
+        # 2. start to get all boxes from each layer.
+        console.log "# 2. start to get all boxes from each layer."
+        layers_name = window.appController.mission.available_layers_names
+        
+        console.log "layers_name: #{layers_name}"
+      )
+        
+
+
+        # count_of_layers = _.map(layers_name, ((a_layer_name) =>
+        #   # 2.1 set the var, the number of boxes in one layer, after reading the first layer
+        #   window.appController.set_request2('temp_layer_name', a_layer_name, 'str')
+        #   window.appController.send_command('countOfBoxes')
+        #   window.appController.temp_boxes_count = 0
+        #   window.appController.get_request('temp_boxes_count', (data) =>
+        #     console.log "temp_boxes_count"
+        #     console.log data
+        #     window.appController.temp_boxes_count = Number.parseInt(data))
+        #   window.appController.temp_boxes_count
+        #   ), this)
+
+        # console.log "[count_of_layers]: "
+        # console.log count_of_layers
+        
+
+
+      
+      @get_request('used_layers', (data) ->
+        window.appController.mission.load_used_layers_info(JSON.parse(data)) 
+
+
+        )
+      
+      
+      # # 2. start to get all boxes from each layer.
+      # layers_name = @mission.available_layers_names
+      # console.log "[layers_name]: "
+      # console.log layers_name
+      # count_of_layers = _.map(layers_name, ((a_layer_name) =>
+      #   # 2.1 set the var, the number of boxes in one layer, after reading the first layer
+      #   window.appController.set_request2('temp_layer_name', a_layer_name, 'str')
+      #   window.appController.send_command('countOfBoxes')
+      #   window.appController.temp_boxes_count = 0
+      #   window.appController.get_request('temp_boxes_count', (data) =>
+      #     alert data
+      #     window.appController.temp_boxes_count = Number.parseInt(data))
+      #   window.appController.temp_boxes_count
+      #   ), this)
+
+      # console.log "[count_of_layers]: "
+      # console.log count_of_layers
+
+
+
+
+      # N. done after reset, reset the var, the number of boxes to next layer. 
+
       
     load_frame_data: =>
       @set_request('setting_data.frame_line_in_index', @mission.get('frame_line_in_index'))
@@ -200,9 +295,6 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission','rivets'], (Logger,
       if route == 'frame'
         @load_frame_data()
 
-      # if route == 'program'
-      #   if @previous_action.route == "mission/*action" and @previous_action.action == "load"
-      #     @@load_mission_data(@previous_action.selected_mission_name)
 
     after_action: (route, params) =>
       action = params[0]
@@ -303,7 +395,6 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission','rivets'], (Logger,
           # so we need to do save composite variables like layers data in here.
           #
 
-
           _.each(mission_pairs, ((a_pair) ->
             field = a_pair[0]
             value = a_pair[1]
@@ -311,6 +402,10 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission','rivets'], (Logger,
             if _.contains(['available_layers', 'used_layers', 'used_layers_created_number'], field)
               console.log field
               console.log value
+              if field == 'available_layers'
+                @sendLayersToSave()
+              if field == 'used_layers'
+                @sendUsedLayersToSave()
               # to do
             ),this)
 
@@ -462,7 +557,9 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission','rivets'], (Logger,
             console.log "selected_mission_name: #{selected_mission_name}"
             console.log "@mission.get('name'): #{@mission.get('name')}"
 
+            console.log "----->before: load_mission_data"
             @load_mission_data(selected_mission_name)
+            console.log "----->after: load_mission_data"
 
             window.router.navigate("#program", {trigger: true})
             rivets.bind $('.mission_'),{mission: @mission} 
@@ -579,10 +676,14 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission','rivets'], (Logger,
       @mission.updateUsedLayersNameByUlid(new_layer_name, layer_ulid)
 
     #
-    # composite layers data after loading data from pdl
+    # composite layers data after loading data from pdl to js
     #
 
     compositeALayer: (layer_name, layer_boxes) =>
+      # boxes: Array[8]
+      # id: "layer-item-1111-238756119273602980"
+      # name: "1111"
+      # ulid: "1111------ulid991697110701352300"
       new_key =  "layer-item-#{layer_name}-#{Math.random()*10e16}"
       new_ulid = 
       @available_layers_pdl[new_key] = 
@@ -603,6 +704,75 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission','rivets'], (Logger,
         option_value: "#{layer_name}-----option#{Math.random()*10e16}"
         ulid: @getUlidByName(layer_name)
 
+
+    #
+    # generate layers data to save data from js to pdl
+    #
+
+    sendLayersToSave: =>
+      available_layers = @mission.get('available_layers')
+  
+      _.each(available_layers, ((a_layer) =>
+        layer_name = a_layer.name
+        layer_boxes = a_layer.boxes
+
+        @set_request2('temp_layer_name', layer_name, 'str')
+        @send_command('addNewLayer')
+
+        _.each(layer_boxes, ((a_box) =>
+            @set_request2('temp_box.x', a_box.x)
+            @set_request2('temp_box.y', a_box.y)
+            @set_request2('temp_box.rotate', a_box.rotate)
+            @set_request2('temp_box.arrow', a_box.arrow)
+            @set_request2('temp_box.arrowEnabled', a_box.arrowEnabled.toString())
+            @set_request2('temp_box.layer_name', layer_name, 'str')
+            @send_command('addNewBox')
+          ), this)
+
+        ), this)
+      # ajax_faker.send_set2('temp_layer_name', 'layer_1', 'str')
+      # ajax_faker.send_command('addNewLayer')
+
+      # #
+      # # add two boxes to  layer 'layer_1'
+      # #
+
+      # ajax_faker.send_set2('temp_box.x', 1)
+      # ajax_faker.send_set2('temp_box.y', 1)
+      # ajax_faker.send_set2('temp_box.rotate', 1)
+      # ajax_faker.send_set2('temp_box.arrow', 1)
+      # ajax_faker.send_set2('temp_box.arrowEnabled', true)
+      # ajax_faker.send_set2('temp_box.layer_name', 'layer_1', 'str')
+      # ajax_faker.send_command('addNewBox')
+
+      # ajax_faker.send_set2('temp_box.x', 40)
+      # ajax_faker.send_set2('temp_box.y', 40)
+      # ajax_faker.send_set2('temp_box.rotate', 2)
+      # ajax_faker.send_set2('temp_box.arrow', 2)
+      # ajax_faker.send_set2('temp_box.arrowEnable', true)
+      # ajax_faker.send_set2('temp_box.layer_name', 'layer_1', 'str')
+      # ajax_faker.send_command('addNewBox')     
+
+
+    sendUsedLayersToSave: =>
+      used_layers = @mission.get('used_layers')
+ 
+      _.each(used_layers, ((a_layer) =>
+        layer_name = a_layer.name
+
+        @set_request2('temp_layer_name', layer_name, 'str')
+        @send_command('addNewUsedLayer')
+
+        ), this)      
+
+
+
+# ajax_faker.send_set2('temp_layer_name', 'layer_1', 'str')
+# ajax_faker.send_command('addNewUsedLayer')
+# ajax_faker.send_set2('temp_layer_name', 'layer_2', 'str')
+# ajax_faker.send_command('addNewUsedLayer')
+# ajax_faker.send_set2('temp_layer_name', 'layer_1', 'str')
+# ajax_faker.send_command('addNewUsedLayer')
     default_pattern_params: ->
       canvasStage =  
             width:      280
