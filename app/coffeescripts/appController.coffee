@@ -87,36 +87,55 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission','rivets'], (Logger,
     set_request: (var_name, var_value, var_type='not_str', callback) =>
       if var_type == 'str'
         var_value = "'#{var_value}'"
-      $.get("set",
-        var:    var_name
-        prog:   @db_programe
-        value:  var_value
-      ).done (data) =>
-        console.log "#{window.appController.remote_url}set?var=#{var_name}&prog=#{@db_programe}&value=#{var_value}"
-        callback(data) if callback != undefined
-        # console.log data
+
+      get_url = "set?var=#{var_name}&prog=#{@db_programe}&value=#{var_value}"
+      console.log "#{@remote_url}#{get_url}"
+      $.ajax
+        url: get_url
+        cache: false
+        async: false
+        success: (data) ->
+          callback data if callback != undefined
+        error: () ->
+          window.appController.logger.dev "[set]: error"        
         
 
     set_request2: (var_name, var_value, var_type='not_str', callback) =>
       if var_type == 'str'
         var_value = "'#{var_value}'"
-      $.get("set",
-        var:    var_name
-        prog:   @command_program
-        value:  var_value
-      ).done (data) =>
-        console.log "#{window.appController.remote_url}set?var=#{var_name}&prog=#{@command_program}&value=#{var_value}"
-        callback(data) if callback != undefined
-        # console.log data
+
+      get_url = "set?var=#{var_name}&prog=#{@command_program}&value=#{var_value}"
+      console.log "#{@remote_url}#{get_url}"
+      $.ajax
+        url: get_url
+        cache: false
+        async: false
+        success: (data) ->
+          callback data if callback != undefined
+        error: () ->
+          window.appController.logger.dev "[set2]: error"        
+        
+      # $.get("set",
+      #   var:    var_name
+      #   prog:   @command_program
+      #   value:  var_value
+      # ).done (data) =>
+      #   console.log "#{window.appController.remote_url}set?var=#{var_name}&prog=#{@command_program}&value=#{var_value}"
+      #   callback(data) if callback != undefined
+      #   # console.log data
                 
 
     get_request: (var_name,callback) =>
-      $.get("get",
-        var: var_name
-        prog: @db_programe
-      ).done (data) =>
-        console.log "#{window.appController.remote_url}get?var=#{var_name}&prog=#{@db_programe}"
-        callback(data) if callback != undefined
+      get_url = "get?var=#{var_name}&prog=#{@db_programe}"
+      console.log "#{@remote_url}#{get_url}"
+      $.ajax
+        url: get_url
+        cache: false
+        async: false
+        success: (data) ->
+          callback data if callback != undefined
+        error: () ->
+          window.appController.logger.dev "[set2]: error" 
         
 
     send_command: (command, callback) =>
