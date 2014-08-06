@@ -352,6 +352,10 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission','rivets'], (Logger,
           # so we need to do save composite variables like layers data in here.
           #
 
+          @routine_request(name: 'resetBoxes')
+          @routine_request(name: 'resetLayers')
+          @routine_request(name: 'resetUsedLayers')
+
           _.each(mission_pairs, ((a_pair) ->
             field = a_pair[0]
             value = a_pair[1]
@@ -366,10 +370,8 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission','rivets'], (Logger,
               # to do
             ),this)
 
-          @set_request2('new_mission_name', @mission.get('name'), 'str')
-          @send_command('save')
-
-          # get mission list data    
+          @routine_request(name: 'saveVarFile', params:[@mission.get('name')])
+    
           @get_mission_list()
 
           window.router.navigate("#program", {trigger: true})
@@ -633,12 +635,6 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission','rivets'], (Logger,
       @mission.updateUsedLayersNameByUlid(new_layer_name, layer_ulid)
 
     #
-    # composite layers data after loading data from pdl to js
-    #
-
-
-
-    #
     # generate layers data to save data from js to pdl
     #
 
@@ -649,63 +645,29 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission','rivets'], (Logger,
         layer_name = a_layer.name
         layer_boxes = a_layer.boxes
 
-        @set_request2('temp_layer_name', layer_name, 'str')
-        @send_command('addNewLayer')
+        @routine_request(
+          name: 'addNewLayer'
+          params:[layer_name]
+        )
 
         _.each(layer_boxes, ((a_box) =>
-            @set_request2('temp_box.x', a_box.x)
-            @set_request2('temp_box.y', a_box.y)
-            @set_request2('temp_box.rotate', a_box.rotate)
-            @set_request2('temp_box.arrow', a_box.arrow)
-            @set_request2('temp_box.arrowEnabled', a_box.arrowEnabled.toString())
-            @set_request2('temp_box.layer_name', layer_name, 'str')
-            @send_command('addNewBox')
+          @set_request(name: 'request_box.x', value: a_box.x)
+          @set_request(name: 'request_box.y', value: a_box.y)
+          @set_request(name: 'request_box.arrow', value: a_box.arrow)
+          @set_request(name: 'request_box.arrowEnabled', value: a_box.arrowEnabled.toString())
+          @set_request(name: 'request_box.layer_name', value: layer_name, type: 'str')
+          @set_request(name: 'request_box.rotate', value: a_box.rotate)  
+          @routine_request(name: 'addNewBox')          
           ), this)
 
         ), this)
-      # ajax_faker.send_set2('temp_layer_name', 'layer_1', 'str')
-      # ajax_faker.send_command('addNewLayer')
-
-      # #
-      # # add two boxes to  layer 'layer_1'
-      # #
-
-      # ajax_faker.send_set2('temp_box.x', 1)
-      # ajax_faker.send_set2('temp_box.y', 1)
-      # ajax_faker.send_set2('temp_box.rotate', 1)
-      # ajax_faker.send_set2('temp_box.arrow', 1)
-      # ajax_faker.send_set2('temp_box.arrowEnabled', true)
-      # ajax_faker.send_set2('temp_box.layer_name', 'layer_1', 'str')
-      # ajax_faker.send_command('addNewBox')
-
-      # ajax_faker.send_set2('temp_box.x', 40)
-      # ajax_faker.send_set2('temp_box.y', 40)
-      # ajax_faker.send_set2('temp_box.rotate', 2)
-      # ajax_faker.send_set2('temp_box.arrow', 2)
-      # ajax_faker.send_set2('temp_box.arrowEnable', true)
-      # ajax_faker.send_set2('temp_box.layer_name', 'layer_1', 'str')
-      # ajax_faker.send_command('addNewBox')     
-
 
     sendUsedLayersToSave: =>
       used_layers = @mission.get('used_layers')
  
       _.each(used_layers, ((a_layer) =>
-        layer_name = a_layer.name
-
-        @set_request2('temp_layer_name', layer_name, 'str')
-        @send_command('addNewUsedLayer')
-
+        @routine_request(name: 'addNewUsedLayer', params:[a_layer.name])
         ), this)      
-
-
-
-# ajax_faker.send_set2('temp_layer_name', 'layer_1', 'str')
-# ajax_faker.send_command('addNewUsedLayer')
-# ajax_faker.send_set2('temp_layer_name', 'layer_2', 'str')
-# ajax_faker.send_command('addNewUsedLayer')
-# ajax_faker.send_set2('temp_layer_name', 'layer_1', 'str')
-# ajax_faker.send_command('addNewUsedLayer')
     default_pattern_params: ->
       canvasStage =  
             width:      280

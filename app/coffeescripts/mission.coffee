@@ -340,6 +340,7 @@ define [
 
     load_layers_info:(layers_from_pdl) =>
 
+      @set('available_layers', {})
       # {
       #   "layers": [{
       #       "name": "layer_1",
@@ -409,7 +410,7 @@ define [
 
 
     load_used_layers_info:(used_layers_from_pdl) => 
-
+      @set('used_layers', [])
       # {
       #   "used_layers":  [{
       #       "name": "layer_1",
