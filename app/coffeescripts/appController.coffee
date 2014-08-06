@@ -18,8 +18,7 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission','rivets'], (Logger,
 
       # @remote_url = 'http://192.168.56.2/'
       @remote_url = 'http://172.22.117.53/'
-      @db_programe = 'pd_db'
-      @command_program = 'pd_command'
+      @program_name = 'pd_db2'
 
       @mission_saved_flag = true
       @pattern_saved_flag = true
@@ -41,6 +40,8 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission','rivets'], (Logger,
       #
 
       @temp_boxes_count = 0
+    
+
 
       # interval of request
       # @request_body = undefined
@@ -83,99 +84,118 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission','rivets'], (Logger,
     #
     #  ajax request to pdl sever
     #
+    set_request: (options) =>
+      if options.type == 'str'
+        options.value = "'#{ options.value}'"  
 
-    set_request: (var_name, var_value, var_type='not_str', callback) =>
-      if var_type == 'str'
-        var_value = "'#{var_value}'"
-
-      get_url = "set?var=#{var_name}&prog=#{@db_programe}&value=#{var_value}"
+      get_url = "set?var=#{options.name}&prog=#{@program_name}&value=#{options.value}"
       console.log "#{@remote_url}#{get_url}"
+
       $.ajax
         url: get_url
         cache: false
         async: false
         success: (data) ->
-          callback data if callback != undefined
+          options.callback data if options.callback != undefined
         error: () ->
           window.appController.logger.dev "[set]: error"        
         
-
-    set_request2: (var_name, var_value, var_type='not_str', callback) =>
-      if var_type == 'str'
-        var_value = "'#{var_value}'"
-
-      get_url = "set?var=#{var_name}&prog=#{@command_program}&value=#{var_value}"
+    get_request: (options) =>
+      get_url = "get?var=#{options.name}&prog=#{@program_name}"
       console.log "#{@remote_url}#{get_url}"
       $.ajax
         url: get_url
         cache: false
         async: false
         success: (data) ->
-          callback data if callback != undefined
+          options.callback data if options.callback != undefined
         error: () ->
-          window.appController.logger.dev "[set2]: error"        
+          window.appController.logger.dev "[get]: error" 
         
-      # $.get("set",
-      #   var:    var_name
-      #   prog:   @command_program
-      #   value:  var_value
-      # ).done (data) =>
-      #   console.log "#{window.appController.remote_url}set?var=#{var_name}&prog=#{@command_program}&value=#{var_value}"
-      #   callback(data) if callback != undefined
-      #   # console.log data
-                
 
-    get_request: (var_name,callback) =>
-      get_url = "get?var=#{var_name}&prog=#{@db_programe}"
+    routine_request: (options) =>
+      params = options.params
+      if params != undefined 
+        result = '('
+        _.each(params, (param, index) ->
+          if typeof(param) == 'string'
+            result += "'#{param}'"
+          else 
+            result += "#{param}"
+
+          if index != params.length - 1
+            result += ","
+          )
+        result += ')'
+      else
+        result = ''
+
+      get_url = "run?routine=#{options.name}#{result}&prog=#{@program_name}"
       console.log "#{@remote_url}#{get_url}"
       $.ajax
         url: get_url
         cache: false
         async: false
         success: (data) ->
-          callback data if callback != undefined
+          options.callback data if options.callback != undefined
         error: () ->
-          window.appController.logger.dev "[set2]: error" 
-        
-
-    send_command: (command, callback) =>
-      @set_request2('command_', command, 'str', (data) ->
-        window.appController.set_request2('is_lock', 'false', 'not_str', callback)
-        )
-      
-
-
+          window.appController.logger.dev "[get]: error" 
+    
     load_mission_data: (mission_data_name) => 
-      # ajax_faker.send_set('new_mission_name', 'mission_test_001', 'str', 'pd_command')
-      @set_request2('new_mission_name',mission_data_name, 'str')
-      @send_command('load')
-      @get_request('mission_data', (data) ->
-        window.appController.mission.load_mission_info(JSON.parse(data)) )
-      
-      @get_request('setting_data', (data) ->
-        window.appController.mission.load_setting_info(JSON.parse(data)) )
 
-      @get_request('layers', (data) ->
-        window.appController.mission.load_layers_info(JSON.parse(data))
+      @routine_request(
+        name: 'loadVarFile'
+        params: [mission_data_name])
+
+      @get_request(
+        name: 'mission_data'
+        callback: (data) ->
+          window.appController.mission.load_mission_info(JSON.parse(data)) )
+      
+      @get_request(
+        name:'setting_data'
+        callback: (data) ->
+          window.appController.mission.load_setting_info(JSON.parse(data)) )
+
+      @get_request(
+        name: 'layers'
+        callback: (data) ->
+          window.appController.mission.load_layers_info(JSON.parse(data))
       )    
-      @get_request('used_layers', (data) ->
-        window.appController.mission.load_used_layers_info(JSON.parse(data)) 
+      @get_request(
+        name: 'used_layers'
+        callback: (data) ->
+          window.appController.mission.load_used_layers_info(JSON.parse(data)) 
       )
     
       
-    load_frame_data: =>
-      @set_request('setting_data.frame_line_in_index', @mission.get('frame_line_in_index'))
-      @send_command('getFrameIn')
+    load_frame_data: =>  
+      @set_request(
+        name: 'setting_data.frame_line_in_index'
+        value: @mission.get('frame_line_in_index')
+      )
 
-      @get_request('setting_data', (data) =>
-        @mission.load_setting_info(JSON.parse(data)) )
+      @routine_request(name: 'getFrameIn')
 
-      @set_request('setting_data.frame_line_out_index', @mission.get('frame_line_out_index'))
-      @send_command('getFrameOut')
+      @get_request(
+        name: 'setting_data'
+        callback: (data) =>
+          @mission.load_setting_info(JSON.parse(data))
+      )
 
-      @get_request('setting_data', (data) =>
-        @mission.load_setting_info(JSON.parse(data)) )      
+      @set_request(
+        name: 'setting_data.frame_line_out_index'
+        value: @mission.get('frame_line_out_index')
+      )
 
+      @routine_request(name: 'getFrameOut')
+
+      @get_request(
+        name: 'setting_data'
+        callback: (data) =>
+          @mission.load_setting_info(JSON.parse(data))
+      )          
+  
     flash: (options={closable: true})->
       $('#popup').html(options.message)
       $("#popup").modal
@@ -278,33 +298,43 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission','rivets'], (Logger,
           #       console.log "a_layer_name: #{a_layer_name}"
           #       window.appController.temp_boxes_count = Number.parseInt(data))))
 
-        window.appController.set_request2('temp_layer_name', layers_names[0], 'str', (data) ->
-          console.log ('level 1')
-          window.appController.send_command('countOfBoxes', (data) ->
-            console.log ('level 2')
-            window.appController.get_request('temp_boxes_count', (data) ->
-              console.log ('level 3')
-              console.log "a_layer_name: #{layers_names[0]} #{data}"
-              window.appController.temp_boxes_count = Number.parseInt(data)
-
-              window.appController.set_request2('temp_layer_name', layers_names[1], 'str', (data) ->
-                console.log ('level 4')
-                window.appController.send_command('countOfBoxes', (data) ->
-                  console.log ('level 5')
-                  window.appController.get_request('temp_boxes_count', (data) ->
-                    console.log ('level 6')
-                    console.log "a_layer_name: #{layers_names[1]} #{data}"
-                    window.appController.temp_boxes_count = Number.parseInt(data)
-                    )
-                  )
+        for a_layer_name in @mission.available_layers_names
+          window.appController.set_request2('temp_layer_name', a_layer_name, 'str')
+          window.appController.send_command('countOfBoxes') 
+          window.appController.get_request('temp_boxes_count', (data) ->
+                console.log "a_layer_name: #{a_layer_name} #{data}"
+                window.appController.temp_boxes_count = Number.parseInt(data)
                 )
+          @sleep(500)
+                
+
+        # window.appController.set_request2('temp_layer_name', layers_names[0], 'str', (data) ->
+        #   console.log ('level 1')
+        #   window.appController.send_command('countOfBoxes', (data) ->
+        #     console.log ('level 2')
+        #     window.appController.get_request('temp_boxes_count', (data) ->
+        #       console.log ('level 3')
+        #       console.log "a_layer_name: #{layers_names[0]} #{data}"
+        #       window.appController.temp_boxes_count = Number.parseInt(data)
+
+        #       window.appController.set_request2('temp_layer_name', layers_names[1], 'str', (data) ->
+        #         console.log ('level 4')
+        #         window.appController.send_command('countOfBoxes', (data) ->
+        #           console.log ('level 5')
+        #           window.appController.get_request('temp_boxes_count', (data) ->
+        #             console.log ('level 6')
+        #             console.log "a_layer_name: #{layers_names[1]} #{data}"
+        #             window.appController.temp_boxes_count = Number.parseInt(data)
+        #             )
+        #           )
+        #         )
 
 
 
 
-              )
-            )
-          )
+        #       )
+        #     )
+        #   )
 
           # window.appController.set_request2('temp_layer_name', a_layer_name, 'str')
           # window.appController.send_command('countOfBoxes')

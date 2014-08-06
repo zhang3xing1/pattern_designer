@@ -111,20 +111,13 @@ define [
         return
 
       if _.contains(['name', 'creator', 'product', 'company', 'code'], attr)
-        window.appController.set_request("mission_data.#{attr}", @get(attr), 'str')
+        window.appController.set_request(
+          name: "mission_data.#{attr}" 
+          value: @get(attr)
+          type:'str'
+          )
         return
 
-
-
-      # if _.contains(['frame_line_in', 'frame_line_out', 'tool_index'], attr)
-      #   if !rInteger.test(@get(attr))
-      #     @set(attr,  @previous(attr)) 
-      #   return  
-
-      # if attr.search('box_') == 0
-      #   if !rInteger.test(@get(attr))
-      #     @set(attr,  @previous(attr)) 
-      #   return
       if attr.search('position_') > 0 
         if !@is_real
           @set(attr,  @previous(attr))
@@ -134,7 +127,10 @@ define [
         return
 
       if attr == 'length_wise' or attr == 'cross_wise'  or attr == 'orient'      
-        window.appController.set_request("setting_data.#{attr}", @get(attr).toString())
+        window.appController.set_request(
+          name: "setting_data.#{attr}"
+          value: @get(attr).toString()
+          )
         return 
       
       if !rInteger.test(@get(attr))
@@ -146,31 +142,51 @@ define [
           @set('box_width',  @previous('box_width')) 
           @set('box_length', @previous('box_length'))  
         else 
-          window.appController.set_request("setting_data.#{attr}", @get(attr))
+          window.appController.set_request(
+            name: "setting_data.#{attr}"
+            value: @get(attr)
+            )
         return
 
 
       if attr == 'frame_line_in_index'
         @logger.dev "[mission.coffee]: frame_line_in_index"
-        window.appController.set_request('setting_data.frame_line_in_index', window.appController.mission.get('frame_line_in_index'))
-        window.appController.send_command('getFrameIn')
+        window.appController.set_request(
+          name: 'setting_data.frame_line_in_index',
+          value: window.appController.mission.get('frame_line_in_index')
+          )
 
-        window.appController.get_request('setting_data', (data) =>
-          window.appController.mission.load_setting_info(JSON.parse(data)) )
+        window.appController.routine_request(name: 'getFrameIn')
+
+        window.appController.get_request(
+          name: 'setting_data'
+          callback: (data) ->
+            window.appController.mission.load_setting_info(JSON.parse(data))
+          )
         return
 
       if attr == 'frame_line_out_index'
         @logger.dev "[mission.coffee]: frame_line_out_index"
-        window.appController.set_request('setting_data.frame_line_out_index', window.appController.mission.get('frame_line_out_index'))
-        window.appController.send_command('getFrameOut')        
-        
-        window.appController.get_request('setting_data', (data) =>
-          window.appController.mission.load_setting_info(JSON.parse(data)) )
+        window.appController.set_request(
+          name: 'setting_data.frame_line_out_index',
+          value: window.appController.mission.get('frame_line_out_index')
+          )
+
+        window.appController.routine_request(name: 'getFrameOut')
+
+        window.appController.get_request(
+          name: 'setting_data'
+          callback: (data) ->
+            window.appController.mission.load_setting_info(JSON.parse(data))
+          )
 
         return
 
       # others not str attr
-      window.appController.set_request("setting_data.#{attr}", @get(attr))
+      window.appController.set_request(
+        name: "setting_data.#{attr}"
+        value: @get(attr)
+        )
 
     addLayer: (layer_data) ->
       to_updated_available_layers = @get("available_layers")
