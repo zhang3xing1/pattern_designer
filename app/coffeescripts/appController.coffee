@@ -17,7 +17,8 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission','rivets'], (Logger,
       @removed_layer_index = -1
 
       # @remote_url = 'http://192.168.56.2/'
-      @remote_url = 'http://172.22.117.53/'
+      # @remote_url = 'http://172.22.117.53/'
+      @remote_url = 'http://192.168.1.103:4242/'
       @program_name = 'pd_db2'
 
       @mission_saved_flag = true
@@ -26,13 +27,6 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission','rivets'], (Logger,
       # mission index page
       @mission_list = []
 
-
-      # 
-      # composite layer after loading data from PDL
-      #
-
-      @available_layers_pdl = {}
-      @used_layers_pdl = []
 
 
       #
@@ -143,6 +137,9 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission','rivets'], (Logger,
     
     load_mission_data: (mission_data_name) => 
 
+      @mission.set('available_layers', {})
+      @mission.set('used_layers', [])
+
       @routine_request(
         name: 'loadVarFile'
         params: [mission_data_name])
@@ -167,8 +164,7 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission','rivets'], (Logger,
         callback: (data) ->
           window.appController.mission.load_used_layers_info(JSON.parse(data)) 
       )
-    
-      
+
     load_frame_data: =>  
       @set_request(
         name: 'setting_data.frame_line_in_index'
@@ -194,8 +190,8 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission','rivets'], (Logger,
         name: 'setting_data'
         callback: (data) =>
           @mission.load_setting_info(JSON.parse(data))
-      )          
-  
+      )    
+
     flash: (options={closable: true})->
       $('#popup').html(options.message)
       $("#popup").modal
@@ -288,63 +284,10 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission','rivets'], (Logger,
           $("[name='length']").bootstrapSwitch('state', !state) 
       
       if route == 'patterns'
-        console.log @mission.available_layers_names
-
-        layers_names = @mission.available_layers_names
-
-        # for a_layer_name in @mission.available_layers_names
-          # window.appController.set_request2('temp_layer_name', a_layer_name, 'str', window.appController.send_command('countOfBoxes', window.appController.get_request('temp_boxes_count', (data) ->
-          #       alert data
-          #       console.log "a_layer_name: #{a_layer_name}"
-          #       window.appController.temp_boxes_count = Number.parseInt(data))))
-
-        for a_layer_name in @mission.available_layers_names
-          window.appController.set_request2('temp_layer_name', a_layer_name, 'str')
-          window.appController.send_command('countOfBoxes') 
-          window.appController.get_request('temp_boxes_count', (data) ->
-                console.log "a_layer_name: #{a_layer_name} #{data}"
-                window.appController.temp_boxes_count = Number.parseInt(data)
-                )
-          @sleep(500)
-                
-
-        # window.appController.set_request2('temp_layer_name', layers_names[0], 'str', (data) ->
-        #   console.log ('level 1')
-        #   window.appController.send_command('countOfBoxes', (data) ->
-        #     console.log ('level 2')
-        #     window.appController.get_request('temp_boxes_count', (data) ->
-        #       console.log ('level 3')
-        #       console.log "a_layer_name: #{layers_names[0]} #{data}"
-        #       window.appController.temp_boxes_count = Number.parseInt(data)
-
-        #       window.appController.set_request2('temp_layer_name', layers_names[1], 'str', (data) ->
-        #         console.log ('level 4')
-        #         window.appController.send_command('countOfBoxes', (data) ->
-        #           console.log ('level 5')
-        #           window.appController.get_request('temp_boxes_count', (data) ->
-        #             console.log ('level 6')
-        #             console.log "a_layer_name: #{layers_names[1]} #{data}"
-        #             window.appController.temp_boxes_count = Number.parseInt(data)
-        #             )
-        #           )
-        #         )
-
-
-
-
-        #       )
-        #     )
-        #   )
-
-          # window.appController.set_request2('temp_layer_name', a_layer_name, 'str')
-          # window.appController.send_command('countOfBoxes')
-          # window.appController.get_request('temp_boxes_count', (data) ->
-          #   alert data
-          #   window.appController.temp_boxes_count = Number.parseInt(data))
-
-          # $('#patterns').append( "<li class=\"list-group-item\" id=\"#{a_layer.id}\">#{a_layer.name}</li>" )
-
-
+        layers = _.values(@mission.get('available_layers'))
+        for a_layer in layers
+          $('#patterns').append( "<li class=\"list-group-item\" id=\"#{a_layer.id}\">#{a_layer.name}</li>" )
+  
         $("[id^='layer-item-']").on('click', (el) ->
           $("[id^='layer-item-']").removeClass('selected-item')
           $(this).addClass('selected-item')
@@ -693,30 +636,6 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission','rivets'], (Logger,
     # composite layers data after loading data from pdl to js
     #
 
-    compositeALayer: (layer_name, layer_boxes) =>
-      # boxes: Array[8]
-      # id: "layer-item-1111-238756119273602980"
-      # name: "1111"
-      # ulid: "1111------ulid991697110701352300"
-      new_key =  "layer-item-#{layer_name}-#{Math.random()*10e16}"
-      new_ulid = 
-      @available_layers_pdl[new_key] = 
-        name: layer_name
-        boxes: layer_boxes
-        id: new_key
-        ulid: "#{layer_name}------ulid#{Math.random()*10e17}"
-
-    compositeAUsedLayer: (layer_name) =>
-      # id: "ddddd-----10001-----27212137775495650"
-      # name: "ddddd"
-      # option_value: "ddddd-----option3679642337374389"
-      # ulid: "ddddd------ulid64922175602987410"
-      new_id = "#{layer_name}-----#{@used_layers_pdl.length}-----#{Math.random()*10e16}"
-      @used_layers_pdl[@used_layers_pdl.length] =
-        id: new_id
-        name: layer_name
-        option_value: "#{layer_name}-----option#{Math.random()*10e16}"
-        ulid: @getUlidByName(layer_name)
 
 
     #

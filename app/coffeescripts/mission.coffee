@@ -5,7 +5,7 @@ define [
   'logger'
 ], ($, _, Backbone, aLogger) ->  
   class Mission extends Backbone.Model
-    available_layers_names = []
+    boxes_count = 0
 
     defaults: {
       name: 'MissionName',
@@ -98,6 +98,7 @@ define [
         
 
     validateAttrValue : (event_name) ->
+      return
 
       rInteger = /^\+?[1-9][0-9]*$/
      
@@ -360,17 +361,50 @@ define [
       #       "is_available": false
       #     }]
       # }
-      available_layers_names = _.select(layers_from_pdl.layers, ((a_layer) =>
+
+      boxes = {} # by layer_name
+
+      available_layers_names = _.select(layers_from_pdl.layers, ((a_layer) => 
         a_layer.is_available == true), this)
 
       available_layers_names = _.map(available_layers_names, ((a_layer) =>
         a_layer.name), this)
 
-      console.log "available_layers_names"
-      console.log available_layers_names
+      for a_layer in available_layers_names
+        boxes[a_layer] = []
 
-      @available_layers_names = available_layers_names
 
+      window.appController.routine_request(name: 'countOfBoxes', params: [''])
+      window.appController.get_request(
+        name: 'temp_boxes_count'
+        callback: (data) =>
+          @boxes_count = Number.parseInt(data))
+
+
+      for i in [1..@boxes_count] by 1
+        window.appController.routine_request(
+          name: 'findBox'
+          params: [i, '']
+          )
+        window.appController.get_request(
+          name: 'request_box'
+          callback: (data) ->
+            box= JSON.parse(data)
+            boxes[box.layer_name].push(box) if box.is_available )
+
+      console.log boxes
+
+      for a_layer_name in available_layers_names
+        available_layers = @get('available_layers') 
+        new_layer  = @compositeALayer(a_layer_name, boxes[a_layer_name])
+        available_layers[new_layer.id] = new_layer
+        @set('available_layers', available_layers)
+
+        used_layers = @get('used_layers')
+        console.log "used_layers before"
+        console.log used_layers
+        console.log "@get('used_layers') before"
+        console.log @get('used_layers')
 
 
 
@@ -410,11 +444,48 @@ define [
       #     }]
       # }
 
-      used_layers = _.select(used_layers_from_pdl.used_layers, ((a_layer) =>
+      used_layers_name = _.select(used_layers_from_pdl.used_layers, ((a_layer) =>
         a_layer.is_available == true), this)
 
+      used_layers_name = _.map(used_layers_name, ((a_layer) =>
+        a_layer.name), this)
+
+      used_layers = []
+      for a_layer_name  in used_layers_name
+        new_used_layer =  @compositeAUsedLayer(a_layer_name) 
+        used_layers.push(new_used_layer)
+      
       @set('used_layers', used_layers)
       
+    compositeALayer: (layer_name, layer_boxes) =>
+      # available_layer will be used it after getting the data from pdl
+      # the key of layer is id
+
+
+      # boxes: Array[8]
+      # id: "layer-item-1111-238756119273602980"
+      # name: "1111"
+      # ulid: "1111------ulid991697110701352300"
+      new_layer  = 
+        name: layer_name
+        boxes: layer_boxes
+        id: "layer-item-#{layer_name}-#{Math.random()*10e16}"
+        ulid: "#{layer_name}------ulid#{Math.random()*10e17}"
+
+
+
+    compositeAUsedLayer: (layer_name) =>
+      # id: "ddddd-----10001-----27212137775495650"
+      # name: "ddddd"
+      # option_value: "ddddd-----option3679642337374389"
+      # ulid: "ddddd------ulid64922175602987410"
+      new_used_layer =
+        id: "#{layer_name}-----#{@get('used_layers').length}-----#{Math.random()*10e16}"
+        name: layer_name
+        option_value: "#{layer_name}-----option#{Math.random()*10e16}"
+        ulid: window.appController.getUlidByName(layer_name)
+
+
   create: new Mission
 
 
