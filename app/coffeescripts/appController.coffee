@@ -529,7 +529,8 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission','rivets'], (Logger,
             return false 
 
           window.router.navigate("#mission/index", {trigger: true})
-          return false    
+          return false 
+
       if route == 'pattern/*action'
         if action == 'edit'
           @load_pattern_data(window.appController.selected_layer)
