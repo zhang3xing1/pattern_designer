@@ -20,29 +20,6 @@ define [
       
       # Append our compiled template to this Views "el"
       @$el.append compiledTemplate
-
-
-      $("[name='teach']").on "switchChange.bootstrapSwitch", (event, state) ->
-        # console.log this # DOM element
-        # console.log event # jQuery event
-        # console.log state # true | false
-
-        # state turn to be off, then button 'set' turn to be button 'PLACE'
-        if state
-          # ...
-          $('a.teach').removeClass('label-success')
-          $('a.teach').addClass('label-primary')
-          $('a.teach').html('Set')
-          $("input").attr "readonly", false
-
-        else
-          # ...
-          $('a.teach').removeClass('label-primary')
-          $('a.teach').addClass('label-success')
-          $('a.teach').html('Place')
-          $("input").attr "readonly", true
-          $("input#table-index").attr "readonly", false
-
         
   )
   

@@ -44,7 +44,7 @@ define [
       tool_position_z: 0,
       tool_position_a: 0,
       tool_position_e: 0,
-      tool_position_r: 0,
+      tool_position_r: 1,
 
       length_wise: false,
       cross_wise: true,
@@ -89,8 +89,8 @@ define [
 
       @on('all', @validateAttrValue)
 
-    is_real: (value) =>
-      rReal    = /^([1-9]\d*)(\.{0,1}\d*[1-9])?$/
+    is_real: (attr) =>
+      rReal    = /^([0-9]\d*)(\.{0,1}\d*[1-9])?$/
       result = (rReal.test(@get(attr)) or @get(attr) == 0)
       unless result
         console.log "validateAttrValue: #{attr}value: #{@get(attr)} before: #{@previous(attr)} is_real? #{result}"
@@ -98,7 +98,7 @@ define [
         
 
     validateAttrValue : (event_name) ->
-      return
+      # return
 
       rInteger = /^\+?[1-9][0-9]*$/
      
@@ -119,8 +119,15 @@ define [
           )
         return
 
+      if attr.search('tool_position_') == 0
+        if !@is_real(attr)
+          @set(attr,  @previous(attr))
+        else
+          window.appController.set_request(name: "setting_data.#{attr}", value: @get(attr))
+        return 
+
       if attr.search('position_') > 0 
-        if !@is_real
+        if !@is_real(attr)
           @set(attr,  @previous(attr))
           return
         if parseFloat(@get(attr)) > 720
@@ -137,6 +144,9 @@ define [
       if !rInteger.test(@get(attr))
         @set(attr,  @previous(attr)) 
 
+      #
+      # if integer validator above passed, then deal these cases below.
+      #
       if attr ==  "box_length" or attr ==  "box_width"
         if parseInt(@get('box_length')) < parseInt(@get('box_width'))
           @logger.debug "#{@get('box_length')} < #{@get('box_width')}"
@@ -166,6 +176,8 @@ define [
           )
         return
 
+
+
       if attr == 'frame_line_out_index'
         @logger.dev "[mission.coffee]: frame_line_out_index"
         window.appController.set_request(
@@ -183,6 +195,10 @@ define [
 
         return
 
+      if attr == 'tool_index'
+        @logger.dev "[mission.coffee]: tool_index"
+        window.appController.load_tool_data()
+        return
       # others not str attr
       window.appController.set_request(
         name: "setting_data.#{attr}"

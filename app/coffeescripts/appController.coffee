@@ -17,8 +17,8 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission','rivets'], (Logger,
       @removed_layer_index = -1
 
       # @remote_url = 'http://192.168.56.2/'
-      # @remote_url = 'http://172.22.117.53/'
-      @remote_url = 'http://192.168.1.103:4242/'
+      @remote_url = 'http://172.22.117.53/'
+      # @remote_url = 'http://192.168.1.103:4242/'
       @program_name = 'pd_db2'
 
       @mission_saved_flag = true
@@ -110,17 +110,13 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission','rivets'], (Logger,
     routine_request: (options) =>
       params = options.params
       if params != undefined 
-        result = '('
-        _.each(params, (param, index) ->
+        params_ = _.map(params, (param)->
           if typeof(param) == 'string'
-            result += "'#{param}'"
-          else 
-            result += "#{param}"
-
-          if index != params.length - 1
-            result += ","
+            "'#{param}'" 
+          else
+            param
           )
-        result += ')'
+        result = "(#{params_.join(',')})"
       else
         result = ''
 
@@ -190,7 +186,16 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission','rivets'], (Logger,
         name: 'setting_data'
         callback: (data) =>
           @mission.load_setting_info(JSON.parse(data))
-      )    
+      )  
+
+    load_tool_data: =>
+        @set_request(name: 'setting_data.tool_index', value: @mission.get('tool_index'))
+        @routine_request(name: 'getTool')
+
+        @get_request(
+          name:'setting_data'
+          callback: (data) ->
+            window.appController.mission.load_setting_info(JSON.parse(data)) )
 
     flash: (options={closable: true})->
       $('#popup').html(options.message)
@@ -256,7 +261,6 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission','rivets'], (Logger,
     after_action: (route, params) =>
       action = params[0]
       rivets.bind $('.mission_'),{mission: @mission}
-
 
       if route == 'placeSetting'
         orient_value = window.appController.mission.get('orient')
@@ -536,7 +540,42 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission','rivets'], (Logger,
       rivets.bind $('.mission_'),{mission: @mission}    
 
       if route == 'pickSetting'
-        rivets.bind $('.mission_'),{mission: @new_mission}   
+        $("input").attr "readonly", true
+        $("input#table-index").attr "readonly", false
+        
+        $("[name='teach']").on "switchChange.bootstrapSwitch", (event, state) ->
+          # console.log this # DOM element
+          # console.log event # jQuery event
+          # console.log state # true | false
+
+          # state turn to be off, then button 'set' turn to be button 'PLACE'
+          if state
+            # ...
+            $('a.teach').removeClass('label-primary')
+            $('a.teach').addClass('label-success')
+            $('a.teach').html('')
+            # $("a.teach").attr("href", "#getTool")
+            $("input").attr "readonly", true
+            $("input#table-index").attr "readonly", false
+          else
+            # ...
+            $('a.teach').removeClass('label-success')
+            $('a.teach').addClass('label-success')
+            $('a.teach').html('Place')
+            $("a.teach").attr("href", "#tool/set")
+            $("input").attr "readonly", false
+
+        @load_tool_data()     
+
+        rivets.bind $('.mission_'),{mission: @mission}     
+
+
+      if route == 'tool/*action' 
+        if action == 'set'   
+          @routine_request(name: 'setTool')
+          window.router.navigate("#pickSetting", {trigger: true})
+          rivets.bind $('.mission_'),{mission: @mission} 
+          return false 
 
       @logger.debug("[after_action]: window.appController.mission_saved_flag #{window.appController.mission_saved_flag}")
     
@@ -659,7 +698,6 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission','rivets'], (Logger,
           @set_request(name: 'request_box.rotate', value: a_box.rotate)  
           @routine_request(name: 'addNewBox')          
           ), this)
-
         ), this)
 
     sendUsedLayersToSave: =>

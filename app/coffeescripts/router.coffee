@@ -41,6 +41,7 @@ define [
       'palletSetting' : 'palletSetting'
       'constraintSetting': 'constraintSetting'
       "patterns": "patternIndex"
+      'tool/*action': 'tool'
 
       # default root router
       "": "missionShow"
@@ -54,6 +55,9 @@ define [
       # initialize only one appController
       window.appController = AppController.create
       Backbone.history.start()
+
+    tool: ->
+      return  
 
     missionShow: ->
       $('.right_board').remove()
@@ -236,7 +240,7 @@ define [
     ######################################################
 
     before: (route, params) ->
-      @logger.debug("[Before] - route: #{route}, params: #{params}")
+      @logger.dev("[Before] - route: #{route}, params: #{params}")
       return window.appController.before_action(route, params)
       
     after: (route, params) ->
