@@ -8,8 +8,8 @@ define [
     boxes_count = 0
 
     defaults: {
-      name: 'MissionName',
-      creator: 'Your name',
+      name: 'new_mission',
+      creator: '',
       product: '',
       company: '',
       code: '', 
@@ -51,18 +51,19 @@ define [
       
       mini_distance:     10,
 
-      pallet_length: 300,
-      pallet_width: 200,
-      pallet_height: 250,
+      pallet_length: 800,
+      pallet_width: 600,
       pallet_weight: 1000,
-      sleepsheet_height: 5,
+      pallet_height: 100,
 
+      sleepsheet_height: 2,
       tare:           1000,
       max_gross:      800,
-      max_height:     600,
+      max_height:     800,
+      max_pack:       4,
       overhang_len:   10,  # the value for overhang
       overhang_wid:   10,
-      max_pack:       200,
+      
 
       #       pallet =  
       #       width:    200
