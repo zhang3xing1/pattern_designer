@@ -27,15 +27,12 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission','rivets'], (Logger,
       # mission index page
       @mission_list = []
 
-
-
       #
       # get boxes from pdl
       #
 
       @temp_boxes_count = 0
-    
-
+  
 
       # interval of request
       # @request_body = undefined
@@ -551,6 +548,23 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission','rivets'], (Logger,
         if action == 'edit'
           @load_pattern_data(window.appController.selected_layer)
       
+        if action == 'save'
+          @logger.debug "route-save"
+          @logger.debug "previous_action.action #{window.appController.previous_action.action}"
+          @logger.debug "current_action.action #{window.appController.current_action.action}"
+          if window.appController.previous_action.action == 'edit'
+            window.appController.saveLayerByID({id: window.appController.selected_layer.id, ulid: window.appController.selected_layer.ulid})
+            
+            # if layer name was modified, then update the layers and used_layers of mission
+            # referring to the ulid of this layer.
+            new_name = $('#layer-name').val()
+            window.appController.updateUsedLayersNameByUlid(new_name, window.appController.selected_layer.ulid)
+            window.appController.selected_layer = undefined
+
+          else
+            window.appController.saveLayerByID()
+          window.router.navigate("patterns", {trigger: true})
+
       if route == 'frame'
         $("input[rv-value*='position']").attr "readonly", true
 

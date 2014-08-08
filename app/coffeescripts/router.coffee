@@ -76,24 +76,8 @@ define [
         $('.right_board').remove()
         patternShowView = new PatternShowView
         patternShowView.render()
-      if action == 'save'
-        @logger.debug "route-save"
-        @logger.debug "previous_action.action #{window.appController.previous_action.action}"
-        @logger.debug "current_action.action #{window.appController.current_action.action}"
-        if window.appController.previous_action.action == 'edit'
-          window.appController.saveLayerByID({id: window.appController.selected_layer.id, ulid: window.appController.selected_layer.ulid})
-          
-          # if layer name was modified, then update the layers and used_layers of mission
-          # referring to the ulid of this layer.
-          new_name = $('#layer-name').val()
-          window.appController.updateUsedLayersNameByUlid(new_name, window.appController.selected_layer.ulid)
-          window.appController.selected_layer = undefined
 
-        else
-          window.appController.saveLayerByID()
-        @navigate("patterns", {trigger: true})
-      # if action == 'update'
-        # to do 
+
       if action == 'edit'
         layers = window.appController.getLayers()
         selected_layer_id = $('.list-group-item.selected-item').attr('id')
