@@ -105,7 +105,19 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission','rivets'], (Logger,
           options.callback data if options.callback != undefined
         error: () ->
           window.appController.logger.dev "[get]: error" 
-        
+    
+    get_mission_list: =>
+      get_url = "get?dirList=UD:/usr/dev/"
+      console.log "#{@remote_url}#{get_url}"
+
+      $.ajax
+        url: get_url
+        cache: false
+        async: false
+        success: (data) ->
+          window.appController.mission_list = JSON.parse(data)
+        error: () ->
+          window.appController.logger.dev "[get_mission_list]: error" 
 
     routine_request: (options) =>
       params = options.params
@@ -203,13 +215,6 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission','rivets'], (Logger,
         escapeClose: options.closable
         clickClose: options.closable
         showClose: options.closable
-
-    get_mission_list: =>
-      url = "get?dirList=UD:/usr/dev/"
-      console.log url
-      $.get url, (data) =>
-        @mission_list = JSON.parse(data)
-
 
     # decide if router be valid
     before_action: (route, params) ->
@@ -312,10 +317,20 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission','rivets'], (Logger,
           # selected_mission_name = 
           # if one of exist missions has a same name with the to-updated name mission
           # we could not allow it happen.
-        if action == 'update'
+        if action == 'delete'
+          @get_mission_list()
+          selected_mission_name = $('.list-group-item.selected-item').html()
+          if _.contains(@mission_list, "#{selected_mission_name}.var")
+
+            @routine_request(name: 'deleteVarFile', params: [selected_mission_name])
+          else
+            console.log  'not it'
+
+          
           window.router.navigate("#mission/index", {trigger: true})
           return false
         
+
         if action == 'rename'
           selected_mission_name = $('.list-group-item.selected-item').html()
           if selected_mission_name == undefined
@@ -336,6 +351,7 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission','rivets'], (Logger,
           return false
 
         if action == 'index'
+          @get_mission_list()
           if @mission_list.length > 0
             _.each(window.appController.mission_list, (a_mission) ->
               r_var_file = /\w+\.var$/
