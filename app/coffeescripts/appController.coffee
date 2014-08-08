@@ -526,7 +526,6 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission','rivets'], (Logger,
               return        
 
         if action == 'load'
-          console.log "in mission load......"
           selected_mission_name = $('.list-group-item.selected-item').html()
           if selected_mission_name != undefined
             @mission.set('name', selected_mission_name)
@@ -542,6 +541,19 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission','rivets'], (Logger,
             return false 
 
           window.router.navigate("#mission/index", {trigger: true})
+          return false 
+
+        if action == 'reload'
+          @get_mission_list()
+          to_reload_mission_name = "#{@mission.get('name')}.var"
+          if _.contains(@mission_list, to_reload_mission_name)
+            @routine_request(name: 'loadVarFile', params: [to_reload_mission_name])
+            console.log "----->before: reload_mission_data"
+            @load_mission_data(selected_mission_name)
+            console.log "----->after: reload_mission_data"
+          else
+            console.log  'not it'
+          window.router.navigate("#program", {trigger: true})
           return false 
 
       if route == 'pattern/*action'

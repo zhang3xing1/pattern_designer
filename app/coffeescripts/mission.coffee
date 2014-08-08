@@ -51,8 +51,8 @@ define [
       
       mini_distance:     10,
 
-      pallet_length: 800,
-      pallet_width: 600,
+      pallet_length: 400,
+      pallet_width: 300,
       pallet_weight: 1000,
       pallet_height: 100,
 
