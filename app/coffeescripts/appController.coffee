@@ -292,7 +292,8 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission','rivets'], (Logger,
       if route == 'patterns'
         layers = _.values(@mission.get('available_layers'))
         for a_layer in layers
-          $('#patterns').append( "<li class=\"list-group-item\" id=\"#{a_layer.id}\">#{a_layer.name}</li>" )
+          if a_layer.name != 'SHEET'
+            $('#patterns').append( "<li class=\"list-group-item\" id=\"#{a_layer.id}\">#{a_layer.name}</li>" )
   
         $("[id^='layer-item-']").on('click', (el) ->
           $("[id^='layer-item-']").removeClass('selected-item')

@@ -88,6 +88,11 @@ define [
       @logger = aLogger.create
       @logger.debug "this is in mission"
 
+      available_layers = @get('available_layers')
+      new_layer  = @compositeALayer('SHEET', [])
+      available_layers[new_layer.id] = new_layer
+      @set('available_layers', available_layers)
+
       @on('all', @validateAttrValue)
 
     is_real: (attr) =>
@@ -409,8 +414,6 @@ define [
           callback: (data) ->
             box= JSON.parse(data)
             boxes[box.layer_name].push(box) if box.is_available )
-
-      console.log boxes
 
       for a_layer_name in available_layers_names
         available_layers = @get('available_layers') 
