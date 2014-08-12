@@ -378,8 +378,8 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission','rivets'], (Logger,
             value = a_pair[1]
 
             if _.contains(['available_layers', 'used_layers', 'used_layers_created_number'], field)
-              console.log field
-              console.log value
+              # console.log field
+              # console.log value
               if field == 'available_layers'
                 @sendLayersToSave()
               if field == 'used_layers'
@@ -388,7 +388,9 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission','rivets'], (Logger,
             ),this)
 
           @routine_request(name: 'saveVarFile', params:[@mission.get('name')])
-    
+          
+          @mission.generateCSVData()
+
           @get_mission_list()
 
           window.router.navigate("#program", {trigger: true})

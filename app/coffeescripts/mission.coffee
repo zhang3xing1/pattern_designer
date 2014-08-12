@@ -127,7 +127,7 @@ define [
           window.appController.set_request(name: "setting_data.#{attr}", value: @get(attr))
         return 
 
-      if attr.search('position_') > 0 
+      if attr.search('in_position') or attr.search('out_position') > 0 
         if !@is_real(attr)
           @set(attr,  @previous(attr))
           return
@@ -504,6 +504,84 @@ define [
         ulid: window.appController.getUlidByName(layer_name)
 
 
+    generateCSVData: ->
+      # 2.2.0.23;gianni;18.06.14_14.51;asd;sd
+      # "pallet";EURO-Palette;1200;800;145;30
+      # "sheet";5;0
+      # "pall_info";198;18;30;1200;800;1585
+      # "tool";simulazio;0;0;1;-135;0;32;0;0;0;0
+      # "linein";Conveyor;1;0
+      # "lineout";Pallet place definition;0;0
+      # "pack";gianni;310;260;80;0;0;0;0
+      @pprint "_versionOfMultipck;#{@get('name')};#{@get('creator')};#{@get('company')}"
+      @pprint "\"pallet\";_description;#{@get('pallet_length')};#{@get('pallet_width')};#{@get('pallet_height')};#{@get('tare')}"
+      @pprint "\"sheet\";#{@get('sleepsheet_height')};__sheetNumber"
+      @pprint "\"pall_info\";__totalPackages;__numberOfLayers;#{@get_total_weight()};#{@get('pallet_length')};#{@get('pallet_width')};#{@get('pallet_height')}"
+      @pprint "\"tool\";_toolName;#{@get('tool_index')};_toolType;_numberOfGroup;#{@get('tool_position_x')};#{@get('tool_position_y')};#{@get('tool_position_z')};__grip_-x;__grip+x;__grip-y;__grip+y"
+      @pprint "\"linein\";__name;#{@get('frame_line_in_index')};__lineInOutputNumber;"
+      @pprint "\"lineout\";__name;#{@get('frame_line_out_index')};__lineOutOutputNumber;"
+      @pprint "\"pack\";#{@get('product')};_packLength;_packWidth;#{@get_total_height()};#{@get_total_weight()};#{@get('tool_index')};#{@get('frame_line_in_index')};#{@get('frame_line_out_index')}"
+      @pprint "10000"
+      @pprint "120000"
+      @pprint "220000"
+
+
+      all_layers = @getUsedLayersName()
+      packageSequence = 1
+      layerNO = 1
+      for a_layer_name in all_layers
+        packageSequenceInLayer = 1
+
+        a_layer = @getLayerDataByName(a_layer_name)
+        boxes_in_a_layer = a_layer.boxes
+        for a_box in boxes_in_a_layer
+          @pprint "100101;__numberOfPackagesToPick;__tcpX;__tcpY;__tcpZ;__tcpRz;__gripperStatus;#{packageSequence};__?;__?;__?"
+          if a_box.arrowEnabled
+            switch a_box.arrow
+              when 0
+                # @moveByX(0)
+                # @moveByY(1)
+                insert_angle = '0 1'
+              when 45
+                # @moveByX(1)
+                # @moveByY(1)
+                insert_angle = '1 1'
+              when 90
+                # @moveByX(1)
+                # @moveByY(0)
+                insert_angle = '1 0'
+              when 135
+                # @moveByX(1)
+                # @moveByY(-1)
+                insert_angle = '1 -1'
+              when 180
+                # @moveByX(0)
+                # @moveByY(-1)
+                insert_angle = '0 -1'
+              when 225
+                # @moveByX(-1)
+                # @moveByY(-1)
+                insert_angle = '-1 -1'
+              when 270
+                # @moveByX(-1)
+                # @moveByY(0)
+                insert_angle = '-1 0'
+              when 315
+                # @moveByX(-1)
+                # @moveByY(1)
+                insert_angle = '-1 1'
+              when 360
+                # @moveByX(0)
+                # @moveByY(1)
+                insert_angle = '0 1'
+          else
+            insert_angle = '0 0'
+          @pprint "200101;#{a_box.x};#{a_box.y};#{@get('box_height') * layerNO};__tcpRZ;#{insert_angle};__gripperStatus;__gripperAfterStatus;__flagToIndicateNextMovementWithoutGripperLifting;#{packageSequence};#{layerNO};#{packageSequenceInLayer};_?;_?;_?;_?"
+
+          packageSequence += 1
+          packageSequenceInLayer += 1
+    pprint: (str) ->
+      console.log str
   create: new Mission
 
 
