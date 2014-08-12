@@ -505,6 +505,8 @@ define [
 
 
     generateCSVData: ->
+      window.appController.routine_request(name: 'resetCSVFile', params: ["#{@get('name')}.csv"])
+
       # 2.2.0.23;gianni;18.06.14_14.51;asd;sd
       # "pallet";EURO-Palette;1200;800;145;30
       # "sheet";5;0
@@ -581,7 +583,7 @@ define [
           packageSequence += 1
           packageSequenceInLayer += 1
     pprint: (str) ->
-      console.log str
+      window.appController.routine_request(name: 'writeCSVFile', params: ["#{@get('name')}.csv","#{str}"])
   create: new Mission
 
 
