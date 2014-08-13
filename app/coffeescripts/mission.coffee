@@ -243,6 +243,7 @@ define [
       new_used_layer = {name: layer_name, option_value: layer_option_value, id: "#{layer_name}-----#{current_number}-----#{Math.random()*10e16}", ulid: layer_ulid} 
       @set('used_layers_created_number', current_number + 1)
       to_updated_used_layers.push(new_used_layer)
+      @set('used_layers', to_updated_used_layers)
     removeFromUsedLayers: (layer_option_value) ->
       to_updated_used_layers = @get("used_layers") 
       result = _.reject(to_updated_used_layers, (used_layer) ->
@@ -305,8 +306,8 @@ define [
         sum + @getBoxesNumberByLayerName(layer_name)), 0, this)
 
     load_mission_info:(mission_data_from_pdl) =>
-      console.log "[load_mission_info]:"
-      console.log mission_data_from_pdl
+      # console.log "[load_mission_info]:"
+      # console.log mission_data_from_pdl
       @set('name',mission_data_from_pdl.name)
       @set('creator',mission_data_from_pdl.creator)
       @set('product',mission_data_from_pdl.product)
@@ -314,8 +315,8 @@ define [
       @set('code',mission_data_from_pdl.code)
 
     load_setting_info:(setting_data_from_pdl) =>
-      console.log "[mission: load_setting_info]"
-      console.log setting_data_from_pdl
+      # console.log "[mission: load_setting_info]"
+      # console.log setting_data_from_pdl
       @set('frame_line_in_index',setting_data_from_pdl.frame_line_in_index)
       @set('frame_line_in_position_x',setting_data_from_pdl.frame_line_in_position_x)
       @set('frame_line_in_position_y',setting_data_from_pdl.frame_line_in_position_y)
