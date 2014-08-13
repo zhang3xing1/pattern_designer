@@ -403,11 +403,7 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission','rivets'], (Logger,
             $('#my-select').append( "<option value='#{a_layer.name}-----#{Math.random()*10e16}'>#{a_layer.name}</option>" )
             ),this) 
 
-          # init used layers    
-          # _.each(window.appController.getUsedLayersOrder().reverse(),((a_layer) ->
-          #     $('#my-select').prepend( "<option value=#{a_layer.option_value} selected>#{a_layer.name}</option>" )
-          #   ),this) 
-
+          $('#my-select').prepend( "<option value='PALLET' selected>0: PALLET</option>" )
           _.each(window.appController.getUsedLayersOrder(),((a_layer) ->
               $('#my-select').prepend( "<option value=#{a_layer.option_value} selected>#{a_layer.name}</option>" )
             ),this) 
@@ -562,6 +558,7 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission','rivets'], (Logger,
         $('#my-select').append( "<option value='#{a_layer.name}-----#{Math.random()*10e16}'>#{a_layer.name}</option>" )
         ),this) 
 
+      $('#my-select').prepend( "<option value='PALLET' selected>0: PALLET</option>" )
       _.each(window.appController.getUsedLayersOrder(),((a_layer, layer_index) ->
           $('#my-select').prepend( "<option value=#{a_layer.option_value} layer-index='#{layer_index}' selected>#{layer_index+1}: #{a_layer.name}</option>" )
         ),this) 
