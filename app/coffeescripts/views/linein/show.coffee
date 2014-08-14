@@ -30,7 +30,7 @@ define [
           {
             name: 'Additional Info'
             router: "#additionalInfo"
-          }                    
+          }                              
         ]
       compiledTemplate = _.template(LineinShowView, data)
       

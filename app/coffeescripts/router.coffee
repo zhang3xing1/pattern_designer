@@ -17,13 +17,14 @@ define [
   "views/linein/boxSetting"
   "views/linein/placeSetting"
   "views/linein/pickSetting"
+  "views/linein/toolSetting"
   "views/linein/additionalInfo"
   "views/lineout/palletSetting"
   "views/lineout/constraintSetting"
   "views/pattern/show"
 ], ($, _, Backbone, AppController, BackboneRoutefilter, Tinybox, Logger, MissionShowView, PatternIndexView, FrameShowView, 
   LineinShowView, LineoutShowView, MissionEditView, MissionIndexView, MissionNewView,
-  BoxSettingView, PlaceSettingView, PickSettingView, AdditionalInfoView,
+  BoxSettingView, PlaceSettingView, PickSettingView, ToolSettingView, AdditionalInfoView,
   PalletSettingView, ConstraintSettingView, PatternShowView) ->
   class AppRouter extends Backbone.Router
     routes:
@@ -37,6 +38,7 @@ define [
       'boxSetting': 'boxSetting'
       'placeSetting': 'placeSetting'
       'pickSetting': 'pickSetting'
+      'toolSetting': 'toolSetting'
       'additionalInfo': 'additionalInfo'
       'palletSetting' : 'palletSetting'
       'constraintSetting': 'constraintSetting'
@@ -181,12 +183,20 @@ define [
       boxSettingView = new BoxSettingView
       boxSettingView.render()  
 
+    toolSetting: ->
+      console.log 'toolSetting'
+      $('.right_board').remove()
+      toolSettingView = new ToolSettingView
+      toolSettingView.render() 
+      $("[name='teach']").bootstrapSwitch('onColor', 'success') 
+
     pickSetting: ->
       console.log 'pickSetting'
       $('.right_board').remove()
       pickSettingView = new PickSettingView
       pickSettingView.render() 
       $("[name='teach']").bootstrapSwitch('onColor', 'success') 
+
 
     placeSetting: ->
       console.log 'placeSetting'

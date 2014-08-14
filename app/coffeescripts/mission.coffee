@@ -46,6 +46,13 @@ define [
       tool_position_e: 0,
       tool_position_r: 1,
 
+      tcp_position_x: 1,
+      tcp_position_y: 1,
+      tcp_position_z: 1,
+      tcp_position_a: 1,
+      tcp_position_e: 1,
+      tcp_position_r: 1,      
+
       length_wise: false,
       cross_wise: true,
       
@@ -88,12 +95,14 @@ define [
       @logger = aLogger.create
       @logger.debug "this is in mission"
 
+      @on('all', @validateAttrValue)
+
       available_layers = @get('available_layers')
       new_layer  = @compositeALayer('SHEET', [])
       available_layers[new_layer.id] = new_layer
       @set('available_layers', available_layers)
 
-      @on('all', @validateAttrValue)
+      
 
     is_real: (attr) =>
       rReal    = /^([0-9]\d*)(\.{0,1}\d*[1-9])?$/

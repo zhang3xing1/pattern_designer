@@ -510,6 +510,38 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission','rivets'], (Logger,
 
       rivets.bind $('.mission_'),{mission: @mission}    
 
+
+      if route == 'toolSetting'
+        $("input").attr "readonly", true
+        $("input#table-index").attr "readonly", false
+        
+        $("[name='teach']").on "switchChange.bootstrapSwitch", (event, state) ->
+          # console.log this # DOM element
+          # console.log event # jQuery event
+          # console.log state # true | false
+
+          # state turn to be off, then button 'set' turn to be button 'PLACE'
+          if state
+            # ...
+            $('a.teach').removeClass('label-primary')
+            $('a.teach').addClass('label-success')
+            $('a.teach').html('')
+            # $("a.teach").attr("href", "#getTool")
+            $("input").attr "readonly", true
+            $("input#table-index").attr "readonly", false
+          else
+            # ...
+            $('a.teach').removeClass('label-success')
+            $('a.teach').addClass('label-success')
+            $('a.teach').html('Place')
+            $("a.teach").attr("href", "#tool/set")
+            $("input").attr "readonly", false
+
+        @load_tool_data()     
+
+        rivets.bind $('.mission_'),{mission: @mission}  
+
+
       if route == 'pickSetting'
         $("input").attr "readonly", true
         $("input#table-index").attr "readonly", false
