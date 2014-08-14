@@ -399,13 +399,18 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission','rivets'], (Logger,
           window.router.navigate("#program", {trigger: true})
         if action == 'edit'
           # init avaiable layers
-          _.each(@mission.get('available_layers'),((a_layer, index) ->
+          # destroy all data in multi_select
+          $('.ms-list').empty()
+          $('#my-select').empty()
+
+
+          _.each(@mission.get('available_layers'),((a_layer, layer_index) ->
             $('#my-select').append( "<option value='#{a_layer.name}-----#{Math.random()*10e16}'>#{a_layer.name}</option>" )
             ),this) 
 
           $('#my-select').prepend( "<option value='PALLET' selected>0: PALLET</option>" )
-          _.each(window.appController.getUsedLayersOrder(),((a_layer) ->
-              $('#my-select').prepend( "<option value=#{a_layer.option_value} selected>#{a_layer.name}</option>" )
+          _.each(window.appController.getUsedLayersOrder(),((a_layer, layer_index) ->
+              $('#my-select').prepend( "<option value=#{a_layer.option_value} layer-index='#{layer_index}' selected>#{layer_index+1}: #{a_layer.name}</option>" )
             ),this) 
 
           $('#my-select').multiSelect
