@@ -280,12 +280,13 @@ define [
       else
         0
 
-    get_total_height: ->
-      # @get('used_layers').length * @get('box_height')
+    get_total_height: =>
       all_layers_name = @getUsedLayersName()
       _.reduce(all_layers_name,((sum, layer_name) ->
         if @getBoxesNumberByLayerName(layer_name) > 0 
           layer_height = @get('box_height')
+        else if layer_name == 'SHEET'
+          layer_height = @get('sleepsheet_height')
         else
           layer_height = 0
         sum + layer_height), 0, this)
