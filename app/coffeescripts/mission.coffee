@@ -105,12 +105,18 @@ define [
       
 
     is_real: (attr) =>
-      rReal    = /^([0-9]\d*)(\.{0,1}\d*[1-9])?$/
-      result = (rReal.test(@get(attr)) or @get(attr) == 0)
+      rReal    = /^(\-|\+)?([0-9]+(\.[0-9]+)?)$/
+      result = rReal.test(@get(attr))
       unless result
         console.log "validateAttrValue: #{attr}value: #{@get(attr)} before: #{@previous(attr)} is_real? #{result}"
       result
         
+    is_int: (attr) =>
+      rInt    = /^(\-|\+)?([0-9]+)$/
+      result = rInt.test(@get(attr))
+      unless result
+        console.log "validateAttrValue: #{attr}value: #{@get(attr)} before: #{@previous(attr)} is_real? #{result}"
+      result
 
     validateAttrValue : (event_name) ->
       # return
@@ -120,105 +126,214 @@ define [
       result = event_name.split(':')
       attr = result[1]
 
-      if attr == undefined
-        return
-
-      if _.contains(['available_layers', 'used_layers', 'used_layers_created_number'], attr)
-        return
-
-      if _.contains(['name', 'creator', 'product', 'company', 'code'], attr)
-        window.appController.set_request(
-          name: "mission_data.#{attr}" 
-          value: @get(attr)
-          type:'str'
-          )
-        return
-
-      if attr.search('tool_position_') == 0
-        if !@is_real(attr)
-          @set(attr,  @previous(attr))
-        else
-          window.appController.set_request(name: "setting_data.#{attr}", value: @get(attr))
-        return 
-
-      if attr.search('in_position') or attr.search('out_position') > 0 
-        if !@is_real(attr)
-          @set(attr,  @previous(attr))
+      switch attr
+        when undefined
           return
-        if parseFloat(@get(attr)) > 720
-            @set(attr,  @previous(attr))
-        return
-
-      if attr == 'length_wise' or attr == 'cross_wise'  or attr == 'orient'      
-        window.appController.set_request(
-          name: "setting_data.#{attr}"
-          value: @get(attr).toString()
+        when 'available_layers', 'used_layers', 'used_layers_created_number'
+          return
+        when 'name', 'creator', 'product', 'company', 'code'
+          window.appController.set_request(
+            name: "mission_data.#{attr}" 
+            value: @get(attr)
+            type:'str'
           )
-        return 
+        when 'tool_position_x', 'tool_position_y', 'tool_position_z', 'tool_position_a', 'tool_position_r', 'tool_position_e'
+          if !@is_real(attr)
+            @set(attr,  @previous(attr))
+          else
+            window.appController.set_request(name: "setting_data.#{attr}", value: @get(attr))
+          return 
+        when 'tcp_position_x', 'tcp_position_y', 'tcp_position_z', 'tcp_position_a', 'tcp_position_r', 'tcp_position_e'
+          if !@is_real(attr)
+            @set(attr,  @previous(attr))
+          else
+            window.appController.set_request(name: "setting_data.#{attr}", value: @get(attr))
+          return 
+
+        when 'frame_line_in_position_x', 'frame_line_in_position_y', 'frame_line_in_position_z', 'frame_line_in_position_r'
+          if !@is_real(attr)
+            @set(attr,  @previous(attr))
+            return
+          if parseFloat(@get(attr)) > 720
+              @set(attr,  @previous(attr))
+          return
+        when 'frame_line_out_position_x', 'frame_line_out_position_y', 'frame_line_out_position_z', 'frame_line_out_position_r'
+          if !@is_real(attr)
+            @set(attr,  @previous(attr))
+            return
+          if parseFloat(@get(attr)) > 720
+              @set(attr,  @previous(attr))
+          return  
+        when 'length_wise', 'cross_wise', 'orient'       
+          window.appController.set_request(
+            name: "setting_data.#{attr}"
+            value: @get(attr).toString()
+            )
+          return  
+        when 'box_length', 'box_width'
+          if !@is_int(attr)
+            @set(attr,  @previous(attr))
+          else
+            if parseInt(@get('box_length')) < parseInt(@get('box_width'))
+              @logger.debug "#{@get('box_length')} < #{@get('box_width')}"
+              @set('box_width',  @previous('box_width')) 
+              @set('box_length', @previous('box_length'))  
+            else 
+              window.appController.set_request(
+                name: "setting_data.#{attr}"
+                value: @get(attr)
+                )
+          return 
+        when 'frame_line_in_index'
+          @logger.dev "[mission.coffee]: frame_line_in_index"
+          if !@is_int(attr)
+            @set(attr,  @previous(attr))
+          else
+            window.appController.set_request(
+              name: 'setting_data.frame_line_in_index',
+              value: window.appController.mission.get('frame_line_in_index')
+              )
+
+            window.appController.routine_request(name: 'getFrameIn')
+
+            window.appController.get_request(
+              name: 'setting_data'
+              callback: (data) ->
+                window.appController.mission.load_setting_info(JSON.parse(data))
+              )
+          return
+        when 'frame_line_out_index'
+          @logger.dev "[mission.coffee]: frame_line_out_index"
+          if !@is_int(attr)
+            @set(attr,  @previous(attr))
+          else
+            window.appController.set_request(
+              name: 'setting_data.frame_line_out_index',
+              value: window.appController.mission.get('frame_line_out_index')
+              )
+
+            window.appController.routine_request(name: 'getFrameOut')
+
+            window.appController.get_request(
+              name: 'setting_data'
+              callback: (data) ->
+                window.appController.mission.load_setting_info(JSON.parse(data))
+              )
+          return  
+        when 'tool_index'
+          if !@is_int(attr)
+            @set(attr,  @previous(attr))
+          else
+            @logger.dev "[mission.coffee]: tool_index"
+            window.appController.load_tool_data()
+
+        else
+          if !@is_int(attr)
+            @set(attr,  @previous(attr))
+          else
+            window.appController.set_request(
+              name: "setting_data.#{attr}"
+              value: @get(attr)
+              )
+      # if attr == undefined
+      #   return
+
+      # if _.contains(['available_layers', 'used_layers', 'used_layers_created_number'], attr)
+      #   return
+
+      # if _.contains(['name', 'creator', 'product', 'company', 'code'], attr)
+      #   window.appController.set_request(
+      #     name: "mission_data.#{attr}" 
+      #     value: @get(attr)
+      #     type:'str'
+      #     )
+      #   return
+
+      # if attr.search('tool_position_') == 0
+      #   if !@is_real(attr)
+      #     @set(attr,  @previous(attr))
+      #   else
+      #     window.appController.set_request(name: "setting_data.#{attr}", value: @get(attr))
+      #   return 
+
+      # if attr.search('in_position') or attr.search('out_position') > 0 
+      #   if !@is_real(attr)
+      #     @set(attr,  @previous(attr))
+      #     return
+      #   if parseFloat(@get(attr)) > 720
+      #       @set(attr,  @previous(attr))
+      #   return
+
+      # if attr == 'length_wise' or attr == 'cross_wise'  or attr == 'orient'      
+      #   window.appController.set_request(
+      #     name: "setting_data.#{attr}"
+      #     value: @get(attr).toString()
+      #     )
+      #   return 
       
-      if !rInteger.test(@get(attr))
-        @set(attr,  @previous(attr)) 
+      # if !@is_int(attr)
+      #   @set(attr,  @previous(attr)) 
 
       #
       # if integer validator above passed, then deal these cases below.
       #
-      if attr ==  "box_length" or attr ==  "box_width"
-        if parseInt(@get('box_length')) < parseInt(@get('box_width'))
-          @logger.debug "#{@get('box_length')} < #{@get('box_width')}"
-          @set('box_width',  @previous('box_width')) 
-          @set('box_length', @previous('box_length'))  
-        else 
-          window.appController.set_request(
-            name: "setting_data.#{attr}"
-            value: @get(attr)
-            )
-        return
+      # if attr ==  "box_length" or attr ==  "box_width"
+      #   if parseInt(@get('box_length')) < parseInt(@get('box_width'))
+      #     @logger.debug "#{@get('box_length')} < #{@get('box_width')}"
+      #     @set('box_width',  @previous('box_width')) 
+      #     @set('box_length', @previous('box_length'))  
+      #   else 
+      #     window.appController.set_request(
+      #       name: "setting_data.#{attr}"
+      #       value: @get(attr)
+      #       )
+      #   return
 
 
-      if attr == 'frame_line_in_index'
-        @logger.dev "[mission.coffee]: frame_line_in_index"
-        window.appController.set_request(
-          name: 'setting_data.frame_line_in_index',
-          value: window.appController.mission.get('frame_line_in_index')
-          )
+      # if attr == 'frame_line_in_index'
+      #   @logger.dev "[mission.coffee]: frame_line_in_index"
+      #   window.appController.set_request(
+      #     name: 'setting_data.frame_line_in_index',
+      #     value: window.appController.mission.get('frame_line_in_index')
+      #     )
 
-        window.appController.routine_request(name: 'getFrameIn')
+      #   window.appController.routine_request(name: 'getFrameIn')
 
-        window.appController.get_request(
-          name: 'setting_data'
-          callback: (data) ->
-            window.appController.mission.load_setting_info(JSON.parse(data))
-          )
-        return
+      #   window.appController.get_request(
+      #     name: 'setting_data'
+      #     callback: (data) ->
+      #       window.appController.mission.load_setting_info(JSON.parse(data))
+      #     )
+      #   return
 
 
 
-      if attr == 'frame_line_out_index'
-        @logger.dev "[mission.coffee]: frame_line_out_index"
-        window.appController.set_request(
-          name: 'setting_data.frame_line_out_index',
-          value: window.appController.mission.get('frame_line_out_index')
-          )
+      # if attr == 'frame_line_out_index'
+      #   @logger.dev "[mission.coffee]: frame_line_out_index"
+      #   window.appController.set_request(
+      #     name: 'setting_data.frame_line_out_index',
+      #     value: window.appController.mission.get('frame_line_out_index')
+      #     )
 
-        window.appController.routine_request(name: 'getFrameOut')
+      #   window.appController.routine_request(name: 'getFrameOut')
 
-        window.appController.get_request(
-          name: 'setting_data'
-          callback: (data) ->
-            window.appController.mission.load_setting_info(JSON.parse(data))
-          )
+      #   window.appController.get_request(
+      #     name: 'setting_data'
+      #     callback: (data) ->
+      #       window.appController.mission.load_setting_info(JSON.parse(data))
+      #     )
 
-        return
+      #   return
 
-      if attr == 'tool_index'
-        @logger.dev "[mission.coffee]: tool_index"
-        window.appController.load_tool_data()
-        return
+      # if attr == 'tool_index'
+      #   @logger.dev "[mission.coffee]: tool_index"
+      #   window.appController.load_tool_data()
+      #   return
       # others not str attr
-      window.appController.set_request(
-        name: "setting_data.#{attr}"
-        value: @get(attr)
-        )
+      # window.appController.set_request(
+      #   name: "setting_data.#{attr}"
+      #   value: @get(attr)
+      #   )
 
     addLayer: (layer_data) ->
       to_updated_available_layers = @get("available_layers")

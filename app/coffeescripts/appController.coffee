@@ -259,6 +259,11 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission','rivets'], (Logger,
         if action == 'save'
           @flash(message: 'Saving Data......', closable: false)
 
+        if action == 'save_as'
+          new_message = '<form class="navbar-form"> <div class="form-group"> <input type="text" class="form-control" id="to-renamed-mission" placeholder="'\
+            + "#{selected_mission_name}" + '"> </div> <a class="btn btn-default" id="misson_rename">Rename</a> </form>'          
+          @flash(message: 'Saving Data......', closable: false)
+
       if route == 'frame'
         @load_frame_data()
 
