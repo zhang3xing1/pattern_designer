@@ -256,6 +256,8 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission','rivets'], (Logger,
             @flash({message: 'Do you want to abandon the modification?'})
             window.router.navigate("#program", {trigger: true})
             return false
+        if action == 'save'
+          @flash(message: 'Saving Data......', closable: false)
 
       if route == 'frame'
         @load_frame_data()
@@ -351,6 +353,8 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission','rivets'], (Logger,
           return false
 
         if action == 'index'
+          $('a[href="#mission/load"]').click ->
+            window.appController.flash(message: 'Loading Data...', closable: false)
           @get_mission_list()
           if @mission_list.length > 0
             _.each(window.appController.mission_list, (a_mission) ->
@@ -391,11 +395,11 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission','rivets'], (Logger,
             ),this)
 
           @routine_request(name: 'saveVarFile', params:[@mission.get('name')])
-          
           @mission.generateCSVData()
-
           @get_mission_list()
-
+          
+          window.appController.sleep(1000)
+          $.modal.close()
           window.router.navigate("#program", {trigger: true})
         if action == 'edit'
           # init avaiable layers
@@ -464,10 +468,12 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission','rivets'], (Logger,
             @load_mission_data(selected_mission_name)
             console.log "----->after: load_mission_data"
 
+            $.modal.close()
             window.router.navigate("#program", {trigger: true})
             rivets.bind $('.mission_'),{mission: @mission} 
             return false 
 
+          $.modal.close();
           window.router.navigate("#mission/index", {trigger: true})
           return false 
 

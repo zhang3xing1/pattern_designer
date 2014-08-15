@@ -56,11 +56,11 @@ body {
 /* right zone style */
 
 .left-panel{
-  margin-top: 8%
+  padding-top: 40px
 }
 
 .right-panel{
-  margin-top: 8%
+  margin-top: 40px;
 }
 
 div.left-panel  ul.line{
@@ -117,8 +117,9 @@ div.left-panel  ul.line{
 
 #dashboard{
   width: 220px;
-  margin-top: 1%;
-  margin-left: -18%;
+  position: absolute;
+  left: 500px;
+  top: 50px;
 }
 
 .label-info {
@@ -159,6 +160,8 @@ div.left-panel  ul.line{
   height: 40px !important;
   width: 60px !important;
 }
+
+
 /*body {
         margin:   28px;
         padding:  0px;

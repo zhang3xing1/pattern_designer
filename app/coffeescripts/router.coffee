@@ -65,8 +65,7 @@ define [
       $('.right_board').remove()
       missionShowView = new MissionShowView({app: @appData})
       missionShowView.render()
-      return
-      
+
     patternIndex: ->
       $('.right_board').remove()
       patternIndexView = new PatternIndexView
@@ -78,7 +77,6 @@ define [
         $('.right_board').remove()
         patternShowView = new PatternShowView
         patternShowView.render()
-
 
       if action == 'edit'
         layers = window.appController.getLayers()
@@ -161,21 +159,6 @@ define [
 
       if action == 'save'
         window.appController.mission_saved_flag = true
-        # todo
-      # if action == 'update'
-      #   window.router.navigate("#mission/index", {trigger: true})
-        # # window.router.navigate("#mission/index", {trigger: true})
-        # selected_mission_name = $('.list-group-item.selected-item').html()
-        # if selected_mission_name != '' and selected_mission_name != undefined
-        #   # check exist
-        #   selected_mission_name = undefined
-        # else
-        #   window.appController.flash(message: 'select a layer to delete first!')        
-        # return false
-        # # selected_mission_name = 
-        # # if one of exist missions has a same name with the to-updated name mission
-        # # we could not allow it happen.
-      # if action == 
 
     boxSetting: ->
       console.log 'boxSetting'
