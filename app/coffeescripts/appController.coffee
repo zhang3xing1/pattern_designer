@@ -267,7 +267,12 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission','rivets'], (Logger,
       if route == 'frame'
         @load_frame_data()
 
-
+      if route == 'pattern/*action'
+        if action == 'new'
+          unless @mission.validate_layers(attr: 'count')
+            window.router.navigate("#patterns", {trigger: true} )
+            @flash(message: 'Reach the maximam number of Pattern!', closable: true)
+            return false
     after_action: (route, params) =>
       action = params[0]
       rivets.bind $('.mission_'),{mission: @mission}
@@ -328,12 +333,9 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission','rivets'], (Logger,
           @get_mission_list()
           selected_mission_name = $('.list-group-item.selected-item').html()
           if _.contains(@mission_list, "#{selected_mission_name}.var")
-
             @routine_request(name: 'deleteVarFile', params: [selected_mission_name])
           else
-            console.log  'not it'
-
-          
+            @flash("#{selected_mission_name} does not exist!", close: true)
           window.router.navigate("#mission/index", {trigger: true})
           return false
         
@@ -411,7 +413,6 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission','rivets'], (Logger,
           # destroy all data in multi_select
           $('.ms-list').empty()
           $('#my-select').empty()
-
 
           _.each(@mission.get('available_layers'),((a_layer, layer_index) ->
             $('#my-select').append( "<option value='#{a_layer.name}-----#{Math.random()*10e16}'>#{a_layer.name}</option>" )
@@ -491,14 +492,27 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission','rivets'], (Logger,
             @load_mission_data(selected_mission_name)
             console.log "----->after: reload_mission_data"
           else
-            console.log  'not it'
+            @flash(message: "[#{@mission.get('name')}] does not exist in ROBOT!", close: true)
           window.router.navigate("#program", {trigger: true})
           return false 
 
       if route == 'pattern/*action'
         if action == 'edit'
           @load_pattern_data(window.appController.selected_layer)
-      
+
+        if action == 'clone'
+          layers = window.appController.getLayers()
+          selected_layer_id = $('.list-group-item.selected-item').attr('id')
+          selected_layer = layers[selected_layer_id]
+
+          if Object.keys(layers).length != 0 and selected_layer_id != undefined and selected_layer != undefined
+            # clone it as a new one before renaming this layer
+            clone_layer_name = "#{selected_layer.name}_clone" 
+            window.appController.saveLayerByID({name: clone_layer_name})
+
+          window.router.navigate("patterns", {trigger: true})
+          return false 
+
         if action == 'save'
           @logger.debug "route-save"
           @logger.debug "previous_action.action #{window.appController.previous_action.action}"

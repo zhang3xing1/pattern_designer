@@ -91,25 +91,14 @@ define [
           $('.right_board').remove()
           patternShowView = new PatternShowView
           patternShowView.render()
-      if action == 'clone'
-        layers = window.appController.getLayers()
-        selected_layer_id = $('.list-group-item.selected-item').attr('id')
-        selected_layer = layers[selected_layer_id]
 
-        if Object.keys(layers).length != 0 and selected_layer_id != undefined and selected_layer != undefined
-          # clone it as a new one before renaming this layer
-          clone_layer_name = "#{selected_layer.name}_clone" 
-          window.appController.saveLayerByID({name: clone_layer_name})
-
-        @navigate("patterns", {trigger: true})
-        return false
       if action == 'delete'
         selected_layer_id = $('.list-group-item.selected-item').attr('id')
         if selected_layer_id != '' and selected_layer_id != undefined
           window.appController.removeLayer(selected_layer_id)
           selected_layer_id = undefined
         else
-          window.appController.flash(message: 'select a layer to delete first!')
+          window.appController.flash(message: 'Delete a layer after choosing it!')
 
         @navigate("patterns", {trigger: true})
         return false      

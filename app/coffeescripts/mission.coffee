@@ -100,9 +100,7 @@ define [
       available_layers = @get('available_layers')
       new_layer  = @compositeALayer('SHEET', [])
       available_layers[new_layer.id] = new_layer
-      @set('available_layers', available_layers)
-
-      
+      @set('available_layers', available_layers)  
 
     is_real: (attr) =>
       rReal    = /^(\-|\+)?([0-9]+(\.[0-9]+)?)$/
@@ -118,6 +116,18 @@ define [
         console.log "validateAttrValue: #{attr}value: #{@get(attr)} before: #{@previous(attr)} is_real? #{result}"
       result
 
+    validate_layers: (options={attr: ''})->
+      # max_number: 5 
+      layer_names = @getAvailableLayersOrder
+      if options.attr == 'count'
+        layer_names = @getAvailableLayersOrder
+        return @getAvailableLayersOrder().length <= 5
+      if options.attr == 'name'
+        return (options.name != '') and (!_.contains(layer_names, options.name))
+
+      return false
+    validate_used_layers:(options={attr: ''}) ->
+      # 8
     validateAttrValue : (event_name) ->
       # return
 
@@ -235,105 +245,6 @@ define [
               name: "setting_data.#{attr}"
               value: @get(attr)
               )
-      # if attr == undefined
-      #   return
-
-      # if _.contains(['available_layers', 'used_layers', 'used_layers_created_number'], attr)
-      #   return
-
-      # if _.contains(['name', 'creator', 'product', 'company', 'code'], attr)
-      #   window.appController.set_request(
-      #     name: "mission_data.#{attr}" 
-      #     value: @get(attr)
-      #     type:'str'
-      #     )
-      #   return
-
-      # if attr.search('tool_position_') == 0
-      #   if !@is_real(attr)
-      #     @set(attr,  @previous(attr))
-      #   else
-      #     window.appController.set_request(name: "setting_data.#{attr}", value: @get(attr))
-      #   return 
-
-      # if attr.search('in_position') or attr.search('out_position') > 0 
-      #   if !@is_real(attr)
-      #     @set(attr,  @previous(attr))
-      #     return
-      #   if parseFloat(@get(attr)) > 720
-      #       @set(attr,  @previous(attr))
-      #   return
-
-      # if attr == 'length_wise' or attr == 'cross_wise'  or attr == 'orient'      
-      #   window.appController.set_request(
-      #     name: "setting_data.#{attr}"
-      #     value: @get(attr).toString()
-      #     )
-      #   return 
-      
-      # if !@is_int(attr)
-      #   @set(attr,  @previous(attr)) 
-
-      #
-      # if integer validator above passed, then deal these cases below.
-      #
-      # if attr ==  "box_length" or attr ==  "box_width"
-      #   if parseInt(@get('box_length')) < parseInt(@get('box_width'))
-      #     @logger.debug "#{@get('box_length')} < #{@get('box_width')}"
-      #     @set('box_width',  @previous('box_width')) 
-      #     @set('box_length', @previous('box_length'))  
-      #   else 
-      #     window.appController.set_request(
-      #       name: "setting_data.#{attr}"
-      #       value: @get(attr)
-      #       )
-      #   return
-
-
-      # if attr == 'frame_line_in_index'
-      #   @logger.dev "[mission.coffee]: frame_line_in_index"
-      #   window.appController.set_request(
-      #     name: 'setting_data.frame_line_in_index',
-      #     value: window.appController.mission.get('frame_line_in_index')
-      #     )
-
-      #   window.appController.routine_request(name: 'getFrameIn')
-
-      #   window.appController.get_request(
-      #     name: 'setting_data'
-      #     callback: (data) ->
-      #       window.appController.mission.load_setting_info(JSON.parse(data))
-      #     )
-      #   return
-
-
-
-      # if attr == 'frame_line_out_index'
-      #   @logger.dev "[mission.coffee]: frame_line_out_index"
-      #   window.appController.set_request(
-      #     name: 'setting_data.frame_line_out_index',
-      #     value: window.appController.mission.get('frame_line_out_index')
-      #     )
-
-      #   window.appController.routine_request(name: 'getFrameOut')
-
-      #   window.appController.get_request(
-      #     name: 'setting_data'
-      #     callback: (data) ->
-      #       window.appController.mission.load_setting_info(JSON.parse(data))
-      #     )
-
-      #   return
-
-      # if attr == 'tool_index'
-      #   @logger.dev "[mission.coffee]: tool_index"
-      #   window.appController.load_tool_data()
-      #   return
-      # others not str attr
-      # window.appController.set_request(
-      #   name: "setting_data.#{attr}"
-      #   value: @get(attr)
-      #   )
 
     addLayer: (layer_data) ->
       to_updated_available_layers = @get("available_layers")
