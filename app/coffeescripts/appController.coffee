@@ -339,7 +339,6 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission','rivets'], (Logger,
           window.router.navigate("#mission/index", {trigger: true})
           return false
         
-
         if action == 'rename'
           selected_mission_name = $('.list-group-item.selected-item').html()
           if selected_mission_name == undefined
@@ -497,8 +496,24 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission','rivets'], (Logger,
           return false 
 
       if route == 'pattern/*action'
+        if action == 'new'
+          $('#layer-name').val("Layer_#{(Math.random()*10e16).toString().substr(0,5)}")
+          $('#layer-name').focus().select()
+          $("#layer-name").focusin(->
+            return 
+          ).focusout ->
+            if $('#layer-name').val() == ''
+              window.appController.flash(message: 'layer name can not be empty!')
+              new_layer_name = "Layer_#{(Math.random()*10e16).toString().substr(0,5)}"
+            else
+              new_layer_name = $('#layer-name').val()    
+            new_layer_name = window.appController.mission.generate_valid_layer_name(new_layer_name)
+            $('#layer-name').val(new_layer_name)
+            $('#layer-name').focus()
+
         if action == 'edit'
           @load_pattern_data(window.appController.selected_layer)
+          $('#layer-name').focus().select()
 
         if action == 'clone'
           layers = window.appController.getLayers()
@@ -517,6 +532,9 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission','rivets'], (Logger,
           @logger.debug "route-save"
           @logger.debug "previous_action.action #{window.appController.previous_action.action}"
           @logger.debug "current_action.action #{window.appController.current_action.action}"
+
+          a_layer_name = $('#layer-name').val()
+
           if window.appController.previous_action.action == 'edit'
             window.appController.saveLayerByID({id: window.appController.selected_layer.id, ulid: window.appController.selected_layer.ulid})
             
@@ -525,7 +543,6 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission','rivets'], (Logger,
             new_name = $('#layer-name').val()
             window.appController.updateUsedLayersNameByUlid(new_name, window.appController.selected_layer.ulid)
             window.appController.selected_layer = undefined
-
           else
             window.appController.saveLayerByID()
           window.router.navigate("patterns", {trigger: true})

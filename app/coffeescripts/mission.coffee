@@ -118,14 +118,19 @@ define [
 
     validate_layers: (options={attr: ''})->
       # max_number: 5 
-      layer_names = @getAvailableLayersOrder
+      layer_names = @getAvailableLayersOrder()
       if options.attr == 'count'
-        layer_names = @getAvailableLayersOrder
+        layer_names = @getAvailableLayersOrder()
         return @getAvailableLayersOrder().length <= 5
       if options.attr == 'name'
         return (options.name != '') and (!_.contains(layer_names, options.name))
 
       return false
+
+    generate_valid_layer_name: (new_layer_name)->
+      while ! @validate_layers(attr: 'name', name: new_layer_name)
+        new_layer_name = "Layer_#{(Math.random()*10e16).toString().substr(0,5)}"
+      new_layer_name
     validate_used_layers:(options={attr: ''}) ->
       # 8
     validateAttrValue : (event_name) ->
