@@ -102,6 +102,12 @@ define [
       available_layers[new_layer.id] = new_layer
       @set('available_layers', available_layers)  
 
+
+    max_number_of_layers : =>
+      5
+    max_number_of_used_layers : =>
+        
+
     is_real: (attr) =>
       rReal    = /^(\-|\+)?([0-9]+(\.[0-9]+)?)$/
       result = rReal.test(@get(attr))
@@ -117,11 +123,10 @@ define [
       result
 
     validate_layers: (options={attr: ''})->
-      # max_number: 5 
       layer_names = @getAvailableLayersOrder()
       if options.attr == 'count'
         layer_names = @getAvailableLayersOrder()
-        return @getAvailableLayersOrder().length <= 5
+        return @getAvailableLayersOrder().length <= @max_number_of_layers()
       if options.attr == 'name'
         return (options.name != '') and (!_.contains(layer_names, options.name))
 

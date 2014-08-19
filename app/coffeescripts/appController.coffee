@@ -28,45 +28,6 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission','rivets'], (Logger,
       # mission index page
       @mission_list = []
 
-      #
-      # get boxes from pdl
-      #
-
-      @temp_boxes_count = 0
-  
-
-      # interval of request
-      # @request_body = undefined
-    # http://192.168.56.2/set?var=gui_string&prog=gui_example_test_2&value=%27ddddd%27
-    # getVarRequest: (varName, callback) ->
-    #   get_url = "get?var=" + varName + "&prog=" + programName
-    #   $.ajax
-    #     url: get_url
-    #     cache: false
-    #     dataType: 'JSONP'
-    #     success: (data) ->
-    #       callback data
-    #       return
-    #     done: () ->
-    #       window.appController.logger.dev "[get]: #{get_url}"
-    #     error: () ->
-    #       window.appController.logger.dev "[get]: error"
-    #   return
-
-    # setVarRequest: (varName, newVarValue, callback) ->
-    #   set_url = "set?var=" + varName + "&prog=" + programName + "&value=" + newVarValue
-    #   $.ajax
-    #     url: set_url
-    #     cache: false
-    #     dataType: 'JSONP'
-    #     success: (data) ->
-    #       callback data, varName
-    #       return 
-    #     done: () ->
-    #       window.appController.logger.dev "[set]: #{set_url}"
-    #     error: () ->
-    #       window.appController.logger.dev "[set]: error"
-    #   return
 
     sleep: (d = 100) ->
       t = Date.now()
@@ -268,7 +229,7 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission','rivets'], (Logger,
         @load_frame_data()
 
       if route == 'pattern/*action'
-        if action == 'new'
+        if action == 'new' or action == 'clone'
           unless @mission.validate_layers(attr: 'count')
             window.router.navigate("#patterns", {trigger: true} )
             @flash(message: 'Reach the maximam number of Pattern!', closable: true)
@@ -452,11 +413,7 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission','rivets'], (Logger,
               # to_remove_used_layer_index = $("option[value='" + option_value + "']").attr('layer-index')
 
               window.appController.removeFromUsedLayers(option_value)
-
-
               @refreshSelectableAndSelectedLayers()
-
-
               window.appController.mission_saved_flag = false
 
               # mission binding by rivets
@@ -552,7 +509,6 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission','rivets'], (Logger,
 
       rivets.bind $('.mission_'),{mission: @mission}    
 
-
       if route == 'toolSetting'
         $("input").attr "readonly", true
         $("input#table-index").attr "readonly", false
@@ -582,7 +538,6 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission','rivets'], (Logger,
         @load_tool_data()     
 
         rivets.bind $('.mission_'),{mission: @mission}  
-
 
       if route == 'pickSetting'
         $("input").attr "readonly", true
@@ -614,7 +569,6 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission','rivets'], (Logger,
 
         rivets.bind $('.mission_'),{mission: @mission}     
 
-
       if route == 'tool/*action' 
         if action == 'set'   
           @routine_request(name: 'setTool')
@@ -624,14 +578,12 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission','rivets'], (Logger,
 
       @logger.debug("[after_action]: window.appController.mission_saved_flag #{window.appController.mission_saved_flag}")
     
-
     # functions for mission edit page
 
     refreshSelectableAndSelectedLayers: ->
       # destroy all data in multi_select
       $('.ms-list').empty()
       $('#my-select').empty()
-
 
       _.each(@mission.get('available_layers'),((a_layer, layer_index) ->
         $('#my-select').append( "<option value='#{a_layer.name}-----#{Math.random()*10e16}'>#{a_layer.name}</option>" )
@@ -643,7 +595,6 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission','rivets'], (Logger,
         ),this) 
 
       $('#my-select').multiSelect('refresh')   
-
 
     setBoard: (newBoard) ->
       @board = newBoard
