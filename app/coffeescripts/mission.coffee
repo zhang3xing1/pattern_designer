@@ -121,6 +121,9 @@ define [
         console.log "validateAttrValue: #{attr}value: #{@get(attr)} before: #{@previous(attr)} is_real? #{result}"
       result
 
+    is_blank: (attr) =>
+      @get(attr) == ''
+        
     validate_layers: (options={attr: ''})->
       layer_names = @getAvailableLayersOrder()
       if options.attr == 'count'
@@ -139,7 +142,7 @@ define [
           else
             sum + 1) , 0, this)  
 
-        return number_of_used_layers <= @max_number_of_used_layers()
+        return number_of_used_layers < @max_number_of_used_layers()
 
       return false
 
@@ -156,7 +159,17 @@ define [
           return
         when 'available_layers', 'used_layers', 'used_layers_created_number'
           return
-        when 'name', 'creator', 'product', 'company', 'code'
+        when 'name'
+          if @is_blank(attr)
+            @set(attr,  @previous(attr))
+            window.appController.flash(message: "[#{attr}] could not be blank!")
+          else
+            window.appController.set_request(
+              name: "mission_data.#{attr}" 
+              value: @get(attr)
+              type:'str'
+            )
+        when 'creator', 'product', 'company', 'code'
           window.appController.set_request(
             name: "mission_data.#{attr}" 
             value: @get(attr)
@@ -174,21 +187,20 @@ define [
           else
             window.appController.set_request(name: "setting_data.#{attr}", value: @get(attr))
           return 
-
-        when 'frame_line_in_position_x', 'frame_line_in_position_y', 'frame_line_in_position_z', 'frame_line_in_position_r'
-          if !@is_real(attr)
-            @set(attr,  @previous(attr))
-            return
-          if parseFloat(@get(attr)) > 720
-              @set(attr,  @previous(attr))
-          return
-        when 'frame_line_out_position_x', 'frame_line_out_position_y', 'frame_line_out_position_z', 'frame_line_out_position_r'
-          if !@is_real(attr)
-            @set(attr,  @previous(attr))
-            return
-          if parseFloat(@get(attr)) > 720
-              @set(attr,  @previous(attr))
-          return  
+        # when 'frame_line_in_position_x', 'frame_line_in_position_y', 'frame_line_in_position_z', 'frame_line_in_position_r'
+        #   if !@is_real(attr)
+        #     @set(attr,  @previous(attr))
+        #     return
+        #   if parseFloat(@get(attr)) > 720
+        #       @set(attr,  @previous(attr))
+        #   return
+        # when 'frame_line_out_position_x', 'frame_line_out_position_y', 'frame_line_out_position_z', 'frame_line_out_position_r'
+        #   if !@is_real(attr)
+        #     @set(attr,  @previous(attr))
+        #     return
+        #   if parseFloat(@get(attr)) > 720
+        #       @set(attr,  @previous(attr))
+        #   return  
         when 'length_wise', 'cross_wise', 'orient'       
           window.appController.set_request(
             name: "setting_data.#{attr}"
@@ -196,7 +208,7 @@ define [
             )
           return  
         when 'box_length', 'box_width'
-          if !@is_int(attr)
+          if !@is_int(attr) or @get(attr) < 1
             @set(attr,  @previous(attr))
           else
             if parseInt(@get('box_length')) < parseInt(@get('box_width'))
@@ -209,9 +221,33 @@ define [
                 value: @get(attr)
                 )
           return 
+        when 'box_x_off','box_y_off','box_z_off'
+          if !@is_int(attr)
+            @set(attr,  @previous(attr))  
+          else
+            window.appController.set_request(
+              name: "setting_data.#{attr}"
+              value: @get(attr)
+              )
+        when 'mini_distance', 'sleepsheet_height', 'overhang_len', 'overhang_wid'
+          if !@is_int(attr) or @get(attr) < 0
+            @set(attr,  @previous(attr))
+          else
+            window.appController.set_request(
+              name: "setting_data.#{attr}"
+              value: @get(attr)
+              )
+        when 'box_height', 'box_weight', 'box_per_pick', 'pallet_length', 'pallet_width', 'pallet_height', 'tare', 'max_gross', 'max_height', 'max_pack'
+          if !@is_int(attr) or @get(attr) < 1
+            @set(attr,  @previous(attr))
+          else
+            window.appController.set_request(
+              name: "setting_data.#{attr}"
+              value: @get(attr)
+              )
         when 'frame_line_in_index'
           @logger.dev "[mission.coffee]: frame_line_in_index"
-          if !@is_int(attr)
+          if !@is_int(attr) or @get(attr) < 0
             @set(attr,  @previous(attr))
           else
             window.appController.set_request(
@@ -229,7 +265,7 @@ define [
           return
         when 'frame_line_out_index'
           @logger.dev "[mission.coffee]: frame_line_out_index"
-          if !@is_int(attr)
+          if !@is_int(attr) or @get(attr) < 0
             @set(attr,  @previous(attr))
           else
             window.appController.set_request(
@@ -246,7 +282,7 @@ define [
               )
           return  
         when 'tool_index'
-          if !@is_int(attr)
+          if !@is_int(attr) or @get(attr) < 0
             @set(attr,  @previous(attr))
           else
             @logger.dev "[mission.coffee]: tool_index"
