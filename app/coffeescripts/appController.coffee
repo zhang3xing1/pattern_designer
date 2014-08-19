@@ -393,8 +393,11 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission','rivets'], (Logger,
               selected_layer_name = selected_layer_info[0]
               selected_layer_ulid = @getUlidByName(selected_layer_name)
 
-              window.appController.addToUsedLayers(selected_layer_name, option_value[0], selected_layer_ulid)
-
+              if window.appController.mission.validate_used_layers(attr: 'count')
+                window.appController.addToUsedLayers(selected_layer_name, option_value[0], selected_layer_ulid)
+              else
+                window.appController.flash(message: "Reach maximam number of used layers")
+                
               @refreshSelectableAndSelectedLayers()
 
               # mission changed

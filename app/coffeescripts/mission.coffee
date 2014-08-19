@@ -102,11 +102,10 @@ define [
       available_layers[new_layer.id] = new_layer
       @set('available_layers', available_layers)  
 
-
     max_number_of_layers : =>
       5
     max_number_of_used_layers : =>
-        
+      8 
 
     is_real: (attr) =>
       rReal    = /^(\-|\+)?([0-9]+(\.[0-9]+)?)$/
@@ -126,18 +125,24 @@ define [
       layer_names = @getAvailableLayersOrder()
       if options.attr == 'count'
         layer_names = @getAvailableLayersOrder()
-        return @getAvailableLayersOrder().length <= @max_number_of_layers()
+        return @getAvailableLayersOrder().length < @max_number_of_layers()
       if options.attr == 'name'
         return (options.name != '') and (!_.contains(layer_names, options.name))
 
       return false
 
-    generate_valid_layer_name: (new_layer_name)->
-      while ! @validate_layers(attr: 'name', name: new_layer_name)
-        new_layer_name = "Layer_#{(Math.random()*10e16).toString().substr(0,5)}"
-      new_layer_name
-    validate_used_layers:(options={attr: ''}) ->
-      # 8
+    validate_used_layers:(options={attr: ''}) =>
+      if options.attr == 'count'
+        number_of_used_layers = _.reduce(@used_layers(),((sum, layer) ->
+          if layer.name == 'SHEET'
+            sum  
+          else
+            sum + 1) , 0, this)  
+
+        return number_of_used_layers <= @max_number_of_used_layers()
+
+      return false
+
     validateAttrValue : (event_name) ->
       # return
 
@@ -255,6 +260,11 @@ define [
               name: "setting_data.#{attr}"
               value: @get(attr)
               )
+
+    generate_valid_layer_name: (new_layer_name)->
+      while ! @validate_layers(attr: 'name', name: new_layer_name)
+        new_layer_name = "Layer_#{(Math.random()*10e16).toString().substr(0,5)}"
+      new_layer_name
 
     addLayer: (layer_data) ->
       to_updated_available_layers = @get("available_layers")
