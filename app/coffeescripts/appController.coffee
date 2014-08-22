@@ -397,7 +397,7 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission','rivets'], (Logger,
                 window.appController.addToUsedLayers(selected_layer_name, option_value[0], selected_layer_ulid)
               else
                 window.appController.flash(message: "Reach maximam number of used layers")
-                
+
               @refreshSelectableAndSelectedLayers()
 
               # mission changed
@@ -422,6 +422,7 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission','rivets'], (Logger,
               # mission binding by rivets
               rivets.bind $('.mission_'),{mission: window.appController.mission}
 
+          $("input").attr('readonly',true)
         if action == 'load'
           selected_mission_name = $('.list-group-item.selected-item').html()
           if selected_mission_name != undefined
@@ -438,7 +439,7 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission','rivets'], (Logger,
             rivets.bind $('.mission_'),{mission: @mission} 
             return false 
 
-          $.modal.close();
+          $.modal.close()
           window.router.navigate("#mission/index", {trigger: true})
           return false 
 

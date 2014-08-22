@@ -397,6 +397,16 @@ define [
       _.reduce(all_layers,((sum, layer_name) ->
         sum + @getBoxesNumberByLayerName(layer_name)), 0, this)
 
+    get_count_of_sheets : =>
+      _.reduce(@used_layers(),((sum, layer) ->
+        if layer.name == 'SHEET'
+          sum + 1 
+        else
+          sum) , 0, this)
+
+    get_count_of_layers : =>
+      @getAvailableLayersOrder().length
+
     load_mission_info:(mission_data_from_pdl) =>
       # console.log "[load_mission_info]:"
       # console.log mission_data_from_pdl
@@ -586,8 +596,6 @@ define [
         id: "layer-item-#{layer_name}-#{Math.random()*10e16}"
         ulid: "#{layer_name}------ulid#{Math.random()*10e17}"
 
-
-
     compositeAUsedLayer: (layer_name) =>
       # id: "ddddd-----10001-----27212137775495650"
       # name: "ddddd"
@@ -613,12 +621,12 @@ define [
       # "pack";gianni;310;260;80;0;0;0;0
       @pprint "_versionOfMultipck;#{@get('name')};#{@get('creator')};#{@get('company')}"
       @pprint "\"pallet\";_description;#{@get('pallet_length')};#{@get('pallet_width')};#{@get('pallet_height')};#{@get('tare')}"
-      @pprint "\"sheet\";#{@get('sleepsheet_height')};__sheetNumber"
-      @pprint "\"pall_info\";__totalPackages;__numberOfLayers;#{@get_total_weight()};#{@get('pallet_length')};#{@get('pallet_width')};#{@get('pallet_height')}"
-      @pprint "\"tool\";_toolName;#{@get('tool_index')};_toolType;_numberOfGroup;#{@get('tool_position_x')};#{@get('tool_position_y')};#{@get('tool_position_z')};__grip_-x;__grip+x;__grip-y;__grip+y"
-      @pprint "\"linein\";__name;#{@get('frame_line_in_index')};__lineInOutputNumber;"
-      @pprint "\"lineout\";__name;#{@get('frame_line_out_index')};__lineOutOutputNumber;"
-      @pprint "\"pack\";#{@get('product')};_packLength;_packWidth;#{@get_total_height()};#{@get_total_weight()};#{@get('tool_index')};#{@get('frame_line_in_index')};#{@get('frame_line_out_index')}"
+      @pprint "\"sheet\";#{@get('sleepsheet_height')};#{@get_count_of_sheets()}"
+      @pprint "\"pall_info\";#{@get_total_box()};#{@get_count_of_layers()};#{@get_total_weight()};#{@get('pallet_length')};#{@get('pallet_width')};#{@get('pallet_height')}"
+      @pprint "\"tool\";_toolName;#{@get('tool_index')};0;_numberOfGroup;#{@get('tool_position_x')};#{@get('tool_position_y')};#{@get('tool_position_z')};__grip_-x;__grip+x;__grip-y;__grip+y"
+      @pprint "\"linein\";__name;#{@get('frame_line_in_index')};0;"
+      @pprint "\"lineout\";__name;#{@get('frame_line_out_index')};0;"
+      @pprint "\"pack\";#{@get('product')};#{@get('box_length')};#{@get('box_width')};#{@get('box_height')};#{@get('box_weight')};1;0;0"
       @pprint "10000"
       @pprint "120000"
       @pprint "220000"
@@ -627,13 +635,28 @@ define [
       all_layers = @getUsedLayersName()
       packageSequence = 1
       layerNO = 1
+
+
+      packages = new Array(@get('box_per_pick'))
+      index_ = 0
+      while index_ < packages.length
+        packages[index_] = 1
+        index_ += 1
+      
+      gripperStatus = packages.join(' ')
+      gripperAfterStatus = _.map(packages,(el) ->
+        0).join(' ')
+      
+      gripperStatus = _.map(new Array(@get('box_per_pick')), (el) ->
+        1).join(' ')
+      gripperAfterStatus = _.map(new Array(@get('box_per_pick')), (el) ->
+        0).join(' ')
       for a_layer_name in all_layers
         packageSequenceInLayer = 1
 
         a_layer = @getLayerDataByName(a_layer_name)
         boxes_in_a_layer = a_layer.boxes
         for a_box in boxes_in_a_layer
-          @pprint "100101;__numberOfPackagesToPick;__tcpX;__tcpY;__tcpZ;__tcpRz;__gripperStatus;#{packageSequence};__?;__?;__?"
           if a_box.arrowEnabled
             switch a_box.arrow
               when 0
@@ -673,8 +696,11 @@ define [
                 # @moveByY(1)
                 insert_angle = '0 1'
           else
-            insert_angle = '0 0'
-          @pprint "200101;#{a_box.x};#{a_box.y};#{@get('box_height') * layerNO};__tcpRZ;#{insert_angle};__gripperStatus;__gripperAfterStatus;__flagToIndicateNextMovementWithoutGripperLifting;#{packageSequence};#{layerNO};#{packageSequenceInLayer};_?;_?;_?;_?"
+            insert_angle = '0 0' 
+
+           
+          @pprint "100101;#{@get('box_per_pick')};#{@get('tcp_position_x')};#{@get('tcp_position_y')};#{@get('tcp_position_z')};#{@get('tcp_position_r')};#{gripperStatus};#{packageSequence};0;0;0"
+          @pprint "200101;#{a_box.x};#{a_box.y};#{@get('box_height') * layerNO};__tcpRZ;#{insert_angle};#{gripperStatus};#{gripperAfterStatus};0;#{packageSequence};#{layerNO};#{packageSequenceInLayer};1;0;0;0"
 
           packageSequence += 1
           packageSequenceInLayer += 1
