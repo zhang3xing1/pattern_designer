@@ -111,26 +111,8 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission','rivets'], (Logger,
         name: 'loadVarFile'
         params: [mission_data_name])
 
-      @get_request(
-        name: 'mission_data'
-        callback: (data) ->
-          window.appController.mission.load_mission_info(JSON.parse(data)) )
-      
-      @get_request(
-        name:'setting_data'
-        callback: (data) ->
-          window.appController.mission.load_setting_info(JSON.parse(data)) )
+      @load_data_from_pdl()
 
-      @get_request(
-        name: 'layers'
-        callback: (data) ->
-          window.appController.mission.load_layers_info(JSON.parse(data))
-      )    
-      @get_request(
-        name: 'used_layers'
-        callback: (data) ->
-          window.appController.mission.load_used_layers_info(JSON.parse(data)) 
-      )
 
     load_frame_data: =>  
       @set_request(
@@ -179,6 +161,28 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission','rivets'], (Logger,
           name:'setting_data'
           callback: (data) ->
             window.appController.mission.load_setting_info(JSON.parse(data)) )        
+
+    load_data_from_pdl: =>
+      @get_request(
+        name: 'mission_data'
+        callback: (data) ->
+          window.appController.mission.load_mission_info(JSON.parse(data)) )
+      
+      @get_request(
+        name:'setting_data'
+        callback: (data) ->
+          window.appController.mission.load_setting_info(JSON.parse(data)) )
+
+      @get_request(
+        name: 'layers'
+        callback: (data) ->
+          window.appController.mission.load_layers_info(JSON.parse(data))
+      )    
+      @get_request(
+        name: 'used_layers'
+        callback: (data) ->
+          window.appController.mission.load_used_layers_info(JSON.parse(data)) 
+      )      
 
     flash: (options={closable: true})->
       $('#popup').html(options.message)
@@ -237,8 +241,8 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission','rivets'], (Logger,
             + "#{selected_mission_name}" + '"> </div> <a class="btn btn-default" id="misson_rename">Rename</a> </form>'          
           @flash(message: 'Saving Data......', closable: false)
 
-      if route == 'frame'
-        @load_frame_data()
+      # if route == 'frame'
+      #   @load_frame_data()
 
       if route == 'pattern/*action'
         if action == 'new' or action == 'clone'
@@ -594,6 +598,8 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission','rivets'], (Logger,
 
       @logger.debug("[after_action]: window.appController.mission_saved_flag #{window.appController.mission_saved_flag}")
     
+
+      @load_data_from_pdl()
     # functions for mission edit page
 
     refreshSelectableAndSelectedLayers: ->

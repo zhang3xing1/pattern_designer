@@ -100,7 +100,7 @@ define [
       available_layers = @get('available_layers')
       new_layer  = @compositeALayer('SHEET', [])
       available_layers[new_layer.id] = new_layer
-      @set('available_layers', available_layers)  
+      @set('available_layers', available_layers) 
 
     max_number_of_layers : =>
       5
