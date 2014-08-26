@@ -371,12 +371,12 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission','rivets'], (Logger,
           # so we need to do save composite variables like layers data in here.
           #
 
-          @routine_request(name: 'resetBoxes')
-          @routine_request(name: 'resetLayers')
-          @routine_request(name: 'resetUsedLayers')
+          # @routine_request(name: 'resetBoxes')
+          # @routine_request(name: 'resetLayers')
+          # @routine_request(name: 'resetUsedLayers')
 
-          @sendLayersToSave()
-          @sendUsedLayersToSave()
+          # @sendLayersToSave()
+          # @sendUsedLayersToSave()
 
 
           # _.each(mission_pairs, ((a_pair) ->
@@ -714,24 +714,25 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission','rivets'], (Logger,
       available_layers = @mission.get('available_layers')
   
       _.each(available_layers, ((a_layer) =>
-        layer_name = a_layer.name
-        layer_boxes = a_layer.boxes
+        if a_layer.name != 'SHEET'
+          layer_name = a_layer.name
+          layer_boxes = a_layer.boxes
 
-        @routine_request(
-          name: 'addNewLayer'
-          params:[layer_name]
-        )
+          @routine_request(
+            name: 'addNewLayer'
+            params:[layer_name]
+          )
 
-        _.each(layer_boxes, ((a_box) =>
-          @set_request(name: 'request_box.x', value: a_box.x)
-          @set_request(name: 'request_box.y', value: a_box.y)
-          @set_request(name: 'request_box.arrow', value: a_box.arrow)
-          @set_request(name: 'request_box.arrowEnabled', value: a_box.arrowEnabled.toString())
-          @set_request(name: 'request_box.layer_name', value: layer_name, type: 'str')
-          @set_request(name: 'request_box.rotate', value: a_box.rotate)  
-          @routine_request(name: 'addNewBox')          
+          _.each(layer_boxes, ((a_box) =>
+            @set_request(name: 'request_box.x', value: a_box.x)
+            @set_request(name: 'request_box.y', value: a_box.y)
+            @set_request(name: 'request_box.arrow', value: a_box.arrow)
+            @set_request(name: 'request_box.arrowEnabled', value: a_box.arrowEnabled.toString())
+            @set_request(name: 'request_box.layer_name', value: layer_name, type: 'str')
+            @set_request(name: 'request_box.rotate', value: a_box.rotate)  
+            @routine_request(name: 'addNewBox')          
+            ), this)
           ), this)
-        ), this)
 
     sendUsedLayersToSave: =>
       used_layers = @mission.get('used_layers')

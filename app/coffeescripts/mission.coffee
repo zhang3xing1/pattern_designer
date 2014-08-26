@@ -157,7 +157,9 @@ define [
       switch attr
         when undefined
           return
-        when 'available_layers', 'used_layers', 'used_layers_created_number'
+        when 'available_layers'
+          return  
+        when 'used_layers', 'used_layers_created_number'
           return
         when 'name'
           if @is_blank(attr)
@@ -328,6 +330,8 @@ define [
     getAvailableLayersOrder: ->
       result = _.map(_.values(@get("available_layers")), (layer) ->
         layer.name) 
+      result = _.filter result, (layer_name) ->
+              layer_name != 'SHEET'
       # result.reverse()
     used_layers: ->
       @get("used_layers")
