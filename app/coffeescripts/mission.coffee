@@ -21,7 +21,7 @@ define [
       frame_line_in_position_z: 0,
       frame_line_in_position_r: 0,
 
-      frame_line_out_index: 1,
+      frame_line_out_index: 2,
       frame_line_out_position_x: 0,
       frame_line_out_position_y: 0,
       frame_line_out_position_z: 0,
@@ -188,11 +188,10 @@ define [
             window.appController.set_request(name: "setting_data.#{attr}", value: @get(attr))
           return 
         # when 'frame_line_in_position_x', 'frame_line_in_position_y', 'frame_line_in_position_z', 'frame_line_in_position_r'
-        #   if !@is_real(attr)
+        #   if !@is_real(attr) or parseFloat(@get(attr)) > 720
         #     @set(attr,  @previous(attr))
-        #     return
-        #   if parseFloat(@get(attr)) > 720
-        #       @set(attr,  @previous(attr))
+        #   else 
+        #     window.appController.routine_request(name: 'setTool')
         #   return
         # when 'frame_line_out_position_x', 'frame_line_out_position_y', 'frame_line_out_position_z', 'frame_line_out_position_r'
         #   if !@is_real(attr)
@@ -247,7 +246,10 @@ define [
               )
         when 'frame_line_in_index'
           @logger.dev "[mission.coffee]: frame_line_in_index"
-          if !@is_int(attr) or @get(attr) < 0
+
+          value_frame_line_in_index = window.appController.mission.get('frame_line_in_index')
+          value_frame_line_out_index = window.appController.mission.get('frame_line_out_index')
+          if !@is_int(attr) or @get(attr) < 0 or value_frame_line_in_index == value_frame_line_out_index
             @set(attr,  @previous(attr))
           else
             window.appController.set_request(
@@ -265,7 +267,9 @@ define [
           return
         when 'frame_line_out_index'
           @logger.dev "[mission.coffee]: frame_line_out_index"
-          if !@is_int(attr) or @get(attr) < 0
+          value_frame_line_in_index = window.appController.mission.get('frame_line_in_index')
+          value_frame_line_out_index = window.appController.mission.get('frame_line_out_index')
+          if !@is_int(attr) or @get(attr) < 0 or value_frame_line_in_index == value_frame_line_out_index
             @set(attr,  @previous(attr))
           else
             window.appController.set_request(
@@ -286,6 +290,7 @@ define [
             @set(attr,  @previous(attr))
           else
             @logger.dev "[mission.coffee]: tool_index"
+            window.appController.set_request(name: 'setting_data.tool_index', value: @get('tool_index'))
             window.appController.load_tool_data()
 
         else
@@ -375,9 +380,9 @@ define [
       all_layers_name = @getUsedLayersName()
       _.reduce(all_layers_name,((sum, layer_name) ->
         if @getBoxesNumberByLayerName(layer_name) > 0 
-          layer_height = @get('box_height')
+          layer_height = Number.parseInt(@get('box_height'))
         else if layer_name == 'SHEET'
-          layer_height = @get('sleepsheet_height')
+          layer_height = Number.parseInt(@get('sleepsheet_height'))
         else
           layer_height = 0
         sum + layer_height), 0, this)

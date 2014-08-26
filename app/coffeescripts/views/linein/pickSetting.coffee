@@ -3,10 +3,12 @@ define [
   "underscore"
   "backbone"
   "bootstrapSwitch"
+  "rivets"
   # Using the Require.js text! plugin, we are loaded raw text
   # which will be used as our views primary template
   "text!templates/linein/pickSetting.html"
-], ($, _, Backbone, bootstrapSwitch, PickSettingView) ->
+
+], ($, _, Backbone, bootstrapSwitch, rivets, PickSettingView) ->
   PickSettingTemplate = Backbone.View.extend(
     el: $("#right_board")
     render: ->

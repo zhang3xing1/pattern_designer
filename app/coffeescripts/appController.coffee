@@ -18,8 +18,8 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission','rivets'], (Logger,
 
       # @remote_url = 'http://192.168.56.2/'
       # @remote_url = 'http://172.22.117.53/'
-      # @remote_url = 'http://192.168.1.103:4242/'
-      @remote_url = 'http://127.0.0.1:8000/'
+      @remote_url = 'http://192.168.1.101:4242/'
+      # @remote_url = 'http://127.0.0.1:8000/'
       @program_name = 'pd_db2'
 
       @mission_saved_flag = true
@@ -160,9 +160,7 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission','rivets'], (Logger,
       )  
 
     load_tool_data: =>
-        @set_request(name: 'setting_data.tool_index', value: @mission.get('tool_index'))
         @routine_request(name: 'getTool')
-
         @get_request(
           name:'setting_data'
           callback: (data) ->
