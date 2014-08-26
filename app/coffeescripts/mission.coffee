@@ -179,7 +179,11 @@ define [
           if !@is_real(attr)
             @set(attr,  @previous(attr))
           else
-            window.appController.set_request(name: "setting_data.#{attr}", value: @get(attr))
+            window.appController.set_request(
+              name: "setting_data.#{attr}" 
+              value: @get(attr)
+            )            
+            window.appController.routine_request(name: 'setTool')
           return 
         when 'tcp_position_x', 'tcp_position_y', 'tcp_position_z', 'tcp_position_a', 'tcp_position_r', 'tcp_position_e'
           if !@is_real(attr)
@@ -187,19 +191,26 @@ define [
           else
             window.appController.set_request(name: "setting_data.#{attr}", value: @get(attr))
           return 
-        # when 'frame_line_in_position_x', 'frame_line_in_position_y', 'frame_line_in_position_z', 'frame_line_in_position_r'
-        #   if !@is_real(attr) or parseFloat(@get(attr)) > 720
-        #     @set(attr,  @previous(attr))
-        #   else 
-        #     window.appController.routine_request(name: 'setTool')
-        #   return
-        # when 'frame_line_out_position_x', 'frame_line_out_position_y', 'frame_line_out_position_z', 'frame_line_out_position_r'
-        #   if !@is_real(attr)
-        #     @set(attr,  @previous(attr))
-        #     return
-        #   if parseFloat(@get(attr)) > 720
-        #       @set(attr,  @previous(attr))
-        #   return  
+        when 'frame_line_in_position_x', 'frame_line_in_position_y', 'frame_line_in_position_z', 'frame_line_in_position_r'
+          if !@is_real(attr) or parseFloat(@get(attr)) > 720
+            @set(attr,  @previous(attr))
+          else 
+            window.appController.set_request(
+              name: "setting_data.#{attr}" 
+              value: @get(attr)
+            )             
+            window.appController.routine_request(name: 'setFrameIn')
+          return
+        when 'frame_line_out_position_x', 'frame_line_out_position_y', 'frame_line_out_position_z', 'frame_line_out_position_r'
+          if !@is_real(attr) or parseFloat(@get(attr)) > 720
+            @set(attr,  @previous(attr))
+          else 
+            window.appController.set_request(
+              name: "setting_data.#{attr}" 
+              value: @get(attr)
+            ) 
+            window.appController.routine_request(name: 'setFrameOut')
+          return 
         when 'length_wise', 'cross_wise', 'orient'       
           window.appController.set_request(
             name: "setting_data.#{attr}"
@@ -254,16 +265,10 @@ define [
           else
             window.appController.set_request(
               name: 'setting_data.frame_line_in_index',
-              value: window.appController.mission.get('frame_line_in_index')
+              value: @get('frame_line_in_index')
               )
 
-            window.appController.routine_request(name: 'getFrameIn')
-
-            window.appController.get_request(
-              name: 'setting_data'
-              callback: (data) ->
-                window.appController.mission.load_setting_info(JSON.parse(data))
-              )
+            window.appController.load_frame_in_data()
           return
         when 'frame_line_out_index'
           @logger.dev "[mission.coffee]: frame_line_out_index"
@@ -277,13 +282,7 @@ define [
               value: window.appController.mission.get('frame_line_out_index')
               )
 
-            window.appController.routine_request(name: 'getFrameOut')
-
-            window.appController.get_request(
-              name: 'setting_data'
-              callback: (data) ->
-                window.appController.mission.load_setting_info(JSON.parse(data))
-              )
+            window.appController.load_frame_out_data()
           return  
         when 'tool_index'
           if !@is_int(attr) or @get(attr) < 0

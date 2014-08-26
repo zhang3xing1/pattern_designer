@@ -166,6 +166,20 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission','rivets'], (Logger,
           callback: (data) ->
             window.appController.mission.load_setting_info(JSON.parse(data)) )
 
+    load_frame_in_data: =>
+        @routine_request(name: 'getFrameIn')
+        @get_request(
+          name:'setting_data'
+          callback: (data) ->
+            window.appController.mission.load_setting_info(JSON.parse(data)) )
+
+    load_frame_out_data: =>
+        @routine_request(name: 'getFrameOut')
+        @get_request(
+          name:'setting_data'
+          callback: (data) ->
+            window.appController.mission.load_setting_info(JSON.parse(data)) )        
+
     flash: (options={closable: true})->
       $('#popup').html(options.message)
       $("#popup").modal
@@ -506,40 +520,40 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission','rivets'], (Logger,
             window.appController.saveLayerByID()
           window.router.navigate("patterns", {trigger: true})
 
-      if route == 'frame'
-        $("input[rv-value*='position']").attr "readonly", true
+      # if route == 'frame'
+      #   $("input[rv-value*='position']").attr "readonly", true
 
       rivets.bind $('.mission_'),{mission: @mission}    
 
-      if route == 'toolSetting'
-        $("input").attr "readonly", true
-        $("input#table-index").attr "readonly", false
+      # if route == 'toolSetting'
+      #   $("input").attr "readonly", true
+      #   $("input#table-index").attr "readonly", false
         
-        $("[name='teach']").on "switchChange.bootstrapSwitch", (event, state) ->
-          # console.log this # DOM element
-          # console.log event # jQuery event
-          # console.log state # true | false
+      #   $("[name='teach']").on "switchChange.bootstrapSwitch", (event, state) ->
+      #     # console.log this # DOM element
+      #     # console.log event # jQuery event
+      #     # console.log state # true | false
 
-          # state turn to be off, then button 'set' turn to be button 'PLACE'
-          if state
-            # ...
-            $('a.teach').removeClass('label-primary')
-            $('a.teach').addClass('label-success')
-            $('a.teach').html('')
-            # $("a.teach").attr("href", "#getTool")
-            $("input").attr "readonly", true
-            $("input#table-index").attr "readonly", false
-          else
-            # ...
-            $('a.teach').removeClass('label-success')
-            $('a.teach').addClass('label-success')
-            $('a.teach').html('Place')
-            $("a.teach").attr("href", "#tool/set")
-            $("input").attr "readonly", false
+      #     # state turn to be off, then button 'set' turn to be button 'PLACE'
+      #     if state
+      #       # ...
+      #       $('a.teach').removeClass('label-primary')
+      #       $('a.teach').addClass('label-success')
+      #       $('a.teach').html('')
+      #       # $("a.teach").attr("href", "#getTool")
+      #       $("input").attr "readonly", true
+      #       $("input#table-index").attr "readonly", false
+      #     else
+      #       # ...
+      #       $('a.teach').removeClass('label-success')
+      #       $('a.teach').addClass('label-success')
+      #       $('a.teach').html('Place')
+      #       $("a.teach").attr("href", "#tool/set")
+      #       $("input").attr "readonly", false
 
-        @load_tool_data()     
+      #   @load_tool_data()     
 
-        rivets.bind $('.mission_'),{mission: @mission}  
+      #   rivets.bind $('.mission_'),{mission: @mission}  
 
       if route == 'pickSetting'
         $("input").attr "readonly", true
