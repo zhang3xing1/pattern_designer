@@ -102,7 +102,7 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission','rivets'], (Logger,
         error: () ->
           window.appController.logger.dev "[get]: error" 
     
-    load_mission_data: (mission_data_name) => 
+    load_whole_mission_data: (mission_data_name) => 
 
       @mission.set('available_layers', {})
       @mission.set('used_layers', [])
@@ -111,35 +111,41 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission','rivets'], (Logger,
         name: 'loadVarFile'
         params: [mission_data_name])
 
-      @load_data_from_pdl()
+      # @load_frame_data()
+      @load_tool_data()
+      @load_frame_in_data()
+      @load_frame_out_data()
+      @load_missionData_data()
+      @load_settingData_data()
+      # @load_layers_data()
+      # @load_used_layers_data()
 
+    # load_frame_data: =>  
+    #   @set_request(
+    #     name: 'setting_data.frame_line_in_index'
+    #     value: @mission.get('frame_line_in_index')
+    #   )
 
-    load_frame_data: =>  
-      @set_request(
-        name: 'setting_data.frame_line_in_index'
-        value: @mission.get('frame_line_in_index')
-      )
+    #   @routine_request(name: 'getFrameIn')
 
-      @routine_request(name: 'getFrameIn')
+    #   @get_request(
+    #     name: 'setting_data'
+    #     callback: (data) =>
+    #       @mission.load_setting_info(JSON.parse(data))
+    #   )
 
-      @get_request(
-        name: 'setting_data'
-        callback: (data) =>
-          @mission.load_setting_info(JSON.parse(data))
-      )
+    #   @set_request(
+    #     name: 'setting_data.frame_line_out_index'
+    #     value: @mission.get('frame_line_out_index')
+    #   )
 
-      @set_request(
-        name: 'setting_data.frame_line_out_index'
-        value: @mission.get('frame_line_out_index')
-      )
+    #   @routine_request(name: 'getFrameOut')
 
-      @routine_request(name: 'getFrameOut')
-
-      @get_request(
-        name: 'setting_data'
-        callback: (data) =>
-          @mission.load_setting_info(JSON.parse(data))
-      )  
+    #   @get_request(
+    #     name: 'setting_data'
+    #     callback: (data) =>
+    #       @mission.load_setting_info(JSON.parse(data))
+    #   )  
 
     load_tool_data: =>
         @routine_request(name: 'getTool')
@@ -162,22 +168,24 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission','rivets'], (Logger,
           callback: (data) ->
             window.appController.mission.load_setting_info(JSON.parse(data)) )        
 
-    load_data_from_pdl: =>
+    load_missionData_data: =>
       @get_request(
         name: 'mission_data'
         callback: (data) ->
           window.appController.mission.load_mission_info(JSON.parse(data)) )
       
+    load_settingData_data: =>
       @get_request(
         name:'setting_data'
         callback: (data) ->
           window.appController.mission.load_setting_info(JSON.parse(data)) )
-
+    load_layers_data: =>
       @get_request(
         name: 'layers'
         callback: (data) ->
           window.appController.mission.load_layers_info(JSON.parse(data))
       )    
+    load_used_layers_data: =>      
       @get_request(
         name: 'used_layers'
         callback: (data) ->
@@ -254,6 +262,9 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission','rivets'], (Logger,
       action = params[0]
       rivets.bind $('.mission_'),{mission: @mission}
 
+      @load_whole_mission_data()
+
+
       if route == 'placeSetting'
         orient_value = window.appController.mission.get('orient')
         $("[name='orient']").bootstrapSwitch('state', orient_value) 
@@ -280,6 +291,7 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission','rivets'], (Logger,
           $("[name='length']").bootstrapSwitch('state', !state) 
       
       if route == 'patterns'
+        @load_layers_data()
         layers = _.values(@mission.get('available_layers'))
         for a_layer in layers
           # SHEET  are layers can not access
@@ -352,7 +364,7 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission','rivets'], (Logger,
 
         if action == 'save'
           
-          mission_pairs = _.pairs(window.appController.mission.toJSON())
+          # mission_pairs = _.pairs(window.appController.mission.toJSON())
 
           #
           # in validate, single variable have been saved to pdl programe.
@@ -363,30 +375,37 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission','rivets'], (Logger,
           @routine_request(name: 'resetLayers')
           @routine_request(name: 'resetUsedLayers')
 
-          _.each(mission_pairs, ((a_pair) ->
-            field = a_pair[0]
-            value = a_pair[1]
+          @sendLayersToSave()
+          @sendUsedLayersToSave()
 
-            if _.contains(['available_layers', 'used_layers', 'used_layers_created_number'], field)
-              # console.log field
-              # console.log value
-              if field == 'available_layers'
-                @sendLayersToSave()
-              if field == 'used_layers'
-                @sendUsedLayersToSave()
-              # to do
-            ),this)
+
+          # _.each(mission_pairs, ((a_pair) ->
+          #   field = a_pair[0]
+          #   value = a_pair[1]
+
+          #   if _.contains(['available_layers', 'used_layers', 'used_layers_created_number'], field)
+          #     # console.log field
+          #     # console.log value
+          #     if field == 'available_layers'
+          #       @sendLayersToSave()
+          #     if field == 'used_layers'
+          #       @sendUsedLayersToSave()
+          #     # to do
+          #   ),this)
 
           @routine_request(name: 'saveVarFile', params:[@mission.get('name')])
           @mission.generateCSVData()
           @get_mission_list()
           
-          window.appController.sleep(1000)
+          # window.appController.sleep(1000)
           $.modal.close()
           window.router.navigate("#program", {trigger: true})
         if action == 'edit'
           # init avaiable layers
           # destroy all data in multi_select
+          @load_layers_data()
+          @load_used_layers_data()
+
           $('.ms-list').empty()
           $('#my-select').empty()
 
@@ -419,6 +438,9 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission','rivets'], (Logger,
               # mission changed
               window.appController.mission_saved_flag = false
 
+              # synchronize data on used_layers
+              @routine_request(name: 'resetUsedLayers')
+              @sendUsedLayersToSave()
               # mission binding by rivets
               rivets.bind $('.mission_'),{mission: window.appController.mission}
  
@@ -435,6 +457,10 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission','rivets'], (Logger,
               @refreshSelectableAndSelectedLayers()
               window.appController.mission_saved_flag = false
 
+
+              # synchronize data on used_layers
+              @routine_request(name: 'resetUsedLayers')
+              @sendUsedLayersToSave()
               # mission binding by rivets
               rivets.bind $('.mission_'),{mission: window.appController.mission}
 
@@ -446,9 +472,9 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission','rivets'], (Logger,
             console.log "selected_mission_name: #{selected_mission_name}"
             console.log "@mission.get('name'): #{@mission.get('name')}"
 
-            console.log "----->before: load_mission_data"
-            @load_mission_data(selected_mission_name)
-            console.log "----->after: load_mission_data"
+            console.log "----->before: load_whole_mission_data"
+            @load_whole_mission_data(selected_mission_name)
+            console.log "----->after: load_whole_mission_data"
 
             $.modal.close()
             window.router.navigate("#program", {trigger: true})
@@ -464,15 +490,16 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission','rivets'], (Logger,
           to_reload_mission_name = "#{@mission.get('name')}.var"
           if _.contains(@mission_list, to_reload_mission_name)
             @routine_request(name: 'loadVarFile', params: [to_reload_mission_name])
-            console.log "----->before: reload_mission_data"
-            @load_mission_data(selected_mission_name)
-            console.log "----->after: reload_mission_data"
+            console.log "----->before: reload_whole_mission_data"
+            @load_whole_mission_data(selected_mission_name)
+            console.log "----->after: reload_whole_mission_data"
           else
             @flash(message: "[#{@mission.get('name')}] does not exist in ROBOT!", close: true)
           window.router.navigate("#program", {trigger: true})
           return false 
 
       if route == 'pattern/*action'
+        @load_layers_data()
         if action == 'new'
           $('#layer-name').val("Layer_#{(Math.random()*10e16).toString().substr(0,5)}")
           $('#layer-name').focus().select()
@@ -522,6 +549,17 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission','rivets'], (Logger,
             window.appController.selected_layer = undefined
           else
             window.appController.saveLayerByID()
+
+
+          @routine_request(name: 'resetBoxes')
+          @routine_request(name: 'resetLayers')
+          @sendLayersToSave()
+
+          @routine_request(name: 'resetUsedLayers')
+          @sendUsedLayersToSave()
+
+
+
           window.router.navigate("patterns", {trigger: true})
 
       # if route == 'frame'
@@ -599,7 +637,7 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission','rivets'], (Logger,
       @logger.debug("[after_action]: window.appController.mission_saved_flag #{window.appController.mission_saved_flag}")
     
 
-      @load_data_from_pdl()
+      # @load_whole_mission_data()
     # functions for mission edit page
 
     refreshSelectableAndSelectedLayers: ->

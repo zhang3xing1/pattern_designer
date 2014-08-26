@@ -56,7 +56,7 @@ define [
       length_wise: false,
       cross_wise: true,
       
-      mini_distance:     10,
+      mini_distance: 10,
 
       pallet_length: 400,
       pallet_width: 300,
@@ -97,10 +97,10 @@ define [
 
       @on('all', @validateAttrValue)
 
-      available_layers = @get('available_layers')
-      new_layer  = @compositeALayer('SHEET', [])
-      available_layers[new_layer.id] = new_layer
-      @set('available_layers', available_layers) 
+      # available_layers = @get('available_layers')
+      # new_layer  = @compositeALayer('SHEET', [])
+      # available_layers[new_layer.id] = new_layer
+      # @set('available_layers', available_layers) 
 
     max_number_of_layers : =>
       5
@@ -459,6 +459,7 @@ define [
       @set('tare',setting_data_from_pdl.tare)
       @set('max_gross',setting_data_from_pdl.max_gross)
       @set('max_height',setting_data_from_pdl.max_height)
+      @set('mini_distance',setting_data_from_pdl.mini_distance)
       @set('overhang_len',setting_data_from_pdl.overhang_len)
       @set('overhang_wid',setting_data_from_pdl.overhang_wid)
       @set('max_pack',setting_data_from_pdl.max_pack)
@@ -627,11 +628,11 @@ define [
       @pprint "\"pallet\";_description;#{@get('pallet_length')};#{@get('pallet_width')};#{@get('pallet_height')};#{@get('tare')}"
       @pprint "\"sheet\";#{@get('sleepsheet_height')};#{@get_count_of_sheets()}"
       @pprint "\"pall_info\";#{@get_total_box()};#{@get_count_of_layers()};#{@get_total_weight()};#{@get('pallet_length')};#{@get('pallet_width')};#{@get('pallet_height')}"
-      @pprint "\"tool\";_toolName;#{@get('tool_index')};0;_numberOfGroup;#{@get('tool_position_x')};#{@get('tool_position_y')};#{@get('tool_position_z')};__grip_-x;__grip+x;__grip-y;__grip+y"
-      @pprint "\"linein\";__name;#{@get('frame_line_in_index')};0;"
-      @pprint "\"lineout\";__name;#{@get('frame_line_out_index')};0;"
-      @pprint "\"pack\";#{@get('product')};#{@get('box_length')};#{@get('box_width')};#{@get('box_height')};#{@get('box_weight')};1;0;0"
-      @pprint "10000"
+      @pprint "\"tool\";_toolName;0;0;0;#{@get('tool_position_x')};#{@get('tool_position_y')};#{@get('tool_position_z')};0;0;0;0"
+      @pprint "\"linein\";Conveyor;#{@get('frame_line_in_index')};0;"
+      @pprint "\"lineout\";Pallet place definition;#{@get('frame_line_out_index')};0;"
+      @pprint "\"pack\";#{@get('product')};#{@get('box_length')};#{@get('box_width')};#{@get('box_height')};#{@get('box_weight')};0;0;0"
+      @pprint "010000"
       @pprint "120000"
       @pprint "220000"
 

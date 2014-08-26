@@ -1,3 +1,24 @@
+1. line in and line out are not the same value;   -- ok
+
+2. tool setting in box picking page;   --ok 
+
+2.1 edit frame info in frame page and tool info in box picking page -- ok
+
+2.1 calculate the tool data by moving tcp to the center of box -- todo after discussion
+
+3. temp mission data save, especially layer data; -- almost ok.
+
+4. load pallet size infomation after getting detail info from multipack
+
+5. animation when transitting
+
+6. csv review -- ok
+
+7. implement tcp
+
+
+
+
 UI Validator
 1. Layer_name cannot contain blank char.
 
