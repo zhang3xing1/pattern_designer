@@ -2,6 +2,22 @@ body {
   /*background-color: #373C38;*/
 }
 
+.sub-page-view{
+  /*position: relative;*/
+  left: 734px;
+  top: -95%;
+  position: relative;
+}
+
+#right_board{
+  overflow: hidden;
+  width: 500px;
+  height: 446px;
+  left: 220px;
+  /*position: fixed;*/
+  top: 0px
+}
+
 #right_nav_bar{
   text-align: center;
   /*font-size: 30px;*/
@@ -79,10 +95,6 @@ div.left-panel  ul.line{
 #left_board_nav button{
   height: 11%;
   /*background-color: #e0e0e0;*/
-}
-
-#right_board {
-  float: left;
 }
 
 .info-bottom {

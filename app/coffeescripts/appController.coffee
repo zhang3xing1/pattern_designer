@@ -292,6 +292,7 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission','rivets'], (Logger,
       
       if route == 'patterns'
         @load_layers_data()
+        @load_used_layers_data()
         layers = _.values(@mission.get('available_layers'))
         for a_layer in layers
           # SHEET  are layers can not access
@@ -301,6 +302,11 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission','rivets'], (Logger,
         $("[id^='layer-item-']").on('click', (el) ->
           $("[id^='layer-item-']").removeClass('selected-item')
           $(this).addClass('selected-item')
+          selected_layer_name = $('.list-group-item.selected-item').html()
+          window.appController.selected_layer = window.appController.mission.getLayerDataByName(selected_layer_name)
+          # selected_layer_id = $('.list-group-item.selected-item').attr('id')
+          # selected_layer = layers[selected_layer_id]
+          # window.appController.selected_layer = selected_layer
           return
         )
 
@@ -520,14 +526,16 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission','rivets'], (Logger,
           $('#layer-name').focus().select()
 
         if action == 'clone'
-          layers = window.appController.getLayers()
-          selected_layer_id = $('.list-group-item.selected-item').attr('id')
-          selected_layer = layers[selected_layer_id]
+          # layers = window.appController.getLayers()
+          # selected_layer_id = $('.list-group-item.selected-item').attr('id')
+          # selected_layer = layers[selected_layer_id]
+          # selected_layer = window.appController.selected_layer
 
-          if Object.keys(layers).length != 0 and selected_layer_id != undefined and selected_layer != undefined
+          # if selected_layer != undefined
+          if window.appController.selected_layer != undefined
             # clone it as a new one before renaming this layer
-            clone_layer_name = "#{selected_layer.name}_clone" 
-            window.appController.saveLayerByID({name: clone_layer_name})
+            clone_layer_name = "#{window.appController.selected_layer.name}_clone" 
+            window.appController.saveLayerBy({name: clone_layer_name, boxes: window.appController.selected_layer.boxes})
 
           window.router.navigate("patterns", {trigger: true})
           return false 
@@ -540,7 +548,7 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission','rivets'], (Logger,
           a_layer_name = $('#layer-name').val()
 
           if window.appController.previous_action.action == 'edit'
-            window.appController.saveLayerByID({id: window.appController.selected_layer.id, ulid: window.appController.selected_layer.ulid})
+            window.appController.saveLayerBy({id: window.appController.selected_layer.id, ulid: window.appController.selected_layer.ulid})
             
             # if layer name was modified, then update the layers and used_layers of mission
             # referring to the ulid of this layer.
@@ -548,7 +556,7 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission','rivets'], (Logger,
             window.appController.updateUsedLayersNameByUlid(new_name, window.appController.selected_layer.ulid)
             window.appController.selected_layer = undefined
           else
-            window.appController.saveLayerByID()
+            window.appController.saveLayerBy()
 
 
           @routine_request(name: 'resetBoxes')
@@ -665,11 +673,33 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission','rivets'], (Logger,
     addLayer: (new_layer) ->
       @mission.addLayer(new_layer)
 
-    saveLayerByID: (layer_data) ->
-      # todo validator
-      new_layer = @board.saveLayerData(layer_data)
-      @addLayer(new_layer)
+      @routine_request(name: 'resetBoxes')
+      @routine_request(name: 'resetLayers')
+      @sendLayersToSave()
+
+    removeLayer: (layer_data) ->
+      @mission.removeLayer(layer_data.id)
+
+      @routine_request(name: 'resetBoxes')
+      @routine_request(name: 'resetLayers')
+      @sendLayersToSave()
+
+      @routine_request(name: 'resetUsedLayers')
+      @sendUsedLayersToSave()
+
       # mission changed
+      window.appController.mission_saved_flag = false
+       
+    saveLayerBy: (layer_params) ->
+      if layer_params.id == undefined
+        layer_params.id = "layer-item-#{layer_params.name}-#{Math.random()*10e17}"
+
+      if layer_params.ulid == undefined
+        layer_params.ulid ="#{layer_params.name}------ulid#{Math.random()*10e17}"  
+
+      @addLayer(layer_params)
+      # mission changed
+
       window.appController.mission_saved_flag = false      
 
     getAvailableLayersOrder: ->
@@ -681,12 +711,7 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission','rivets'], (Logger,
     getUsedLayersOrder: ->
       @mission.getUsedLayersOrder()
 
-    removeLayer: (layer_id) ->
-      @mission.removeLayer(layer_id)
-
-      # mission changed
-      window.appController.mission_saved_flag = false
-        
+ 
     removeFromUsedLayers: (layer_option_value) ->
       @mission.removeFromUsedLayers(layer_option_value)
 

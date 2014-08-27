@@ -1,43 +1,45 @@
-<div class="right_board" id='right_nav_bar'>  
-	<div class='title'>
-      <a href="#program" class="label label-primary back-button" style="float: left" >
-      <span class="glyphicon glyphicon-chevron-left"></span>
-    	</a>
-			<%= title %>
-<!-- 	    <a href="#mission/new" class="label label-primary " >
-        Create
-      </a> -->
-	</div>
-
-</div>
-
-
-<div class="right_board" id ='pattern_designer_container'>
-	<div class='left-panel col-sm-6'  style="margin-left: 5%">
-		<div class="panel panel-default">
-		  <div class="panel-heading">
-		  	<h3 class="panel-title">Mission List</h3>
-		  </div>
-			  <!-- List group -->
-			  <ul class="list-group" id='mission_list' style="height: 204px; overflow: scroll;">
-<!-- 			    <li class="list-group-item" id="mission-item-1">mission-1</li>
-			    <li class="list-group-item" id="mission-item-2">mission-2</li>
-			    <li class="list-group-item" id="mission-item-3">mission-3</li> -->
-			  </ul>
+<div class='sub-page-view'>
+	<div class="right_board" id='right_nav_bar'>  
+		<div class='title'>
+	      <a href="#program" class="label label-primary back-button" style="float: left" >
+	      <span class="glyphicon glyphicon-chevron-left"></span>
+	    	</a>
+				<%= title %>
+	<!-- 	    <a href="#mission/new" class="label label-primary " >
+	        Create
+	      </a> -->
 		</div>
 
 	</div>
-  
-  <div class='right-panel col-sm-4', style="float: right; margin-left: -40%; margin-right: 5%;">
-		<ul class="nav nav-pills nav-stacked">
-		  <!-- <li class="active"> -->
-		  <% _.each(buttons, function(button){ %>
-			  <li >
-			    <a href="#mission/<%= button.router %>" id="<%= button %>"class="label label-primary " style="text-align: center; font-size: 18px; margin-bottom: 14px;">
-			      <%= button.name %>
-			    </a>
-			  </li>
-		  <%	}); %>
-		</ul>
+
+
+	<div class="right_board" id ='pattern_designer_container'>
+		<div class='left-panel col-sm-6'  style="margin-left: 5%">
+			<div class="panel panel-default">
+			  <div class="panel-heading">
+			  	<h3 class="panel-title">Mission List</h3>
+			  </div>
+				  <!-- List group -->
+				  <ul class="list-group" id='mission_list' style="height: 204px; overflow: scroll;">
+	<!-- 			    <li class="list-group-item" id="mission-item-1">mission-1</li>
+				    <li class="list-group-item" id="mission-item-2">mission-2</li>
+				    <li class="list-group-item" id="mission-item-3">mission-3</li> -->
+				  </ul>
+			</div>
+
+		</div>
+	  
+	  <div class='right-panel col-sm-4', style="float: right; margin-left: -40%; margin-right: 5%;">
+			<ul class="nav nav-pills nav-stacked">
+			  <!-- <li class="active"> -->
+			  <% _.each(buttons, function(button){ %>
+				  <li >
+				    <a href="#mission/<%= button.router %>" id="<%= button %>"class="label label-primary " style="text-align: center; font-size: 18px; margin-bottom: 14px;">
+				      <%= button.name %>
+				    </a>
+				  </li>
+			  <%	}); %>
+			</ul>
+		</div>
 	</div>
 </div>

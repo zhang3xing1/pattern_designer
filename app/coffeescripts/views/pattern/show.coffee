@@ -1471,25 +1471,36 @@ define [
         saveLayerData: (layer={}) ->
           # some validator
           # todo
-          layer_data = 
-            # id: "layer-item-#{Math.random()*10e17}"
-            # ulid: "#{$('#layer-name').val()}------ulid#{Math.random()*10e17}"
-            name: $('#layer-name').val()
-            boxes: _.map(@boxes.models,((a_box) ->
+          # layer_data = 
+          #   # id: "layer-item-#{Math.random()*10e17}"
+          #   # ulid: "#{$('#layer-name').val()}------ulid#{Math.random()*10e17}"
+          #   name: $('#layer-name').val()
+          #   boxes: _.map(@boxes.models,((a_box) ->
+          #     {
+          #       x: a_box.getXPosition(),
+          #       y: a_box.getYPosition(),
+          #       rotate: a_box.get('rotate'),
+          #       arrow: a_box.get('vectorDegree')
+          #       arrowEnabled: a_box.get('vectorEnabled')
+          #     }
+          #   ), this)  
+          # #  edit_layer_id = ..... 
+          if layer.name == undefined
+            layer_data.name =  $('#layer-name').val()
+          else
+            layer_data.name = layer.name
+
+          if layer.boxes == undefined
+            layer_data.boxes = []
+          else
+            layer_data.boxes =_.map(@boxes.models,((a_box) ->
               {
                 x: a_box.getXPosition(),
                 y: a_box.getYPosition(),
                 rotate: a_box.get('rotate'),
                 arrow: a_box.get('vectorDegree')
                 arrowEnabled: a_box.get('vectorEnabled')
-              }
-            ), this)  
-          #  edit_layer_id = ..... 
-          if layer.name == undefined
-            layer_data.name =  $('#layer-name').val()
-          else
-            layer_data.name = layer.name
-
+              }), this) 
           if layer.id == undefined
             layer_data.id = "layer-item-#{layer_data.name}-#{Math.random()*10e17}"
           else

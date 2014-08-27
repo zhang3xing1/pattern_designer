@@ -80,23 +80,24 @@ define [
         patternShowView.render()
 
       if action == 'edit'
-        layers = window.appController.getLayers()
-        selected_layer_id = $('.list-group-item.selected-item').attr('id')
-        selected_layer = layers[selected_layer_id]
-        @logger.debug("route-edit: selected_layer_id->#{selected_layer_id}; layers-> #{Object.keys(layers)} ")
-        if Object.keys(layers).length == 0 or selected_layer_id == undefined or selected_layer == undefined
+        # layers = window.appController.getLayers()
+        # selected_layer_id = $('.list-group-item.selected-item').attr('id')
+        # selected_layer = layers[selected_layer_id]
+        # @logger.debug("route-edit: selected_layer_id->#{selected_layer_id}; layers-> #{Object.keys(layers)} ")
+        # if Object.keys(layers).length == 0 or selected_layer_id == undefined or selected_layer == undefined
+        if window.appController.selected_layer == undefined
           @navigate("patterns", {trigger: true})
           return false
         else
-          window.appController.selected_layer = selected_layer
           $('.right_board').remove()
           patternShowView = new PatternShowView
           patternShowView.render()
 
       if action == 'delete'
-        selected_layer_id = $('.list-group-item.selected-item').attr('id')
-        if selected_layer_id != '' and selected_layer_id != undefined
-          window.appController.removeLayer(selected_layer_id)
+        # selected_layer_id = $('.list-group-item.selected-item').attr('id')
+        # if selected_layer_id != '' and selected_layer_id != undefined
+        if window.appController.selected_layer != undefined
+          window.appController.removeLayer(window.appController.selected_layer)
           selected_layer_id = undefined
         else
           window.appController.flash(message: 'Delete a layer after choosing it!')
@@ -143,9 +144,15 @@ define [
         missionNewView.render() 
 
       if action == 'index'
-        $('.right_board').remove()
+        # $('.right_board').remove()
+        $('.right_board').addClass('previous-page')
         missionIndexView = new MissionIndexView
-        missionIndexView.render()     
+        missionIndexView.render() 
+        $('.sub-page-view').transition({ left: '0px' });
+        # window.setTimeout((->
+        #   $('.previous-page').remove()
+        #   ), 1000);
+        
 
       if action == 'save'
         window.appController.mission_saved_flag = true
@@ -153,6 +160,7 @@ define [
     boxSetting: ->
       console.log 'boxSetting'
       $('.right_board').remove()
+
       boxSettingView = new BoxSettingView
       boxSettingView.render()  
 
