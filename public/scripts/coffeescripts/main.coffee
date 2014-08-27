@@ -23,6 +23,7 @@ require.config(
     bootstrapSwitch: 'lib/bootstrapSwitch'
     jqueryEditable: 'lib/jqueryEditable'
     tinybox: "lib/jqueryModal"
+    jqueryTransit: "lib/jqueryTransit"
 
   shim:
     underscore:
@@ -46,7 +47,10 @@ require.config(
       exports: "JqueryEditable"     
     tinybox:
       deps: ["jquery"]
-      exports: "Tinybox"     
+      exports: "Tinybox"    
+    jqueryTransit:
+      deps: ["jquery"]
+      exports: "jqueryTransit"       
 )
 
 

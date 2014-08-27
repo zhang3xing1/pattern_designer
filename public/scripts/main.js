@@ -17,7 +17,8 @@
       jqueryMultiSelect: 'lib/jqueryMultiSelect',
       bootstrapSwitch: 'lib/bootstrapSwitch',
       jqueryEditable: 'lib/jqueryEditable',
-      tinybox: "lib/jqueryModal"
+      tinybox: "lib/jqueryModal",
+      jqueryTransit: "lib/jqueryTransit"
     },
     shim: {
       underscore: {
@@ -48,6 +49,10 @@
       tinybox: {
         deps: ["jquery"],
         exports: "Tinybox"
+      },
+      jqueryTransit: {
+        deps: ["jquery"],
+        exports: "jqueryTransit"
       }
     }
   });

@@ -6,6 +6,7 @@ define [
   "backboneRoutefilter"
   "tinybox"
   "logger"
+  "jqueryTransit"
   "views/missions/show"
   "views/pattern/index"
   "views/frame/show"
@@ -22,7 +23,7 @@ define [
   "views/lineout/palletSetting"
   "views/lineout/constraintSetting"
   "views/pattern/show"
-], ($, _, Backbone, AppController, BackboneRoutefilter, Tinybox, Logger, MissionShowView, PatternIndexView, FrameShowView, 
+], ($, _, Backbone, AppController, BackboneRoutefilter, Tinybox, Logger, JqueryTransit, MissionShowView, PatternIndexView, FrameShowView, 
   LineinShowView, LineoutShowView, MissionEditView, MissionIndexView, MissionNewView,
   BoxSettingView, PlaceSettingView, PickSettingView, ToolSettingView, AdditionalInfoView,
   PalletSettingView, ConstraintSettingView, PatternShowView) ->
