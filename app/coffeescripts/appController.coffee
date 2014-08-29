@@ -501,7 +501,7 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission','rivets'], (Logger,
         if action == 'edit'
           selected_layer_name = window.appController.get_selected_layer_name()
           selected_layer = window.appController.mission.getLayerDataByName(selected_layer_name)
-          @load_pattern_data(selected_layer_name)
+          @load_pattern_data(selected_layer)
 
           $('#layer-name').val(selected_layer_name)  
           $('#layer-name').focus().select()

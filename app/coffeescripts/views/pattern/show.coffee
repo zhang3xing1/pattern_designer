@@ -791,17 +791,26 @@ define [
             a_layer_name = $('#layer-name').val()
 
             selected_layer_name = window.appController.get_selected_layer_name()
-            if selected_layer_name != ''
+
+            boxes =_.map(@models,((a_box) ->
+              {
+                x: a_box.getXPosition(),
+                y: a_box.getYPosition(),
+                rotate: a_box.get('rotate'),
+                arrow: a_box.get('vectorDegree')
+                arrowEnabled: a_box.get('vectorEnabled')
+              }), this)             
+            if selected_layer_name == ''
+              window.appController.saveLayerBy(name: a_layer_name = $('#layer-name').val(), boxes: boxes )
+            else
               selected_layer = window.appController.mission.getLayerDataByName(selected_layer_name)
-              window.appController.saveLayerBy(id: selected_layer.id, ulid: selected_layer.ulid)
+              window.appController.saveLayerBy(id: selected_layer.id, ulid: selected_layer.ulid, boxes: boxes )
               
               # if layer name was modified, then update the layers and used_layers of mission
               # referring to the ulid of this layer.
               new_name = $('#layer-name').val()
               window.appController.updateUsedLayersNameByUlid(new_name, selected_layer.ulid)
               window.appController.set_selected_layer_name('')
-            else
-              window.appController.saveLayerBy(name: a_layer_name = $('#layer-name').val())
 
 
             window.appController.routine_request(name: 'resetBoxes')
@@ -811,9 +820,6 @@ define [
             window.appController.routine_request(name: 'resetUsedLayers')
             window.appController.sendUsedLayersToSave()
 
-
-
-            #
         updateDragStatus: (draggableBox) ->
           _.each(@models,((aBox) ->
               if aBox.getBoxId() == draggableBox.getBoxId()
