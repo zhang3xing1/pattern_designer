@@ -12,12 +12,29 @@
 	<div class='left-panel col-sm-10'  style="margin-left: 5%">
 		<div class='top-panel' >
 		  <% _.each(inputs, function(input){ %>
-	      <div class="input-group col-sm-8" style="margin-bottom: 5%; margin-left: 18%">
-	          <span class="input-group-addon label-info colomn-label-info"><%= input.label %></span>
-	          <input type="text" class="form-control mission_" rv-value="mission:<%= input.rv%>">
-	          <span class="input-group-addon"><%= input.unit %></span>
+		  <% 	var i=0;
+				i=i+1;		
+		  console.log(input)
+			if (input.rv!='sleepsheet_height')
+			{
+		%>
+		
+	      <div class="div_label" style="margin-bottom: 5%; margin-left: 18%; width:145px;">
+	          <span class="field_label"><%= input.label %></span>
+	          <input type="text" class="field_text mission_" style="top:-25px; left:190px;" rv-value="mission:<%= input.rv%>">
+	          <span style="position:relative; top:-25px; left:200px;"><%= input.unit %></span>
 	      </div> 
-		  <%	}); %>
+		<% }
+			else
+			{
+		%>
+		<div class="div_label" style="margin-bottom: 5%; margin-left: 18%; width:205px;">
+	          <span class="field_label"><%= input.label %></span>
+	          <input type="text" class="field_text mission_" style="top:-25px; left:190px;" rv-value="mission:<%= input.rv%>">
+	          <span style="position:relative; top:-25px; left:200px;"><%= input.unit %></span>
+	      </div> 
+		
+		  <%	}}); %>
 
 
 		</div>

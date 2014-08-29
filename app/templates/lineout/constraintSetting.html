@@ -9,13 +9,13 @@
 </div>
 
 <div class="right_board" id ='pattern_designer_container'>
-	<div class='left-panel col-sm-10'  style="margin-left: 5%">
+	<div class='left-panel col-sm-10'  style="margin-left: 5%; position:relative; top:15px;">
 		<div class='top-panel' >
 		  <% _.each(inputs, function(input){ %>
-	      <div class="input-group col-sm-7" style="margin-bottom: 5%; margin-left: 18%">
-	          <span class="input-group-addon label-info colomn-label-info"><%= input.label %></span>
-	          <input type="text" class="form-control mission_" rv-value='mission:<%= input.rv %>' >
-	          <span class="input-group-addon"><%= input.unit %></span>
+	      <div class="div_label" style="margin-bottom: 5%; margin-left: 18%; width:155px;">
+	          <span class="field_label"><%= input.label %></span>
+	          <input type="text" class="field_text mission_" style="left:145px; top:-25px;" rv-value='mission:<%= input.rv %>' >
+	          <span style="position:relative; top:-25px; left:145px;"><%= input.unit %></span>
 	      </div> 
 		  <%	}); %>
 

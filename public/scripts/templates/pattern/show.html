@@ -20,14 +20,14 @@
       </div>
       <div id="new_box" class="input-group row column">
           <span class="input-group-addon label-info">New Box :</span>
-          <input type="text" name="new_box" class="form-control boxes" placeholder="name" readonly="readOnly" rv-value="boxes.availableNewTitle">
+          <input type="text" name="new_box" class="field_text boxes" style="width:50px; top:0px; left:-10px;" placeholder="name" readonly="readOnly" rv-value="boxes.availableNewTitle">
           <span class="input-group-btn">
             <button class="btn btn-primary boxes" id= "createNewBox" rv-on-click="boxes.createNewBox">Create</button>
           </span> 
       </div>
       <div id="new_box" class="input-group row column">
           <span class="input-group-addon label-info">Curr Box :</span>
-          <input type="text" name="new_box" class="form-control currentBox" placeholder="name" rv-value="currentBox:title">
+          <input type="text" name="new_box" class="field_text currentBox" style="width:50px; top:0px; left:-10px;" placeholder="name" rv-value="currentBox:title">
           <span class="input-group-btn">
             <button class="btn btn-primary boxes placeCurrentBox"  id= "placeCurrentBox" rv-on-click="boxes.settleCurrentBox">Place</button>
           </span> 

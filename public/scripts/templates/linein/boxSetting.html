@@ -3,6 +3,12 @@
     <a href="#linein" class="label label-primary back-button" style="float: left" >
       <span class="glyphicon glyphicon-chevron-left"></span>
     </a>
+	<!--
+	<a id="postpick_back" data-ftrans="slide reverse" onmousedown="return false;" href="wizard_pick_main.html">
+		<div id="back" class="ios-arrow-left" title="Pick">
+		</div>
+	</a>
+	-->
     <%= title %>
   </div>
 </div>
@@ -15,24 +21,32 @@
 		</div>
         <div class='bottom-panel' style="margin-top: 3%">
             <div class="mission-bottom input-group col-sm-6" style="float: left; ">
-                <span class="input-group-addon label-info colomn-label-info">Length</span>
-                <input type="text" class="form-control mission_" rv-value="mission:box_length" >
-                <span class="input-group-addon">mm</span>
+				<div class="div_label" style="width:135px; margin-left: 5px;">
+					<span class="field_label" >Length</span>
+				</div>
+                <input type="text" style="margin-left:0px;" class="field_text mission_" rv-value="mission:box_length" >
+                <span style="position:relative; top:-35px; left:140px;">mm</span>
             </div>
             <div class="mission-bottom input-group col-sm-6" style="float: right; margin-right: -15%">
-                <span class="input-group-addon label-info colomn-label-info">Width</span>
-                <input type="text" class="form-control mission_" rv-value="mission:box_width" >
-                <span class="input-group-addon">mm</span>
+				<div class="div_label" style="width:135px; margin-left: 5px;">
+					<span class="field_label" >Width</span>
+				</div>
+                <input type="text" style="margin-left:0px;" class="field_text mission_" rv-value="mission:box_width" >
+                <span style="position:relative; top:-35px; left:140px;">mm</span>
             </div>
             <div class="mission-bottom input-group col-sm-6" style="float: left;">
-                <span class="input-group-addon label-info colomn-label-info">Height</span>
-                <input type="text" class="form-control mission_" rv-value="mission:box_height" >
-                <span class="input-group-addon">mm</span>
+				<div class="div_label" style="width:135px; margin-left: 5px;">
+					<span class="field_label" >Height</span>
+				</div>
+                <input type="text" style="margin-left:0px;" class="field_text mission_" rv-value="mission:box_height" >
+                <span style="position:relative; top:-35px; left:140px;">mm</span>
             </div>
             <div class="mission-bottom input-group col-sm-6" style="float: right; margin-right: -15%">
-                <span class="input-group-addon label-info colomn-label-info">Weight</span>
-                <input type="text" class="form-control mission_"  rv-value="mission:box_weight" >
-                <span class="input-group-addon">kg</span>
+				<div class="div_label" style="width:135px; margin-left: 5px;">
+					<span class="field_label" >Weight</span>
+				</div>
+                <input type="text" style="margin-left:0px;" class="field_text mission_" rv-value="mission:box_weight" >
+                <span style="position:relative; top:-35px; left:140px;">kg</span>
             </div>         
         </div>
     </div>

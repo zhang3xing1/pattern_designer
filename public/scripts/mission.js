@@ -42,7 +42,7 @@
         frame_line_in_position_y: 0,
         frame_line_in_position_z: 0,
         frame_line_in_position_r: 0,
-        frame_line_out_index: 2,
+        frame_line_out_index: 1,
         frame_line_out_position_x: 0,
         frame_line_out_position_y: 0,
         frame_line_out_position_z: 0,
@@ -89,9 +89,14 @@
       };
 
       Mission.prototype.initialize = function(params) {
+        var available_layers, new_layer;
         this.logger = aLogger.create;
         this.logger.debug("this is in mission");
-        return this.on('all', this.validateAttrValue);
+        this.on('all', this.validateAttrValue);
+        available_layers = this.get('available_layers');
+        new_layer = this.compositeALayer('SHEET', []);
+        available_layers[new_layer.id] = new_layer;
+        return this.set('available_layers', available_layers);
       };
 
       Mission.prototype.max_number_of_layers = function() {
@@ -165,7 +170,7 @@
       };
 
       Mission.prototype.validateAttrValue = function(event_name) {
-        var attr, rInteger, result, value_frame_line_in_index, value_frame_line_out_index;
+        var attr, rInteger, result;
         rInteger = /^\+?[1-9][0-9]*$/;
         result = event_name.split(':');
         attr = result[1];
@@ -173,7 +178,6 @@
           case void 0:
             break;
           case 'available_layers':
-            break;
           case 'used_layers':
           case 'used_layers_created_number':
             break;
@@ -213,9 +217,6 @@
                 name: "setting_data." + attr,
                 value: this.get(attr)
               });
-              window.appController.routine_request({
-                name: 'setTool'
-              });
             }
             break;
           case 'tcp_position_x':
@@ -230,38 +231,6 @@
               window.appController.set_request({
                 name: "setting_data." + attr,
                 value: this.get(attr)
-              });
-            }
-            break;
-          case 'frame_line_in_position_x':
-          case 'frame_line_in_position_y':
-          case 'frame_line_in_position_z':
-          case 'frame_line_in_position_r':
-            if (!this.is_real(attr) || parseFloat(this.get(attr)) > 720) {
-              this.set(attr, this.previous(attr));
-            } else {
-              window.appController.set_request({
-                name: "setting_data." + attr,
-                value: this.get(attr)
-              });
-              window.appController.routine_request({
-                name: 'setFrameIn'
-              });
-            }
-            break;
-          case 'frame_line_out_position_x':
-          case 'frame_line_out_position_y':
-          case 'frame_line_out_position_z':
-          case 'frame_line_out_position_r':
-            if (!this.is_real(attr) || parseFloat(this.get(attr)) > 720) {
-              this.set(attr, this.previous(attr));
-            } else {
-              window.appController.set_request({
-                name: "setting_data." + attr,
-                value: this.get(attr)
-              });
-              window.appController.routine_request({
-                name: 'setFrameOut'
               });
             }
             break;
@@ -336,30 +305,45 @@
             break;
           case 'frame_line_in_index':
             this.logger.dev("[mission.coffee]: frame_line_in_index");
-            value_frame_line_in_index = window.appController.mission.get('frame_line_in_index');
-            value_frame_line_out_index = window.appController.mission.get('frame_line_out_index');
-            if (!this.is_int(attr) || this.get(attr) < 0 || value_frame_line_in_index === value_frame_line_out_index) {
+            if (!this.is_int(attr) || this.get(attr) < 0) {
               this.set(attr, this.previous(attr));
+			  //popup di errore
+				TINY.box.show({ iframe:'index.hmtl',autohide:4,boxid:'frameless',width:400,height:225,left:50.5,top:70,fixed:false,maskid:'bluemask',maskopacity:40,closejs:function(){}})
+			 
             } else {
               window.appController.set_request({
                 name: 'setting_data.frame_line_in_index',
-                value: this.get('frame_line_in_index')
+                value: window.appController.mission.get('frame_line_in_index')
               });
-              window.appController.load_frame_in_data();
+              window.appController.routine_request({
+                name: 'getFrameIn'
+              });
+              window.appController.get_request({
+                name: 'setting_data',
+                callback: function(data) {
+                  return window.appController.mission.load_setting_info(JSON.parse(data));
+                }
+              });
             }
             break;
           case 'frame_line_out_index':
             this.logger.dev("[mission.coffee]: frame_line_out_index");
-            value_frame_line_in_index = window.appController.mission.get('frame_line_in_index');
-            value_frame_line_out_index = window.appController.mission.get('frame_line_out_index');
-            if (!this.is_int(attr) || this.get(attr) < 0 || value_frame_line_in_index === value_frame_line_out_index) {
+            if (!this.is_int(attr) || this.get(attr) < 0) {
               this.set(attr, this.previous(attr));
             } else {
               window.appController.set_request({
                 name: 'setting_data.frame_line_out_index',
                 value: window.appController.mission.get('frame_line_out_index')
               });
-              window.appController.load_frame_out_data();
+              window.appController.routine_request({
+                name: 'getFrameOut'
+              });
+              window.appController.get_request({
+                name: 'setting_data',
+                callback: function(data) {
+                  return window.appController.mission.load_setting_info(JSON.parse(data));
+                }
+              });
             }
             break;
           case 'tool_index':
@@ -367,10 +351,6 @@
               return this.set(attr, this.previous(attr));
             } else {
               this.logger.dev("[mission.coffee]: tool_index");
-              window.appController.set_request({
-                name: 'setting_data.tool_index',
-                value: this.get('tool_index')
-              });
               return window.appController.load_tool_data();
             }
             break;
@@ -422,11 +402,8 @@
 
       Mission.prototype.getAvailableLayersOrder = function() {
         var result;
-        result = _.map(_.values(this.get("available_layers")), function(layer) {
+        return result = _.map(_.values(this.get("available_layers")), function(layer) {
           return layer.name;
-        });
-        return result = _.filter(result, function(layer_name) {
-          return layer_name !== 'SHEET';
         });
       };
 
@@ -507,9 +484,9 @@
         return _.reduce(all_layers_name, (function(sum, layer_name) {
           var layer_height;
           if (this.getBoxesNumberByLayerName(layer_name) > 0) {
-            layer_height = Number.parseInt(this.get('box_height'));
+            layer_height = this.get('box_height');
           } else if (layer_name === 'SHEET') {
-            layer_height = Number.parseInt(this.get('sleepsheet_height'));
+            layer_height = this.get('sleepsheet_height');
           } else {
             layer_height = 0;
           }
@@ -601,7 +578,6 @@
         this.set('tare', setting_data_from_pdl.tare);
         this.set('max_gross', setting_data_from_pdl.max_gross);
         this.set('max_height', setting_data_from_pdl.max_height);
-        this.set('mini_distance', setting_data_from_pdl.mini_distance);
         this.set('overhang_len', setting_data_from_pdl.overhang_len);
         this.set('overhang_wid', setting_data_from_pdl.overhang_wid);
         return this.set('max_pack', setting_data_from_pdl.max_pack);
@@ -721,11 +697,11 @@
         this.pprint("\"pallet\";_description;" + (this.get('pallet_length')) + ";" + (this.get('pallet_width')) + ";" + (this.get('pallet_height')) + ";" + (this.get('tare')));
         this.pprint("\"sheet\";" + (this.get('sleepsheet_height')) + ";" + (this.get_count_of_sheets()));
         this.pprint("\"pall_info\";" + (this.get_total_box()) + ";" + (this.get_count_of_layers()) + ";" + (this.get_total_weight()) + ";" + (this.get('pallet_length')) + ";" + (this.get('pallet_width')) + ";" + (this.get('pallet_height')));
-        this.pprint("\"tool\";_toolName;0;0;0;" + (this.get('tool_position_x')) + ";" + (this.get('tool_position_y')) + ";" + (this.get('tool_position_z')) + ";0;0;0;0");
-        this.pprint("\"linein\";Conveyor;" + (this.get('frame_line_in_index')) + ";0;");
-        this.pprint("\"lineout\";Pallet place definition;" + (this.get('frame_line_out_index')) + ";0;");
-        this.pprint("\"pack\";" + (this.get('product')) + ";" + (this.get('box_length')) + ";" + (this.get('box_width')) + ";" + (this.get('box_height')) + ";" + (this.get('box_weight')) + ";0;0;0");
-        this.pprint("010000");
+        this.pprint("\"tool\";_toolName;" + (this.get('tool_index')) + ";0;_numberOfGroup;" + (this.get('tool_position_x')) + ";" + (this.get('tool_position_y')) + ";" + (this.get('tool_position_z')) + ";__grip_-x;__grip+x;__grip-y;__grip+y");
+        this.pprint("\"linein\";__name;" + (this.get('frame_line_in_index')) + ";0;");
+        this.pprint("\"lineout\";__name;" + (this.get('frame_line_out_index')) + ";0;");
+        this.pprint("\"pack\";" + (this.get('product')) + ";" + (this.get('box_length')) + ";" + (this.get('box_width')) + ";" + (this.get('box_height')) + ";" + (this.get('box_weight')) + ";1;0;0");
+        this.pprint("10000");
         this.pprint("120000");
         this.pprint("220000");
         all_layers = this.getUsedLayersName();

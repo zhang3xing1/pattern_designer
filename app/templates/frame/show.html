@@ -5,16 +5,18 @@
 
 <div class="right_board" id ='pattern_designer_container'>
 	<div class='left-panel col-sm-9' style="margin-left: 5%">
-		<form class="form-horizontal" role="form" >
-		  <div class=" form-group input-group col-sm-7">
-          <span class="input-group-addon label-info colomn-label-info">Line In</span>
-          <input type="text" class="form-control mission_" rv-value="mission:frame_line_in_index" >
-      </div>
+		<form class="form-horizontal" style="position:relative; top:-15px;" role="form" >
+			<div class=" form-group input-group col-sm-7">
+				<div class="div_label" style="width:135px; margin-left: 5px;">
+					<span class="field_label" style="margin-left:20px;">Line In</span>
+				</div>
+				<input type="text" class="field_text mission_" style="margin-left:0px;" rv-value="mission:frame_line_in_index" >
+			</div>
 			<% _.each(coordinates, function(axis){ %>
-			  <div class="form-group" >
+			  <div class="form-group" style="position:relative; top:-25px; left:-30px;">
 		    	<label  class="col-sm-2 control-label"><%= axis %></label>
 			    <div class="col-sm-5">
-			      <input  class="form-control mission_" rv-value="mission:frame_line_in_position_<%= axis.toLowerCase() %>" >
+			      <input  class="field_coordinate_text mission_" rv-value="mission:frame_line_in_position_<%= axis.toLowerCase() %>" >
 			    </div>
 		  	</div>		
 			<%	}); %> 	
@@ -25,16 +27,18 @@
 	</div>
   
   <div class='right-panel col-sm-9', style="float: right; margin-left: -30%; margin-right: -25%">
-		<form class="form-horizontal" role="form" >
+		<form class="form-horizontal" style="position:relative; top:-15px;" role="form" >
 		  <div class="form-group input-group col-sm-7">
-          <span class="input-group-addon label-info colomn-label-info">Line Out</span>
-          <input type="text" class="form-control mission_" rv-value="mission:frame_line_out_index" >
+          <div class="div_label" style="width:135px; margin-left: 5px;">
+			<span class="field_label" style="margin-left:20px;">Line Out</span>
+		  </div>
+          <input type="text" class="field_text mission_" style="margin-left:0px;" rv-value="mission:frame_line_out_index" >
       </div>
 			<% _.each(coordinates, function(axis){ %>
-			  <div class="form-group" >
+			  <div class="form-group" style="position:relative; top:-25px; left:-30px;">
 		    	<label  class="col-sm-2 control-label"><%= axis %></label>
 			    <div class="col-sm-5">
-			      <input  class="form-control mission_" rv-value="mission:frame_line_out_position_<%= axis.toLowerCase() %>" >
+			      <input  class="field_coordinate_text mission_" rv-value="mission:frame_line_out_position_<%= axis.toLowerCase() %>" >
 			    </div>
 		  	</div>		
 			<%	}); %> 	

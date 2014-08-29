@@ -1,5 +1,5 @@
 (function() {
-  define(["jquery", "underscore", "backbone", "bootstrapSwitch", "rivets", "text!templates/linein/pickSetting.html"], function($, _, Backbone, bootstrapSwitch, rivets, PickSettingView) {
+  define(["jquery", "underscore", "backbone", "bootstrapSwitch", "text!templates/linein/pickSetting.html"], function($, _, Backbone, bootstrapSwitch, PickSettingView) {
     var PickSettingTemplate;
     PickSettingTemplate = Backbone.View.extend({
       el: $("#right_board"),

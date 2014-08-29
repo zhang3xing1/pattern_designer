@@ -8,7 +8,7 @@
 </div>
 
 <div class="right_board placesetting" id ='pattern_designer_container'>
-	<div class='left-panel col-sm-10'  style="margin-left: 5%">
+	<div class='left-panel col-sm-10'  style="margin-left: 5%; position:relative; top:20px;" >
 		<div class='top-panel' style="height: 160px">
 			
 		</div>
@@ -18,13 +18,13 @@
             box_z_off: '0',
             box_orient: false,     
                 -->
-		<form class="form-horizontal" role="form" >
+		<form class="form-horizontal" role="form">
 			<% _.each(['X', 'Y', 'Z'], function(cell){ %>
 			  <div class="form-group" >
-		        <div class="mission-bottom input-group col-sm-5" >
-		            <span class="input-group-addon label-info colomn-label-info"><%= cell %> Off</span>
-		            <input type="text" class="form-control mission_" rv-value="mission:box_<%= cell.toLowerCase()%>_off" >
-		            <span class="input-group-addon">mm</span>
+		        <div class="div_label" style="width:95px; margin-left: 5px;">
+		            <span class="field_label"><%= cell %> Off</span>
+		            <input type="text" style="position:relative; top:-25px; left:80px;" class="field_text mission_" rv-value="mission:box_<%= cell.toLowerCase()%>_off" >
+		            <span style="position:relative; top:-55px; left:185px;">mm</span>
 		        </div>
 		  	</div>	
 		  	<% }); %>	

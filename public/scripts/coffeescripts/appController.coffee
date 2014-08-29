@@ -721,7 +721,7 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission','rivets'], (Logger,
     default_pattern_params: ->
       canvasStage =  
             width:      280
-            height:     360 
+            height:     315 
             stage_zoom: 1.5
 
       # color: RGB
