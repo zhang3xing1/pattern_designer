@@ -101,7 +101,16 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission','rivets'], (Logger,
           options.callback data if options.callback != undefined
         error: () ->
           window.appController.logger.dev "[get]: error" 
-    
+  
+    set_selected_layer_name: (selected_layer_name) =>
+      window.appController.set_request(name:'edting_layer_name', value: selected_layer_name, type: 'str')
+
+    get_selected_layer_name:() =>
+      selected_layer_name = ''
+      window.appController.get_request(name:'edting_layer_name', callback: (data) ->
+        selected_layer_name = data)
+      # window.appController.mission.getLayerDataByName(selected_layer_name)
+      selected_layer_name
     load_whole_mission_data: (mission_data_name) => 
 
       @mission.set('available_layers', {})
@@ -111,41 +120,11 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission','rivets'], (Logger,
         name: 'loadVarFile'
         params: [mission_data_name])
 
-      # @load_frame_data()
       @load_tool_data()
       @load_frame_in_data()
       @load_frame_out_data()
       @load_missionData_data()
       @load_settingData_data()
-      # @load_layers_data()
-      # @load_used_layers_data()
-
-    # load_frame_data: =>  
-    #   @set_request(
-    #     name: 'setting_data.frame_line_in_index'
-    #     value: @mission.get('frame_line_in_index')
-    #   )
-
-    #   @routine_request(name: 'getFrameIn')
-
-    #   @get_request(
-    #     name: 'setting_data'
-    #     callback: (data) =>
-    #       @mission.load_setting_info(JSON.parse(data))
-    #   )
-
-    #   @set_request(
-    #     name: 'setting_data.frame_line_out_index'
-    #     value: @mission.get('frame_line_out_index')
-    #   )
-
-    #   @routine_request(name: 'getFrameOut')
-
-    #   @get_request(
-    #     name: 'setting_data'
-    #     callback: (data) =>
-    #       @mission.load_setting_info(JSON.parse(data))
-    #   )  
 
     load_tool_data: =>
         @routine_request(name: 'getTool')
@@ -303,10 +282,7 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission','rivets'], (Logger,
           $("[id^='layer-item-']").removeClass('selected-item')
           $(this).addClass('selected-item')
           selected_layer_name = $('.list-group-item.selected-item').html()
-          window.appController.selected_layer = window.appController.mission.getLayerDataByName(selected_layer_name)
-          # selected_layer_id = $('.list-group-item.selected-item').attr('id')
-          # selected_layer = layers[selected_layer_id]
-          # window.appController.selected_layer = selected_layer
+          window.appController.set_selected_layer_name(selected_layer_name)
           return
         )
 
@@ -507,6 +483,7 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission','rivets'], (Logger,
       if route == 'pattern/*action'
         @load_layers_data()
         if action == 'new'
+          window.appController.set_selected_layer_name('')
           $('#layer-name').val("Layer_#{(Math.random()*10e16).toString().substr(0,5)}")
           $('#layer-name').focus().select()
           $("#layer-name").focusin(->
@@ -522,88 +499,58 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission','rivets'], (Logger,
             $('#layer-name').focus()
 
         if action == 'edit'
-          @load_pattern_data(window.appController.selected_layer)
+          selected_layer_name = window.appController.get_selected_layer_name()
+          selected_layer = window.appController.mission.getLayerDataByName(selected_layer_name)
+          @load_pattern_data(selected_layer_name)
+
+          $('#layer-name').val(selected_layer_name)  
           $('#layer-name').focus().select()
 
         if action == 'clone'
-          # layers = window.appController.getLayers()
-          # selected_layer_id = $('.list-group-item.selected-item').attr('id')
-          # selected_layer = layers[selected_layer_id]
-          # selected_layer = window.appController.selected_layer
-
-          # if selected_layer != undefined
-          if window.appController.selected_layer != undefined
+          selected_layer_name = window.appController.get_selected_layer_name()
+          selected_layer = window.appController.mission.getLayerDataByName(selected_layer_name)
+          if selected_layer != undefined
             # clone it as a new one before renaming this layer
-            clone_layer_name = "#{window.appController.selected_layer.name}_clone" 
-            window.appController.saveLayerBy({name: clone_layer_name, boxes: window.appController.selected_layer.boxes})
+            clone_layer_name = "#{selected_layer.name}_clone" 
+            window.appController.saveLayerBy({name: clone_layer_name, boxes: selected_layer.boxes})
 
           window.router.navigate("patterns", {trigger: true})
           return false 
 
-        if action == 'save'
-          @logger.debug "route-save"
-          @logger.debug "previous_action.action #{window.appController.previous_action.action}"
-          @logger.debug "current_action.action #{window.appController.current_action.action}"
+        # if action == 'save'
+        #   @logger.debug "route-save"
+        #   @logger.debug "previous_action.action #{window.appController.previous_action.action}"
+        #   @logger.debug "current_action.action #{window.appController.current_action.action}"
 
-          a_layer_name = $('#layer-name').val()
+        #   a_layer_name = $('#layer-name').val()
 
-          if window.appController.previous_action.action == 'edit'
-            window.appController.saveLayerBy({id: window.appController.selected_layer.id, ulid: window.appController.selected_layer.ulid})
+        #   if window.appController.previous_action.action == 'edit'
+        #     window.appController.saveLayerBy({id: window.appController.selected_layer.id, ulid: window.appController.selected_layer.ulid})
             
-            # if layer name was modified, then update the layers and used_layers of mission
-            # referring to the ulid of this layer.
-            new_name = $('#layer-name').val()
-            window.appController.updateUsedLayersNameByUlid(new_name, window.appController.selected_layer.ulid)
-            window.appController.selected_layer = undefined
-          else
-            window.appController.saveLayerBy()
+        #     # if layer name was modified, then update the layers and used_layers of mission
+        #     # referring to the ulid of this layer.
+        #     new_name = $('#layer-name').val()
+        #     window.appController.updateUsedLayersNameByUlid(new_name, window.appController.selected_layer.ulid)
+        #     window.appController.selected_layer = undefined
+        #   else
+        #     window.appController.saveLayerBy()
 
 
-          @routine_request(name: 'resetBoxes')
-          @routine_request(name: 'resetLayers')
-          @sendLayersToSave()
+        #   @routine_request(name: 'resetBoxes')
+        #   @routine_request(name: 'resetLayers')
+        #   @sendLayersToSave()
 
-          @routine_request(name: 'resetUsedLayers')
-          @sendUsedLayersToSave()
+        #   @routine_request(name: 'resetUsedLayers')
+        #   @sendUsedLayersToSave()
 
 
 
-          window.router.navigate("patterns", {trigger: true})
+        #   window.router.navigate("patterns", {trigger: true})
 
       # if route == 'frame'
       #   $("input[rv-value*='position']").attr "readonly", true
 
       rivets.bind $('.mission_'),{mission: @mission}    
-
-      # if route == 'toolSetting'
-      #   $("input").attr "readonly", true
-      #   $("input#table-index").attr "readonly", false
-        
-      #   $("[name='teach']").on "switchChange.bootstrapSwitch", (event, state) ->
-      #     # console.log this # DOM element
-      #     # console.log event # jQuery event
-      #     # console.log state # true | false
-
-      #     # state turn to be off, then button 'set' turn to be button 'PLACE'
-      #     if state
-      #       # ...
-      #       $('a.teach').removeClass('label-primary')
-      #       $('a.teach').addClass('label-success')
-      #       $('a.teach').html('')
-      #       # $("a.teach").attr("href", "#getTool")
-      #       $("input").attr "readonly", true
-      #       $("input#table-index").attr "readonly", false
-      #     else
-      #       # ...
-      #       $('a.teach').removeClass('label-success')
-      #       $('a.teach').addClass('label-success')
-      #       $('a.teach').html('Place')
-      #       $("a.teach").attr("href", "#tool/set")
-      #       $("input").attr "readonly", false
-
-      #   @load_tool_data()     
-
-      #   rivets.bind $('.mission_'),{mission: @mission}  
 
       if route == 'pickSetting'
         $("input").attr "readonly", true
@@ -731,6 +678,12 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission','rivets'], (Logger,
     updateUsedLayersNameByUlid:(new_layer_name, layer_ulid) ->
       @mission.updateUsedLayersNameByUlid(new_layer_name, layer_ulid)
 
+      @routine_request(name: 'resetBoxes')
+      @routine_request(name: 'resetLayers')
+      @sendLayersToSave()
+
+      @routine_request(name: 'resetUsedLayers')
+      @sendUsedLayersToSave()
     #
     # generate layers data to save data from js to pdl
     #

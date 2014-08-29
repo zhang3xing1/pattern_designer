@@ -80,12 +80,8 @@ define [
         patternShowView.render()
 
       if action == 'edit'
-        # layers = window.appController.getLayers()
-        # selected_layer_id = $('.list-group-item.selected-item').attr('id')
-        # selected_layer = layers[selected_layer_id]
-        # @logger.debug("route-edit: selected_layer_id->#{selected_layer_id}; layers-> #{Object.keys(layers)} ")
-        # if Object.keys(layers).length == 0 or selected_layer_id == undefined or selected_layer == undefined
-        if window.appController.selected_layer == undefined
+        selected_layer_name = window.appController.get_selected_layer_name()
+        if selected_layer_name == ''
           @navigate("patterns", {trigger: true})
           return false
         else
@@ -94,11 +90,10 @@ define [
           patternShowView.render()
 
       if action == 'delete'
-        # selected_layer_id = $('.list-group-item.selected-item').attr('id')
-        # if selected_layer_id != '' and selected_layer_id != undefined
-        if window.appController.selected_layer != undefined
-          window.appController.removeLayer(window.appController.selected_layer)
-          selected_layer_id = undefined
+        selected_layer_name = window.appController.get_selected_layer_name()
+        if selected_layer_name != ''
+          selected_layer = window.appController.mission.getLayerDataByName(selected_layer_name)
+          window.appController.removeLayer(selected_layer)
         else
           window.appController.flash(message: 'Delete a layer after choosing it!')
 

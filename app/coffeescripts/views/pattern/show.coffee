@@ -543,17 +543,6 @@ define [
 
           @layer.add @alignGroup
 
-
-          # to edit an exist layer, then load each box data on the stage board.
-          # to_edit_layer_name = window.appController.selectedLayer().name
-          # alert ("in pattern show #{window.appController.last_action.p}")
-          # if to_edit_layer_name
-          #   $('#layer-name').val(to_edit_layer_name)
-          #   console.log window.appController.getLayerByName(to_edit_layer_name)
-          Logger.dev "window.appController.previous_action.action"
-          if window.appController.current_action.action == 'edit'
-            $('#layer-name').val(window.appController.selected_layer.name)
-
         precisionAdjustment: (floatNumber, digitNumber = 0) ->
           ratioBy10 = 1 * Math.pow(10,digitNumber)
           Math.round(parseFloat(floatNumber)*ratioBy10)/ratioBy10
@@ -792,6 +781,39 @@ define [
             @currentBox.get('group').setDraggable(false)
             @hideAlignLines()
             @draw()
+
+            # synchronize current layer data to PDL
+
+            # 1. load this page before settting ulid and id value and the previous name to current page
+            # 2. just update boxes and  delete the layer with previous name  and add the new layer name when settleCurrentBox
+
+
+            a_layer_name = $('#layer-name').val()
+
+            selected_layer_name = window.appController.get_selected_layer_name()
+            if selected_layer_name != ''
+              selected_layer = window.appController.mission.getLayerDataByName(selected_layer_name)
+              window.appController.saveLayerBy(id: selected_layer.id, ulid: selected_layer.ulid)
+              
+              # if layer name was modified, then update the layers and used_layers of mission
+              # referring to the ulid of this layer.
+              new_name = $('#layer-name').val()
+              window.appController.updateUsedLayersNameByUlid(new_name, selected_layer.ulid)
+              window.appController.set_selected_layer_name('')
+            else
+              window.appController.saveLayerBy(name: a_layer_name = $('#layer-name').val())
+
+
+            window.appController.routine_request(name: 'resetBoxes')
+            window.appController.routine_request(name: 'resetLayers')
+            window.appController.sendLayersToSave()
+
+            window.appController.routine_request(name: 'resetUsedLayers')
+            window.appController.sendUsedLayersToSave()
+
+
+
+            #
         updateDragStatus: (draggableBox) ->
           _.each(@models,((aBox) ->
               if aBox.getBoxId() == draggableBox.getBoxId()
