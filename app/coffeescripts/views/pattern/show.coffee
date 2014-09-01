@@ -799,7 +799,8 @@ define [
                 rotate: a_box.get('rotate'),
                 arrow: a_box.get('vectorDegree')
                 arrowEnabled: a_box.get('vectorEnabled')
-              }), this)             
+              }), this)        
+                   
             if selected_layer_name == ''
               window.appController.saveLayerBy(name: a_layer_name = $('#layer-name').val(), boxes: boxes )
             else

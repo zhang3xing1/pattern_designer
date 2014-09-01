@@ -109,8 +109,17 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission','rivets'], (Logger,
       selected_layer_name = ''
       window.appController.get_request(name:'edting_layer_name', callback: (data) ->
         selected_layer_name = data)
-      # window.appController.mission.getLayerDataByName(selected_layer_name)
       selected_layer_name
+
+    set_stored_layer_name: (stored_layer_name) =>
+      window.appController.set_request(name:'stored_layer_name', value: stored_layer_name, type: 'str')
+
+    get_stored_layer_name:() =>
+      stored_layer_name = ''
+      window.appController.get_request(name:'stored_layer_name', callback: (data) ->
+        stored_layer_name = data)
+      stored_layer_name
+      
     load_whole_mission_data: (mission_data_name) => 
 
       @mission.set('available_layers', {})
@@ -486,6 +495,8 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission','rivets'], (Logger,
           window.appController.set_selected_layer_name('')
           $('#layer-name').val("Layer_#{(Math.random()*10e16).toString().substr(0,5)}")
           $('#layer-name').focus().select()
+
+          
           $("#layer-name").focusin(->
             return 
           ).focusout ->
@@ -498,6 +509,7 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission','rivets'], (Logger,
             $('#layer-name').val(new_layer_name)
             $('#layer-name').focus()
 
+
         if action == 'edit'
           selected_layer_name = window.appController.get_selected_layer_name()
           selected_layer = window.appController.mission.getLayerDataByName(selected_layer_name)
@@ -505,6 +517,7 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission','rivets'], (Logger,
 
           $('#layer-name').val(selected_layer_name)  
           $('#layer-name').focus().select()
+
 
         if action == 'clone'
           selected_layer_name = window.appController.get_selected_layer_name()
