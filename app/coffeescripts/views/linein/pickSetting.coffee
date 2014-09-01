@@ -14,7 +14,7 @@ define [
     render: ->
       # Using Underscore we can compile our template with data
       data =
-        title: "Box Picking Setting"
+        title: "TCP Setting"
 
       compiledTemplate = _.template(PickSettingView, data)
       

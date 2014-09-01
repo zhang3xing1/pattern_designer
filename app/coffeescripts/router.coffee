@@ -24,10 +24,11 @@ define [
   "views/lineout/constraintSetting"
   "views/pattern/show"
   "views/lineout/palletTemplate"
+  "views/linein/tools"
 ], ($, _, Backbone, AppController, BackboneRoutefilter, Tinybox, Logger, JqueryTransit, MissionShowView, PatternIndexView, FrameShowView, 
   LineinShowView, LineoutShowView, MissionEditView, MissionIndexView, MissionNewView,
   BoxSettingView, PlaceSettingView, PickSettingView, ToolSettingView, AdditionalInfoView,
-  PalletSettingView, ConstraintSettingView, PatternShowView, PalletTemplateView) ->
+  PalletSettingView, ConstraintSettingView, PatternShowView, PalletTemplateView, ToolsView) ->
   class AppRouter extends Backbone.Router
     routes:
       "program": "missionShow"
@@ -47,6 +48,7 @@ define [
       'constraintSetting': 'constraintSetting'
       "patterns": "patternIndex"
       'tool/*action': 'tool'
+      'tools': 'tools'
 
       # default root router
       "": "missionShow"
@@ -204,6 +206,14 @@ define [
       $('.right_board').remove()
       PalletTemplateShow = new PalletTemplateView
       PalletTemplateShow.render() 
+
+
+    tools: ->
+      console.log 'tools'
+      $('.right_board').remove()
+      ToolsShow = new ToolsView
+      ToolsShow.render() 
+
 
 
     constraintSetting: ->

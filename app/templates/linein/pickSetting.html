@@ -4,11 +4,10 @@
         <a href="#linein" class="label label-primary back-button" style="float: left" >
       <span class="glyphicon glyphicon-chevron-left"></span>
     </a>
-    <%= title %>
-      <a href="#setTool" class="label label-success teach"></a>   
-<!--       <a href="#" class="label label-primary" s>
-        GO to Place
-      </a>  -->  
+    <%= title %>  
+      <a href="#tools" class="label label-primary" s>
+        Load
+      </a>   
     </div>
    
 </div>
@@ -16,14 +15,10 @@
 <div class="right_board" id ='pattern_designer_container'>
     <div class='left-panel col-sm-10'  style="margin-left: 5%">
         <div class='top-panel' >
-           <!-- <div class="div_label" style="width:55px; margin-left: 5px; left:20px;">-->
-				<span class="field_label" style="font-size:16px;">TCP manual def</span>
-                <input type="checkbox" name="teach" checked>
-
-     <!--       </div>  -->
-            
-                <span class="field_label" style="font-size:16px;">Table Index</span>
-                <input type="text" id="table-index" style="left:365px;top:-30px; position:relative; width:45px;" class="form-control mission_" rv-value="mission:tool_index">
+            <div class="div_label" style="width:140px; margin-left: 5px; left:20px; margin-bottom: 20px">
+                <span class="field_label" >Tool Name</span>
+                <input type="text" class="field_text mission_" rv-value="mission:tcp_position_x" style="width:140px; left:200px; top:-25px;">
+            </div>
 
         </div>
 

@@ -24,7 +24,7 @@ define [
             router: "#placeSetting"
           }
           {
-            name: 'Box Pick Location'
+            name: 'TCP Setting'
             router: "#pickSetting"
           }
           {
