@@ -33,7 +33,7 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission','rivets'], (Logger,
       # pallets template data
       @pallet_templates = [
           {
-            id:   1
+            id:   0
             name: 'Industrie-Palette'
             length: 1200
             width:  1000
@@ -41,7 +41,7 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission','rivets'], (Logger,
             height:   145
           }
           {
-            id:   2
+            id:   1
             name: 'Chep 1200 × 1000'
             length: 1200
             width:  1000
@@ -49,7 +49,7 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission','rivets'], (Logger,
             height:   172
           }
           {
-            id:   3
+            id:   2
             name: 'Chep Halbpalette'
             length: 800
             width:  600
@@ -57,7 +57,7 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission','rivets'], (Logger,
             height:   158
           }
           {
-            id:   4
+            id:   3
             name: 'Chep 600 × 400'
             length: 600
             width:  400
@@ -65,7 +65,7 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission','rivets'], (Logger,
             height:   145
           }
           {
-            id:   5
+            id:   4
             name: 'niche definiert'
             length: 1200
             width:  800
@@ -280,9 +280,6 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission','rivets'], (Logger,
           new_message = '<form class="navbar-form"> <div class="form-group"> <input type="text" class="form-control" id="to-renamed-mission" placeholder="'\
             + "#{selected_mission_name}" + '"> </div> <a class="btn btn-default" id="misson_rename">Rename</a> </form>'          
           @flash(message: 'Saving Data......', closable: false)
-
-      # if route == 'frame'
-      #   @load_frame_data()
 
       if route == 'pattern/*action'
         if action == 'new' or action == 'clone'
@@ -516,7 +513,6 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission','rivets'], (Logger,
           window.router.navigate("#program", {trigger: true})
           return false 
 
-
       if route == 'patterns'
         @load_layers_data()
         @load_used_layers_data()
@@ -539,14 +535,22 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission','rivets'], (Logger,
           for a_pattet in @pallet_templates
             # SHEET  are layers can not access
             if a_pattet.name != 'SHEET'
-              $('#patterns').append( "<li class=\"list-group-item\" id=\"#{a_pattet.id}\">#{a_pattet.name}</li>" )
+              $('#patterns').append( "<li class=\"list-group-item\" id=\"pallet-template-#{a_pattet.id}\" pallet-index=\"#{a_pattet.id}\"  >#{a_pattet.name}</li>" )
     
-          $("[id^='layer-item-']").on('click', (el) ->
-            $("[id^='layer-item-']").removeClass('selected-item')
+          $("[id^='pallet-template-']").on('click', (el) ->
+            $("[id^='pallet-template-']").removeClass('selected-item')
             $(this).addClass('selected-item')
-            # selected_layer_name = $('.list-group-item.selected-item').html()
-            # window.appController.set_selected_layer_name(selected_layer_name)
-            return
+            pallet_template = window.appController.pallet_templates[Number.parseInt($('.list-group-item.selected-item').attr('pallet-index'))]
+            # window.appController.set_request(name: 'setting_data.pallet_length', value: pallet_template.length)
+            # window.appController.set_request(name: 'setting_data.pallet_width', value: pallet_template.width)
+            # window.appController.set_request(name: 'setting_data.pallet_height', value: pallet_template.height)
+            # window.appController.set_request(name: 'setting_data.max_height', value: pallet_template.max_height)
+            window.appController.mission.set('pallet_width', pallet_template.width)
+            window.appController.mission.set('pallet_height', pallet_template.height)
+            window.appController.mission.set('pallet_length', pallet_template.length)
+            window.appController.mission.set('max_height', pallet_template.max_height)
+
+            window.router.navigate("palletSetting", {trigger: true})
           )
       if route == 'pattern/*action'
         @load_layers_data()
