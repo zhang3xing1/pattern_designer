@@ -29,6 +29,50 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission','rivets'], (Logger,
       @mission_list = []
 
 
+
+      # pallets template data
+      @pallet_templates = [
+          {
+            id:   1
+            name: 'Industrie-Palette'
+            length: 1200
+            width:  1000
+            max_height: 1500
+            height:   145
+          }
+          {
+            id:   2
+            name: 'Chep 1200 × 1000'
+            length: 1200
+            width:  1000
+            max_height: 1500
+            height:   172
+          }
+          {
+            id:   3
+            name: 'Chep Halbpalette'
+            length: 800
+            width:  600
+            max_height: 1500
+            height:   158
+          }
+          {
+            id:   4
+            name: 'Chep 600 × 400'
+            length: 600
+            width:  400
+            max_height: 1000
+            height:   145
+          }
+          {
+            id:   5
+            name: 'niche definiert'
+            length: 1200
+            width:  800
+            max_height: 1500
+            height:   145
+          }                              
+        ]      
     sleep: (d = 100) ->
       t = Date.now()
       while Date.now() - t <= d
@@ -278,23 +322,6 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission','rivets'], (Logger,
           window.appController.mission.set('cross_wise', state)
           $("[name='length']").bootstrapSwitch('state', !state) 
       
-      if route == 'patterns'
-        @load_layers_data()
-        @load_used_layers_data()
-        layers = _.values(@mission.get('available_layers'))
-        for a_layer in layers
-          # SHEET  are layers can not access
-          if a_layer.name != 'SHEET'
-            $('#patterns').append( "<li class=\"list-group-item\" id=\"#{a_layer.id}\">#{a_layer.name}</li>" )
-  
-        $("[id^='layer-item-']").on('click', (el) ->
-          $("[id^='layer-item-']").removeClass('selected-item')
-          $(this).addClass('selected-item')
-          selected_layer_name = $('.list-group-item.selected-item').html()
-          window.appController.set_selected_layer_name(selected_layer_name)
-          return
-        )
-
       if route == 'mission/*action'
         # if action == 'update'
           # # window.router.navigate("#mission/index", {trigger: true})
@@ -489,6 +516,38 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission','rivets'], (Logger,
           window.router.navigate("#program", {trigger: true})
           return false 
 
+
+      if route == 'patterns'
+        @load_layers_data()
+        @load_used_layers_data()
+        layers = _.values(@mission.get('available_layers'))
+        for a_layer in layers
+          # SHEET  are layers can not access
+          if a_layer.name != 'SHEET'
+            $('#patterns').append( "<li class=\"list-group-item\" id=\"#{a_layer.id}\">#{a_layer.name}</li>" )
+  
+        $("[id^='layer-item-']").on('click', (el) ->
+          $("[id^='layer-item-']").removeClass('selected-item')
+          $(this).addClass('selected-item')
+          selected_layer_name = $('.list-group-item.selected-item').html()
+          window.appController.set_selected_layer_name(selected_layer_name)
+          return
+        )
+
+
+      if route == 'palletTemplate'
+          for a_pattet in @pallet_templates
+            # SHEET  are layers can not access
+            if a_pattet.name != 'SHEET'
+              $('#patterns').append( "<li class=\"list-group-item\" id=\"#{a_pattet.id}\">#{a_pattet.name}</li>" )
+    
+          $("[id^='layer-item-']").on('click', (el) ->
+            $("[id^='layer-item-']").removeClass('selected-item')
+            $(this).addClass('selected-item')
+            # selected_layer_name = $('.list-group-item.selected-item').html()
+            # window.appController.set_selected_layer_name(selected_layer_name)
+            return
+          )
       if route == 'pattern/*action'
         @load_layers_data()
         if action == 'new'
@@ -496,7 +555,7 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission','rivets'], (Logger,
           $('#layer-name').val("Layer_#{(Math.random()*10e16).toString().substr(0,5)}")
           $('#layer-name').focus().select()
 
-          
+
           $("#layer-name").focusin(->
             return 
           ).focusout ->
@@ -530,12 +589,14 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission','rivets'], (Logger,
           window.router.navigate("patterns", {trigger: true})
           return false 
 
+
+
         # if action == 'save'
         #   @logger.debug "route-save"
         #   @logger.debug "previous_action.action #{window.appController.previous_action.action}"
         #   @logger.debug "current_action.action #{window.appController.current_action.action}"
 
-        #   a_layer_name = $('#layer-name').val()
+        #   a_pattet_name = $('#layer-name').val()
 
         #   if window.appController.previous_action.action == 'edit'
         #     window.appController.saveLayerBy({id: window.appController.selected_layer.id, ulid: window.appController.selected_layer.ulid})
