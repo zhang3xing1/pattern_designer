@@ -27,7 +27,7 @@ define [
 ], ($, _, Backbone, AppController, BackboneRoutefilter, Tinybox, Logger, JqueryTransit, MissionShowView, PatternIndexView, FrameShowView, 
   LineinShowView, LineoutShowView, MissionEditView, MissionIndexView, MissionNewView,
   BoxSettingView, PlaceSettingView, PickSettingView, ToolSettingView, AdditionalInfoView,
-  PalletSettingView, ConstraintSettingView, PatternShowView, PalletTemplateShow) ->
+  PalletSettingView, ConstraintSettingView, PatternShowView, PalletTemplateView) ->
   class AppRouter extends Backbone.Router
     routes:
       "program": "missionShow"
@@ -202,7 +202,7 @@ define [
     palletTemplate: ->
       console.log 'palletTemplate'
       $('.right_board').remove()
-      PalletTemplateShow = new PalletTemplateShow
+      PalletTemplateShow = new PalletTemplateView
       PalletTemplateShow.render() 
 
 
