@@ -728,7 +728,7 @@ define [
           ## update the new box params with to_be_added_box_data
           if to_be_added_box_data.x != undefined
             #keys: x,y,rotate,arrow
-            console.log to_be_added_box_data
+            # console.log to_be_added_box_data
             newBox.rotateWithAngle(to_be_added_box_data.rotate)
             newBox.rotateArrow(to_be_added_box_data.arrow) if to_be_added_box_data.arrowEnabled
             newBox.setXPosition(to_be_added_box_data.x)

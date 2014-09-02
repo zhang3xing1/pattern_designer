@@ -46,6 +46,8 @@ define [
       tool_position_e: 0,
       tool_position_r: 1,
 
+
+      tool_name: '',
       tcp_position_x: 1,
       tcp_position_y: 1,
       tcp_position_z: 1,
@@ -453,6 +455,12 @@ define [
       @set('tool_position_a',setting_data_from_pdl.tool_position_a)
       @set('tool_position_e',setting_data_from_pdl.tool_position_e)
       @set('tool_position_r',setting_data_from_pdl.tool_position_r)
+      @set('tcp_position_x',setting_data_from_pdl.tcp_position_x)
+      @set('tcp_position_y',setting_data_from_pdl.tcp_position_y)
+      @set('tcp_position_z',setting_data_from_pdl.tcp_position_z)
+      @set('tcp_position_a',setting_data_from_pdl.tcp_position_a)
+      @set('tcp_position_e',setting_data_from_pdl.tcp_position_e)
+      @set('tcp_position_r',setting_data_from_pdl.tcp_position_r)
       @set('length_wise',setting_data_from_pdl.length_wise)
       @set('cross_wise',setting_data_from_pdl.cross_wise)
       @set('pallet_length',setting_data_from_pdl.pallet_length)

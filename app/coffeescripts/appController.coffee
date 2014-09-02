@@ -73,6 +73,9 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission','rivets'], (Logger,
             height:   145
           }                              
         ]      
+
+      # flag of timeout for calculation of tool
+      @is_timeout = true
     sleep: (d = 100) ->
       t = Date.now()
       while Date.now() - t <= d
@@ -136,7 +139,7 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission','rivets'], (Logger,
         result = ''
 
       get_url = "run?routine=#{options.name}#{result}&prog=#{@program_name}"
-      # console.log "#{@remote_url}#{get_url}"
+      console.log "#{@remote_url}#{get_url}"
       $.ajax
         url: get_url
         cache: false
@@ -290,6 +293,7 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission','rivets'], (Logger,
     after_action: (route, params) =>
       action = params[0]
       rivets.bind $('.mission_'),{mission: @mission}
+      @is_timeout = true
 
       @load_whole_mission_data()
 
@@ -534,28 +538,35 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission','rivets'], (Logger,
           return
         )
 
+      if route == 'calculateTool'
+        @is_timeout = false
+        setTimeout (->
+          window.appController.routine_request(name: 'calculate_tool_data')
+          window.appController.load_settingData_data()
+          setTimeout arguments.callee, 500  unless window.appController.is_timeout 
+        ), 500
 
       if route == 'palletTemplate'
-          for a_pattet in @pallet_templates
-            # SHEET  are layers can not access
-            if a_pattet.name != 'SHEET'
-              $('#patterns').append( "<li class=\"list-group-item\" id=\"pallet-template-#{a_pattet.id}\" pallet-index=\"#{a_pattet.id}\"  >#{a_pattet.name}</li>" )
-    
-          $("[id^='pallet-template-']").on('click', (el) ->
-            $("[id^='pallet-template-']").removeClass('selected-item')
-            $(this).addClass('selected-item')
-            pallet_template = window.appController.pallet_templates[Number.parseInt($('.list-group-item.selected-item').attr('pallet-index'))]
-            # window.appController.set_request(name: 'setting_data.pallet_length', value: pallet_template.length)
-            # window.appController.set_request(name: 'setting_data.pallet_width', value: pallet_template.width)
-            # window.appController.set_request(name: 'setting_data.pallet_height', value: pallet_template.height)
-            # window.appController.set_request(name: 'setting_data.max_height', value: pallet_template.max_height)
-            window.appController.mission.set('pallet_width', pallet_template.width)
-            window.appController.mission.set('pallet_height', pallet_template.height)
-            window.appController.mission.set('pallet_length', pallet_template.length)
-            window.appController.mission.set('max_height', pallet_template.max_height)
+        for a_pattet in @pallet_templates
+          # SHEET  are layers can not access
+          if a_pattet.name != 'SHEET'
+            $('#patterns').append( "<li class=\"list-group-item\" id=\"pallet-template-#{a_pattet.id}\" pallet-index=\"#{a_pattet.id}\"  >#{a_pattet.name}</li>" )
+  
+        $("[id^='pallet-template-']").on('click', (el) ->
+          $("[id^='pallet-template-']").removeClass('selected-item')
+          $(this).addClass('selected-item')
+          pallet_template = window.appController.pallet_templates[Number.parseInt($('.list-group-item.selected-item').attr('pallet-index'))]
+          # window.appController.set_request(name: 'setting_data.pallet_length', value: pallet_template.length)
+          # window.appController.set_request(name: 'setting_data.pallet_width', value: pallet_template.width)
+          # window.appController.set_request(name: 'setting_data.pallet_height', value: pallet_template.height)
+          # window.appController.set_request(name: 'setting_data.max_height', value: pallet_template.max_height)
+          window.appController.mission.set('pallet_width', pallet_template.width)
+          window.appController.mission.set('pallet_height', pallet_template.height)
+          window.appController.mission.set('pallet_length', pallet_template.length)
+          window.appController.mission.set('max_height', pallet_template.max_height)
 
-            window.router.navigate("palletSetting", {trigger: true})
-          )
+          window.router.navigate("palletSetting", {trigger: true})
+        )
       if route == 'pattern/*action'
         @load_layers_data()
         if action == 'new'
@@ -597,69 +608,12 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission','rivets'], (Logger,
           window.router.navigate("patterns", {trigger: true})
           return false 
 
-
-
-        # if action == 'save'
-        #   @logger.debug "route-save"
-        #   @logger.debug "previous_action.action #{window.appController.previous_action.action}"
-        #   @logger.debug "current_action.action #{window.appController.current_action.action}"
-
-        #   a_pattet_name = $('#layer-name').val()
-
-        #   if window.appController.previous_action.action == 'edit'
-        #     window.appController.saveLayerBy({id: window.appController.selected_layer.id, ulid: window.appController.selected_layer.ulid})
-            
-        #     # if layer name was modified, then update the layers and used_layers of mission
-        #     # referring to the ulid of this layer.
-        #     new_name = $('#layer-name').val()
-        #     window.appController.updateUsedLayersNameByUlid(new_name, window.appController.selected_layer.ulid)
-        #     window.appController.selected_layer = undefined
-        #   else
-        #     window.appController.saveLayerBy()
-
-
-        #   @routine_request(name: 'resetBoxes')
-        #   @routine_request(name: 'resetLayers')
-        #   @sendLayersToSave()
-
-        #   @routine_request(name: 'resetUsedLayers')
-        #   @sendUsedLayersToSave()
-
-
-
-        #   window.router.navigate("patterns", {trigger: true})
-
-      # if route == 'frame'
-      #   $("input[rv-value*='position']").attr "readonly", true
-
       rivets.bind $('.mission_'),{mission: @mission}    
 
       if route == 'pickSetting'
         $("input").attr "readonly", true
         $("input#table-index").attr "readonly", false
         
-        # $("[name='teach']").on "switchChange.bootstrapSwitch", (event, state) ->
-        #   # console.log this # DOM element
-        #   # console.log event # jQuery event
-        #   # console.log state # true | false
-
-        #   # state turn to be off, then button 'set' turn to be button 'PLACE'
-        #   if state
-        #     # ...
-        #     $('a.teach').removeClass('label-primary')
-        #     $('a.teach').addClass('label-success')
-        #     $('a.teach').html('')
-        #     # $("a.teach").attr("href", "#getTool")
-        #     $("input").attr "readonly", true
-        #     $("input#table-index").attr "readonly", false
-        #   else
-        #     # ...
-        #     $('a.teach').removeClass('label-success')
-        #     $('a.teach').addClass('label-success')
-        #     $('a.teach').html('Place')
-        #     $("a.teach").attr("href", "#tool/set")
-        #     $("input").attr "readonly", false
-
         @load_tool_data()     
 
         rivets.bind $('.mission_'),{mission: @mission}     
