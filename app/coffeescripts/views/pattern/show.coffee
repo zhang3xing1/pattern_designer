@@ -782,15 +782,10 @@ define [
             @hideAlignLines()
             @draw()
 
-            # synchronize current layer data to PDL
-
-            # 1. load this page before settting ulid and id value and the previous name to current page
-            # 2. just update boxes and  delete the layer with previous name  and add the new layer name when settleCurrentBox
-
 
             a_layer_name = $('#layer-name').val()
-
             selected_layer_name = window.appController.get_selected_layer_name()
+
 
             boxes =_.map(@models,((a_box) ->
               {
@@ -799,20 +794,18 @@ define [
                 rotate: a_box.get('rotate'),
                 arrow: a_box.get('vectorDegree')
                 arrowEnabled: a_box.get('vectorEnabled')
-              }), this)        
-                   
-            if selected_layer_name == ''
-              window.appController.saveLayerBy(name: a_layer_name = $('#layer-name').val(), boxes: boxes )
-            else
-              selected_layer = window.appController.mission.getLayerDataByName(selected_layer_name)
-              window.appController.saveLayerBy(id: selected_layer.id, ulid: selected_layer.ulid, boxes: boxes )
-              
-              # if layer name was modified, then update the layers and used_layers of mission
-              # referring to the ulid of this layer.
-              new_name = $('#layer-name').val()
-              window.appController.updateUsedLayersNameByUlid(new_name, selected_layer.ulid)
-              window.appController.set_selected_layer_name('')
+                layer_name: a_layer_name     # always current layer name
+              }), this) 
 
+
+            if selected_layer_name == ''
+              window.appController.saveLayerBy(name: a_layer_name, boxes: boxes)
+              window.appController.set_selected_layer_name(a_layer_name)
+            else
+              to_update_layer = window.appController.mission.getLayerDataByName(selected_layer_name)
+              window.appController.saveLayerBy(name: a_layer_name, id: to_update_layer.id, ulid: to_update_layer.ulid, boxes: boxes )
+              window.appController.updateUsedLayersNameByUlid(a_layer_name, to_update_layer.ulid)
+       
 
             window.appController.routine_request(name: 'resetBoxes')
             window.appController.routine_request(name: 'resetLayers')

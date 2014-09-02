@@ -1,0 +1,581 @@
+/*@import "wizard_common.css";
+*/
+body {
+	margin: 0;
+	padding: 0;
+	height: 380px; /*379*/
+	width: 530px;
+	
+	font-family: sans-serif;
+	background: rgb(230, 235, 242);
+}
+input[type=number]::-webkit-inner-spin-button,
+input[type=number]::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+#notification_line_in {
+	position:absolute;
+	top:25px;
+	display:none
+}
+/*
+.box{
+height: 260px;
+    overflow: hidden;
+}
+*/
+
+#notification_line_out {
+	position:absolute;
+	top:-35px;
+	left: 255px;
+	display:none
+}
+
+p {
+	margin-top: 5px;
+	margin-bottom: 5px;
+}
+
+input[readonly] {
+	background: rgb(206, 206, 206);
+	color: black;
+	border:1px solid #817F7F; 
+	border-radius: 5px;
+	font-size: 15px;
+	font-weight:bold;
+}
+
+output[readonly] {
+	background: rgb(206, 206, 206);
+	color: rgb(0, 0, 0);
+	border:1px solid #817F7F; 
+	border-radius: 5px;
+	
+}
+
+div.field_coordinate_text[readonly] {
+	background: rgb(206, 206, 206);
+	color: rgb(0, 0, 0);
+	border:2px solid #817F7F; 
+	border-radius: 5px;
+	
+}
+
+.half_container {
+	width: 50%;
+	float: left;
+}
+
+.field {
+	height: 40px;
+	line-height: 40px;	
+	margin-top: 20px;
+	margin-bottom: 0;
+}
+
+.field_label {
+	width:150px;
+	height:30px;
+	font-size: 19px;
+	font-weight: bold;
+	margin-left: 15px;	
+}
+
+.field_label_new_step {
+	width:150px;
+	height:30px;
+	font-size: 21px;
+	font-weight: bold;
+	margin-left: 15px;	
+	line-height: 1.5;
+}
+
+.field_text {
+	border:1px solid #817F7F; 
+	border-radius: 5px;
+	width: 80px;
+	height:36px;
+	overflow:hidden;
+	font-weight:normal;
+	resize: none;
+	margin-left: 20px;
+	font-size: 20px;
+	vertical-align: middle;
+	position:relative;
+	top:-35px;
+	left:135px;
+}
+
+span{
+	font-weight:normal;
+}
+
+.field_unit {
+	font-size: 15px;
+}
+
+.field_coordinate {
+	height: 15%;
+	width: 100%;
+	line-height: 57px;
+	position: relative;
+}
+
+.field_coordinate_frame {
+	height: 13%;
+	width: 100%;
+	line-height: 57px;
+	position: relative;
+}
+
+.field_coordinate_place {
+	height: 13%;
+	width: 100%;
+	line-height: 55px;
+	position: relative;
+}
+
+.field_coordinate_label {
+	font-size: 25px;
+	font-weight: bold;
+	margin-left: 30px;
+}
+
+.field_coordinate_text {
+	width: 140px;
+	margin-left: 20px;
+	font-size: 20px;
+	text-align: center;
+}
+
+.field_coordinate_unit {
+	font-size: 15px;
+}
+
+.icon {
+	height: 32px;
+	width: 32px;
+	margin-left: 10px;
+	cursor: pointer;
+}
+
+.desc{
+	width: 470px;
+	margin-left: 0px;
+	margin-top: 10px;
+}
+
+.advance {
+	-moz-box-shadow:inset 0px 1px 0px 0px #ffffff;
+	-webkit-box-shadow:inset 0px 1px 0px 0px #ffffff;
+	box-shadow:inset 0px 1px 0px 0px #ffffff;
+	background:-webkit-gradient( linear, left top, left bottom, color-stop(0.05, white), color-stop(1, white) );
+	background:-moz-linear-gradient( center top, #ededed 5%, #ededed 100% );
+	filter:progid:DXImageTransform.Microsoft.gradient(startColorstr='white', endColorstr='white');
+	background-color:white;
+	-webkit-border-top-left-radius:7px;
+	-moz-border-radius-topleft:7px;
+	border-top-left-radius:7px;
+	-webkit-border-top-right-radius:7px;
+	-moz-border-radius-topright:7px;
+	border-top-right-radius:7px;
+	-webkit-border-bottom-right-radius:7px;
+	-moz-border-radius-bottomright:7px;
+	border-bottom-right-radius:7px;
+	-webkit-border-bottom-left-radius:7px;
+	-moz-border-radius-bottomleft:7px;
+	border-bottom-left-radius:7px;
+	text-indent:0px;
+	border:1px solid #817F7F;
+	display:inline-block;
+	color:black;
+	font-family:Arial;
+	font-size:25px;
+	font-weight:bold;
+	font-style:normal;
+	height:30px;
+	width:500px;
+	text-decoration:none;
+	text-align:center;
+	text-shadow:1px 0px 0px #ffffff;
+	margin-left: 15px;
+}
+.advance:hover {
+	background:-webkit-gradient( linear, left top, left bottom, color-stop(0.05, #dfdfdf), color-stop(1, #ededed) );
+	background:-moz-linear-gradient( center top, #dfdfdf 5%, #ededed 100% );
+	filter:progid:DXImageTransform.Microsoft.gradient(startColorstr='#dfdfdf', endColorstr='#ededed');
+	background-color:#dfdfdf;
+}
+.advance:active {
+	position:relative;
+	top:1px;
+}
+
+/**
+ * iOS 6 style switch checkboxes
+ * by Lea Verou http://lea.verou.me
+ */
+
+:root input[type="checkbox"] { /* :root here acting as a filter for older browsers */
+	position: absolute;
+	opacity: 0;
+}
+
+:root input[type="checkbox"].ios-switch + div {
+	display: inline-block;
+	vertical-align: middle;
+	width: 3em;	height: 1em;
+	border: 1px solid rgba(0,0,0,.3);
+	border-radius: 999px;
+	margin: 0 .5em;
+	background: white;
+	background-image: linear-gradient(rgba(0,0,0,.1), transparent),
+	                  linear-gradient(90deg, hsl(210, 90%, 60%) 50%, transparent 50%);
+	background-size: 200% 100%;
+	background-position: 100% 0;
+	background-origin: border-box;
+	background-clip: border-box;
+	overflow: hidden;
+	transition-duration: .4s;
+	transition-property: padding, width, background-position, text-indent;
+	box-shadow: 0 .1em .1em rgba(0,0,0,.2) inset,
+	            0 .45em 0 .1em rgba(0,0,0,.05) inset;
+	font-size: 150%; /* change this and see how they adjust! */
+}
+
+:root input[type="checkbox"].ios-switch:checked + div {
+	padding-left: 2em;	width: 1em;
+	background-position: 0 0;
+}
+
+:root input[type="checkbox"].ios-switch + div:before {
+	content: 'On';
+	float: left;
+	width: 1.65em; height: 1.65em;
+	margin: -.1em;
+	border: 1px solid rgba(0,0,0,.35);
+	border-radius: inherit;
+	background: white;
+	background-image: linear-gradient(rgba(0,0,0,.2), transparent);
+	box-shadow: 0 .1em .1em .1em hsla(0,0%,100%,.8) inset,
+	            0 0 .5em rgba(0,0,0,.3);
+	color: white;
+	text-shadow: 0 -1px 1px rgba(0,0,0,.3);
+	text-indent: -2.5em;
+}
+
+:root input[type="checkbox"].ios-switch:active + div:before {
+	background-color: #eee;
+}
+
+:root input[type="checkbox"].ios-switch:focus + div {
+	box-shadow: 0 .1em .1em rgba(0,0,0,.2) inset,
+	            0 .45em 0 .1em rgba(0,0,0,.05) inset,
+	            0 0 .4em 1px rgba(255,0,0,.5);
+}
+
+:root input[type="checkbox"].ios-switch + div:before,
+:root input[type="checkbox"].ios-switch + div:after {
+	font: bold 60%/1.9 sans-serif;
+	text-transform: uppercase;
+}
+
+:root input[type="checkbox"].ios-switch + div:after {
+	content: 'Off';
+	float: left;
+	text-indent: .5em;
+	color: rgba(0,0,0,.45);
+	text-shadow: none;
+
+}
+
+/* Switch code ends here, from now on it’s just bling for the demo page */
+.div_label{
+	position: relative;
+	left:-15px;
+	width: 140px;
+	height:34px;
+	border: 1px solid #817F7F;
+	border-radius: .6em .6em .6em .6em;
+	border-radius: 5px;
+	background: white;
+	font: bold 110% sans-serif;
+	margin-left: 10px;
+	margin-right: 30px;
+}
+
+.div_label_new_step{
+	position: absolute;
+	width: 80px;
+	height:30px;
+	border: 1px solid #817F7F;
+	border-radius: .6em .6em .6em .6em;
+	border-radius: 5px;
+	background: white;
+	font: bold 110% sans-serif;
+	margin-left: 10px;
+	margin-right: 30px;
+	margin-top: 20px;
+}
+
+/*
+label {
+	position: relative;
+	display: block;
+	padding: .8em;
+	border:2px solid #817F7F; 
+	border-radius: .6em .6em .6em .6em;
+	border-radius: 5px;
+	background: white;
+	font: bold 110% sans-serif;
+	width: 470px;
+	margin-left: 10px;
+	margin-right: 30px;
+	margin-top: 20px;
+}
+*/
+.custom-select {
+    position: relative;
+    display: inline-block;
+}
+
+.custom-select select {
+    display: inline-block;
+    border: 2px solid #bbb;
+    padding: 4px 3px 3px 5px;
+    margin: 0;
+    font: inherit;
+    outline:none; /* remove focus ring from Webkit */
+    line-height: 1.2;
+    background: #f8f8f8;
+    
+    -webkit-appearance:none; /* remove the strong OSX influence from Webkit */
+    
+    -webkit-border-radius: 6px;
+    -moz-border-radius: 6px;
+    border-radius: 6px;
+}
+
+/* for Webkit's CSS-only solution */
+@media screen and (-webkit-min-device-pixel-ratio:0) { 
+    .custom-select select {
+        padding-right:30px;    
+    }
+}
+
+/* Since we removed the default focus styles, we have to add our own */
+.custom-select select:focus {
+    -webkit-box-shadow: 0 0 3px 1px #c00;
+    -moz-box-shadow: 0 0 3px 1px #c00;
+    box-shadow: 0 0 3px 1px #c00;
+}
+
+/* Select arrow styling */
+.custom-select:after {
+    content: "▼";
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    font-size: 60%;
+    line-height: 30px;
+    padding: 0 7px;
+    background: #bbb;
+    color: white;
+    
+    pointer-events:none;
+    
+    -webkit-border-radius: 0 6px 6px 0;
+    -moz-border-radius: 0 6px 6px 0;
+    border-radius: 0 6px 6px 0;
+}
+
+.no-pointer-events .custom-select:after {
+    content: none;
+}
+
+/**
+ * iOS 5 style back button
+ * by Gregor Adams http://cssnerd.com/2011/11/30/the-best-pure-css3-ios-style-arrow-back-button/
+ */
+ 
+.ios-arrow-left {
+	color:black;
+	border: 0px solid #817F7F;					/*    AGGIUNTO   */
+	border-bottom: 1px solid #817F7F;			/*    AGGIUNTO   */
+	border-right: 1px solid #817F7F	;			/*    AGGIUNTO   */
+    display : block;
+    position:absolute;
+    z-index : 0;
+    left:30px;
+    top:10px;    
+    height:30px;
+    width:auto;
+    padding: 0 10px 0 6px;
+    background-size : 30px 30px;
+
+    background-repeat:repeat-x;
+    background-position :0;
+    background-image : -moz-linear-gradient(
+        90deg,
+        rgba(0,0,0,0) 0%,
+        rgba(0,0,0,0) 50%,
+        rgba(255,255,255,0.1) 50%,
+        rgba(255,255,255,0.3) 100%
+        );
+    background-image : -o-linear-gradient(
+        90deg,
+        rgba(0,0,0,0) 0%,
+        rgba(0,0,0,0) 50%,
+        rgba(255,255,255,0.1) 50%,
+        rgba(255,255,255,0.3) 100%
+        );
+    background-image : -webkit-linear-gradient(
+        90deg,
+        rgba(0,0,0,0) 0%,
+        rgba(0,0,0,0) 50%,
+        rgba(255,255,255,0.1) 50%,
+        rgba(255,255,255,0.3) 100%
+        );
+
+    border-radius: 5px;
+
+
+    box-shadow :0 -1px 1px rgba(0,0,0,0.2)inset,
+        0 1px 2px rgba(0,0,0,0.8)inset;
+
+    color:#fff;
+    text-shadow : 0px -1px 0px rgba(0,0,0,0.8);
+    cursor: pointer;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -o-user-select: none;
+    user-select: none;
+}
+
+.ios-arrow-left:before{
+    position:absolute;
+    content : ' ';
+    left:-8px;
+    top:3px; 								/*		modificato		*/
+    height : 22px; 							/*		modificato		*/
+    width: 24px;
+    z-index : 1;
+
+	
+	border-top: 1px solid #817F7F;			/*		AGGIUNTO		*/
+	border-left: 1px solid #817F7F;			/*		AGGIUNTO		*/
+	
+	
+	
+    background-repeat:repeat-x;
+    background-size : 30px 30px;
+    background-position :-1px -1.5px;
+    background-image : -moz-linear-gradient(
+        45deg,
+        rgba(0,0,0,0) 0%,
+        rgba(0,0,0,0) 52%,
+        rgba(255,255,255,0.1) 52%,
+        rgba(255,255,255,0.4) 100%
+        );
+    background-image : -o-linear-gradient(
+        45deg,
+        rgba(0,0,0,0) 0%,
+        rgba(0,0,0,0) 52%,
+        rgba(255,255,255,0.1) 52%,
+        rgba(255,255,255,0.4) 100%
+        );
+    background-image : -webkit-linear-gradient(
+        45deg,
+        rgba(0,0,0,0) 0%,
+        rgba(0,0,0,0) 52%,
+        rgba(255,255,255,0.1) 52%,
+        rgba(255,255,255,0.4) 100%
+        );
+    background-image : linear-gradient(
+        45deg,
+        rgba(0,0,0,0) 0%,
+        rgba(0,0,0,0) 52%,
+        rgba(255,255,255,0.1) 52%,
+        rgba(255,255,255,0.4) 100%
+        );
+
+
+    -moz-transform : rotateZ(-45deg) skewY(-10deg) skewX(-10deg);
+    -o-transform : rotateZ(-45deg) skewY(-10deg) skewX(-10deg);
+    -webkit-transform : rotateZ(-45deg) skewY(-10deg) skewX(-10deg);
+    transform : rotateZ(-45deg) skewY(-10deg) skewX(-10deg);
+    border-top-right-radius : 11px;
+    border-top-left-radius :0px;
+    border-bottom-right-radius : 0;
+    border-bottom-left-radius : 10px;
+
+   
+
+    box-shadow :  0px 1px 1px rgba(0,0,0,0.7) inset,
+        2px -2px 2px -3px rgba(0,0,0,0.5) inset;
+
+    /*-webkit-mask-image :
+        -webkit-gradient(linear, left top, right bottom,
+            from(#000000),
+            color-stop(0.4,#000000),
+            color-stop(0.5, transparent),
+            to(transparent));
+    */
+}
+.ios-arrow-left:after {
+
+    font-family : HelveticaNeue,Helvetica, Arial;
+    font-weight: 400;
+    font-size : 12px;
+    line-height : 30px;
+    text-align:center;    
+    content: attr(title)"";
+    z-index: 999;
+    left:-2px;
+    padding-left:3px;
+    position:relative;
+    height: 30px;
+    line-height:30px;
+    display:block;
+    background-repeat:repeat-x;
+    background-size : 30px 30px;
+    background-position :-1px -0.5px;
+    box-shadow :0 -3px 1px -2px rgba(0,0,0,0.3)inset,
+                0 4px 2px -3px rgba(0,0,0,0.8)inset;
+    background-image : -webkit-linear-gradient(
+        90deg,
+        rgba(0,0,0,0) 0%,
+        rgba(0,0,0,0) 50%,
+        rgba(255,255,255,0.1) 50%,
+        rgba(255,255,255,0.3) 100%
+        );
+    background-image : -moz-linear-gradient(
+        90deg,
+        rgba(0,0,0,0) 0%,
+        rgba(0,0,0,0) 50%,
+        rgba(255,255,255,0.1) 50%,
+        rgba(255,255,255,0.3) 100%
+        );
+    background-image : -o-linear-gradient(
+        90deg,
+        rgba(0,0,0,0) 0%,
+        rgba(0,0,0,0) 50%,
+        rgba(255,255,255,0.1) 50%,
+        rgba(255,255,255,0.3) 100%
+        );
+}
+.ios-arrow-left,
+.ios-arrow-left:after,
+.ios-arrow-left:before {
+    background-color: rgba(239,239,239,1);/*originalcolor*/
+}
+
+.ios-arrow-left:hover,
+.ios-arrow-left:hover:after,
+.ios-arrow-left:hover:before {
+    background-color: rgba(219,219,219,1);/*hovercolor*/
+
+}

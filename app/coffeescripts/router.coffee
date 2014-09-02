@@ -151,9 +151,9 @@ define [
         missionIndexView = new MissionIndexView
         missionIndexView.render() 
         $('.sub-page-view').transition({ left: '0px' });
-        # window.setTimeout((->
-        #   $('.previous-page').remove()
-        #   ), 1000);
+        window.setTimeout((->
+          $('.previous-page').remove()
+          ), 1000);
         
 
       if action == 'save'

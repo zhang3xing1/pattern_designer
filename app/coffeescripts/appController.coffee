@@ -86,7 +86,7 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission','rivets'], (Logger,
         options.value = "'#{ options.value}'"  
 
       get_url = "set?var=#{options.name}&prog=#{@program_name}&value=#{options.value}"
-      console.log "#{@remote_url}#{get_url}"
+      # console.log "#{@remote_url}#{get_url}"
 
       $.ajax
         url: get_url
@@ -99,7 +99,7 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission','rivets'], (Logger,
         
     get_request: (options) =>
       get_url = "get?var=#{options.name}&prog=#{@program_name}"
-      console.log "#{@remote_url}#{get_url}"
+      # console.log "#{@remote_url}#{get_url}"
       $.ajax
         url: get_url
         cache: false
@@ -111,7 +111,7 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission','rivets'], (Logger,
     
     get_mission_list: =>
       get_url = "get?dirList=UD:/usr/dev/"
-      console.log "#{@remote_url}#{get_url}"
+      # console.log "#{@remote_url}#{get_url}"
 
       $.ajax
         url: get_url
@@ -136,7 +136,7 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission','rivets'], (Logger,
         result = ''
 
       get_url = "run?routine=#{options.name}#{result}&prog=#{@program_name}"
-      console.log "#{@remote_url}#{get_url}"
+      # console.log "#{@remote_url}#{get_url}"
       $.ajax
         url: get_url
         cache: false
@@ -484,12 +484,12 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission','rivets'], (Logger,
           selected_mission_name = $('.list-group-item.selected-item').html()
           if selected_mission_name != undefined
             @mission.set('name', selected_mission_name)
-            console.log "selected_mission_name: #{selected_mission_name}"
-            console.log "@mission.get('name'): #{@mission.get('name')}"
+            # console.log "selected_mission_name: #{selected_mission_name}"
+            # console.log "@mission.get('name'): #{@mission.get('name')}"
 
-            console.log "----->before: load_whole_mission_data"
+            # console.log "----->before: load_whole_mission_data"
             @load_whole_mission_data(selected_mission_name)
-            console.log "----->after: load_whole_mission_data"
+            # console.log "----->after: load_whole_mission_data"
 
             $.modal.close()
             window.router.navigate("#program", {trigger: true})
@@ -505,9 +505,9 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission','rivets'], (Logger,
           to_reload_mission_name = "#{@mission.get('name')}.var"
           if _.contains(@mission_list, to_reload_mission_name)
             @routine_request(name: 'loadVarFile', params: [to_reload_mission_name])
-            console.log "----->before: reload_whole_mission_data"
+            # console.log "----->before: reload_whole_mission_data"
             @load_whole_mission_data(selected_mission_name)
-            console.log "----->after: reload_whole_mission_data"
+            # console.log "----->after: reload_whole_mission_data"
           else
             @flash(message: "[#{@mission.get('name')}] does not exist in ROBOT!", close: true)
           window.router.navigate("#program", {trigger: true})
@@ -516,6 +516,10 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission','rivets'], (Logger,
       if route == 'patterns'
         @load_layers_data()
         @load_used_layers_data()
+
+        @set_selected_layer_name('')
+        # @set_stored_layer_name('')
+
         layers = _.values(@mission.get('available_layers'))
         for a_layer in layers
           # SHEET  are layers can not access
@@ -560,17 +564,17 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission','rivets'], (Logger,
           $('#layer-name').focus().select()
 
 
-          $("#layer-name").focusin(->
-            return 
-          ).focusout ->
-            if $('#layer-name').val() == ''
-              window.appController.flash(message: 'layer name can not be empty!')
-              new_layer_name = "Layer_#{(Math.random()*10e16).toString().substr(0,5)}"
-            else
-              new_layer_name = $('#layer-name').val()    
-            new_layer_name = window.appController.mission.generate_valid_layer_name(new_layer_name)
-            $('#layer-name').val(new_layer_name)
-            $('#layer-name').focus()
+          # $("#layer-name").focusin(->
+          #   return 
+          # ).focusout ->
+          #   if $('#layer-name').val() == ''
+          #     window.appController.flash(message: 'layer name can not be empty!')
+          #     new_layer_name = "Layer_#{(Math.random()*10e16).toString().substr(0,5)}"
+          #   else
+          #     new_layer_name = $('#layer-name').val()    
+          #   new_layer_name = window.appController.mission.generate_valid_layer_name(new_layer_name)
+          #   $('#layer-name').val(new_layer_name)
+          #   $('#layer-name').focus()
 
 
         if action == 'edit'
@@ -579,7 +583,7 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission','rivets'], (Logger,
           @load_pattern_data(selected_layer)
 
           $('#layer-name').val(selected_layer_name)  
-          $('#layer-name').focus().select()
+          $('#layer-name').focus()
 
 
         if action == 'clone'

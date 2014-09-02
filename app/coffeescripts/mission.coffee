@@ -525,7 +525,8 @@ define [
           name: 'request_box'
           callback: (data) ->
             box= JSON.parse(data)
-            boxes[box.layer_name].push(box) if box.is_available )
+            boxes[box.layer_name].push(box) if box.is_available && boxes[box.layer_name] != undefined)
+
 
       for a_layer_name in available_layers_names
         available_layers = @get('available_layers') 
@@ -534,10 +535,7 @@ define [
         @set('available_layers', available_layers)
 
         used_layers = @get('used_layers')
-        console.log "used_layers before"
-        console.log used_layers
-        console.log "@get('used_layers') before"
-        console.log @get('used_layers')
+
 
 
 
