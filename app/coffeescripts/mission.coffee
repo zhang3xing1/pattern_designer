@@ -195,26 +195,26 @@ define [
           else
             window.appController.set_request(name: "setting_data.#{attr}", value: @get(attr))
           return 
-        when 'frame_line_in_position_x', 'frame_line_in_position_y', 'frame_line_in_position_z', 'frame_line_in_position_r'
-          if !@is_real(attr) or parseFloat(@get(attr)) > 720
-            @set(attr,  @previous(attr))
-          else 
-            window.appController.set_request(
-              name: "setting_data.#{attr}" 
-              value: @get(attr)
-            )             
-            window.appController.routine_request(name: 'setFrameIn')
-          return
-        when 'frame_line_out_position_x', 'frame_line_out_position_y', 'frame_line_out_position_z', 'frame_line_out_position_r'
-          if !@is_real(attr) or parseFloat(@get(attr)) > 720
-            @set(attr,  @previous(attr))
-          else 
-            window.appController.set_request(
-              name: "setting_data.#{attr}" 
-              value: @get(attr)
-            ) 
-            window.appController.routine_request(name: 'setFrameOut')
-          return 
+        # when 'frame_line_in_position_x', 'frame_line_in_position_y', 'frame_line_in_position_z', 'frame_line_in_position_r'
+        #   if !@is_real(attr) or parseFloat(@get(attr)) > 720
+        #     @set(attr,  @previous(attr))
+        #   else 
+        #     window.appController.set_request(
+        #       name: "setting_data.#{attr}" 
+        #       value: @get(attr)
+        #     )             
+        #     window.appController.routine_request(name: 'setFrameIn')
+        #   return
+        # when 'frame_line_out_position_x', 'frame_line_out_position_y', 'frame_line_out_position_z', 'frame_line_out_position_r'
+        #   if !@is_real(attr) or parseFloat(@get(attr)) > 720
+        #     @set(attr,  @previous(attr))
+        #   else 
+        #     window.appController.set_request(
+        #       name: "setting_data.#{attr}" 
+        #       value: @get(attr)
+        #     ) 
+        #     window.appController.routine_request(name: 'setFrameOut')
+        #   return 
         when 'length_wise', 'cross_wise', 'orient'       
           window.appController.set_request(
             name: "setting_data.#{attr}"

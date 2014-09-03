@@ -298,6 +298,10 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission','rivets'], (Logger,
       @load_whole_mission_data()
 
 
+      if route == 'frame'
+        $("input").attr "readonly", true
+        $("input[rv-value$='index']").attr "readonly", false
+
       if route == 'placeSetting'
         orient_value = window.appController.mission.get('orient')
         $("[name='orient']").bootstrapSwitch('state', orient_value) 
@@ -324,19 +328,6 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission','rivets'], (Logger,
           $("[name='length']").bootstrapSwitch('state', !state) 
       
       if route == 'mission/*action'
-        # if action == 'update'
-          # # window.router.navigate("#mission/index", {trigger: true})
-          # selected_mission_name = $('.list-group-item.selected-item').html()
-          # if selected_mission_name != '' and selected_mission_name != undefined
-          #   # check exist
-          #   selected_mission_name = undefined
-          # else
-          #   window.appController.flash(message: 'select a layer to delete first!')        
-          # window.router.navigate("#mission/index", {trigger: true})
-          # return false
-          # selected_mission_name = 
-          # if one of exist missions has a same name with the to-updated name mission
-          # we could not allow it happen.
         if action == 'delete'
           @get_mission_list()
           selected_mission_name = $('.list-group-item.selected-item').html()
@@ -383,35 +374,6 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission','rivets'], (Logger,
 
         if action == 'save'
           
-          # mission_pairs = _.pairs(window.appController.mission.toJSON())
-
-          #
-          # in validate, single variable have been saved to pdl programe.
-          # so we need to do save composite variables like layers data in here.
-          #
-
-          # @routine_request(name: 'resetBoxes')
-          # @routine_request(name: 'resetLayers')
-          # @routine_request(name: 'resetUsedLayers')
-
-          # @sendLayersToSave()
-          # @sendUsedLayersToSave()
-
-
-          # _.each(mission_pairs, ((a_pair) ->
-          #   field = a_pair[0]
-          #   value = a_pair[1]
-
-          #   if _.contains(['available_layers', 'used_layers', 'used_layers_created_number'], field)
-          #     # console.log field
-          #     # console.log value
-          #     if field == 'available_layers'
-          #       @sendLayersToSave()
-          #     if field == 'used_layers'
-          #       @sendUsedLayersToSave()
-          #     # to do
-          #   ),this)
-
           @routine_request(name: 'saveVarFile', params:[@mission.get('name')])
           @mission.generateCSVData()
           @get_mission_list()
