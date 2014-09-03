@@ -163,7 +163,7 @@ define [
           return  
         when 'used_layers', 'used_layers_created_number'
           return
-        when 'name'
+        when 'name', 'tool_name'
           if @is_blank(attr)
             @set(attr,  @previous(attr))
             window.appController.flash(message: "[#{attr}] could not be blank!")
@@ -289,7 +289,7 @@ define [
             window.appController.load_frame_out_data()
           return  
         when 'tool_index'
-          if !@is_int(attr) or @get(attr) < 0
+          if !@is_int(attr) or @get(attr) < 0 or  @get(attr) > 30
             @set(attr,  @previous(attr))
           else
             @logger.dev "[mission.coffee]: tool_index"
@@ -449,6 +449,7 @@ define [
       @set('box_z_off',setting_data_from_pdl.box_z_off)
       @set('orient',setting_data_from_pdl.orient)
       @set('tool_index',setting_data_from_pdl.tool_index)
+      @set('tool_name',setting_data_from_pdl.tool_name)
       @set('tool_position_x',setting_data_from_pdl.tool_position_x)
       @set('tool_position_y',setting_data_from_pdl.tool_position_y)
       @set('tool_position_z',setting_data_from_pdl.tool_position_z)

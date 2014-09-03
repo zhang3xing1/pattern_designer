@@ -76,6 +76,10 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission','rivets'], (Logger,
 
       # flag of timeout for calculation of tool
       @is_timeout = true
+
+
+      # all tool names from pdl
+      @tool_names = []
     sleep: (d = 100) ->
       t = Date.now()
       while Date.now() - t <= d
@@ -102,7 +106,7 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission','rivets'], (Logger,
         
     get_request: (options) =>
       get_url = "get?var=#{options.name}&prog=#{@program_name}"
-      # console.log "#{@remote_url}#{get_url}"
+      console.log "#{@remote_url}#{get_url}"
       $.ajax
         url: get_url
         cache: false
@@ -124,6 +128,14 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission','rivets'], (Logger,
           window.appController.mission_list = JSON.parse(data)
         error: () ->
           window.appController.logger.dev "[get_mission_list]: error" 
+
+    get_tool_names: =>
+      @routine_request(name: 'getToolNames')
+      @get_request(name: 'tool_names', callback: (data) ->
+        tool_names_data = JSON.parse(data)
+        if tool_names_data.tool_names != undefined
+          window.appController.tool_names = tool_names_data.tool_names
+        )
 
     routine_request: (options) =>
       params = options.params
@@ -438,7 +450,6 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission','rivets'], (Logger,
               @refreshSelectableAndSelectedLayers()
               window.appController.mission_saved_flag = false
 
-
               # synchronize data on used_layers
               @routine_request(name: 'resetUsedLayers')
               @sendUsedLayersToSave()
@@ -501,12 +512,26 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission','rivets'], (Logger,
         )
 
       if route == 'calculateTool'
+        $("input").attr "readonly", true
+        # $("input[rv-value^='mission:tool_']").attr "readonly", false
+
         @is_timeout = false
         setTimeout (->
           window.appController.routine_request(name: 'calculate_tool_data')
           window.appController.load_settingData_data()
           setTimeout arguments.callee, 500  unless window.appController.is_timeout 
         ), 500
+
+      if route == 'tools'
+        @get_tool_names()
+        if @tool_names.length > 0
+          _.each(window.appController.tool_names, (a_tool_name, index) ->
+            $('#tool_list').append("<li class=\"list-group-item tool_item\" tool_index='#{index+1}'>#{index+1}: #{a_tool_name}</li>"))
+
+          $(".tool_item").on('click', (el) ->
+            window.appController.set_request(name: 'setting_data.tool_index', value: $(this).attr('tool_index'))
+            window.router.navigate("pickSetting", {trigger: true})
+          ) 
 
       if route == 'palletTemplate'
         for a_pattet in @pallet_templates
@@ -582,15 +607,23 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission','rivets'], (Logger,
 
       if route == 'tool/*action' 
         if action == 'set'   
-          @routine_request(name: 'setTool')
+          @mission.set('tool_position_x', @mission.get('tcp_position_x'))
+          @mission.set('tool_position_y', @mission.get('tcp_position_y'))
+          @mission.set('tool_position_z', @mission.get('tcp_position_z'))
+          @mission.set('tool_position_a', @mission.get('tcp_position_a'))
+          @mission.set('tool_position_r', @mission.get('tcp_position_r'))
+          @mission.set('tool_position_e', @mission.get('tcp_position_e'))
+
+          @set_request(name: 'setting_data.tool_position_x', value: @mission.get('tcp_position_x'))
+          @set_request(name: 'setting_data.tool_position_y', value: @mission.get('tcp_position_y'))
+          @set_request(name: 'setting_data.tool_position_z', value: @mission.get('tcp_position_z'))
+          @set_request(name: 'setting_data.tool_position_a', value: @mission.get('tcp_position_a'))
+          @set_request(name: 'setting_data.tool_position_r', value: @mission.get('tcp_position_r'))
+          @set_request(name: 'setting_data.tool_position_e', value: @mission.get('tcp_position_e'))
+          
           window.router.navigate("#pickSetting", {trigger: true})
           rivets.bind $('.mission_'),{mission: @mission} 
-          return false 
 
-      @logger.debug("[after_action]: window.appController.mission_saved_flag #{window.appController.mission_saved_flag}")
-    
-
-      # @load_whole_mission_data()
     # functions for mission edit page
 
     refreshSelectableAndSelectedLayers: ->
