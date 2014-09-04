@@ -309,6 +309,9 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission','rivets'], (Logger,
 
       @load_whole_mission_data()
 
+      if route == '' or route == 'program'
+        @load_layers_data()
+        @load_used_layers_data()
 
       if route == 'frame'
         $("input").attr "readonly", true
@@ -385,7 +388,9 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission','rivets'], (Logger,
             )
 
         if action == 'save'
-          
+          @load_layers_data()
+          @load_used_layers_data()
+
           @routine_request(name: 'saveVarFile', params:[@mission.get('name')])
           @mission.generateCSVData()
           @get_mission_list()

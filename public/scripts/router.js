@@ -2,7 +2,7 @@
   var __hasProp = {}.hasOwnProperty,
     __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
-  define(["jquery", "underscore", "backbone", "appController", "backboneRoutefilter", "tinybox", "logger", "jqueryTransit", "views/missions/show", "views/pattern/index", "views/frame/show", "views/linein/show", "views/lineout/show", "views/missions/edit", "views/missions/index", "views/missions/new", "views/linein/boxSetting", "views/linein/placeSetting", "views/linein/pickSetting", "views/linein/toolSetting", "views/linein/additionalInfo", "views/lineout/palletSetting", "views/lineout/constraintSetting", "views/pattern/show"], function($, _, Backbone, AppController, BackboneRoutefilter, Tinybox, Logger, JqueryTransit, MissionShowView, PatternIndexView, FrameShowView, LineinShowView, LineoutShowView, MissionEditView, MissionIndexView, MissionNewView, BoxSettingView, PlaceSettingView, PickSettingView, ToolSettingView, AdditionalInfoView, PalletSettingView, ConstraintSettingView, PatternShowView) {
+  define(["jquery", "underscore", "backbone", "appController", "backboneRoutefilter", "tinybox", "logger", "jqueryTransit", "views/missions/show", "views/pattern/index", "views/frame/show", "views/linein/show", "views/lineout/show", "views/missions/edit", "views/missions/index", "views/missions/new", "views/linein/boxSetting", "views/linein/placeSetting", "views/linein/pickSetting", "views/linein/toolSetting", "views/linein/additionalInfo", "views/lineout/palletSetting", "views/lineout/constraintSetting", "views/pattern/show", "views/lineout/palletTemplate", "views/linein/tools", "views/linein/calculateTool"], function($, _, Backbone, AppController, BackboneRoutefilter, Tinybox, Logger, JqueryTransit, MissionShowView, PatternIndexView, FrameShowView, LineinShowView, LineoutShowView, MissionEditView, MissionIndexView, MissionNewView, BoxSettingView, PlaceSettingView, PickSettingView, ToolSettingView, AdditionalInfoView, PalletSettingView, ConstraintSettingView, PatternShowView, PalletTemplateView, ToolsView, CalculateToolView) {
     var AppRouter;
     AppRouter = (function(_super) {
       __extends(AppRouter, _super);
@@ -25,9 +25,12 @@
         'toolSetting': 'toolSetting',
         'additionalInfo': 'additionalInfo',
         'palletSetting': 'palletSetting',
+        'palletTemplate': 'palletTemplate',
         'constraintSetting': 'constraintSetting',
         "patterns": "patternIndex",
         'tool/*action': 'tool',
+        'tools': 'tools',
+        'calculateTool': 'calculateTool',
         "": "missionShow"
       };
 
@@ -147,6 +150,9 @@
           $('.sub-page-view').transition({
             left: '0px'
           });
+          window.setTimeout((function() {
+            return $('.previous-page').remove();
+          }), 1000);
         }
         if (action === 'save') {
           return window.appController.mission_saved_flag = true;
@@ -204,6 +210,30 @@
         $('.right_board').remove();
         palletSettingView = new PalletSettingView;
         return palletSettingView.render();
+      };
+
+      AppRouter.prototype.palletTemplate = function() {
+        var PalletTemplateShow;
+        console.log('palletTemplate');
+        $('.right_board').remove();
+        PalletTemplateShow = new PalletTemplateView;
+        return PalletTemplateShow.render();
+      };
+
+      AppRouter.prototype.tools = function() {
+        var ToolsShow;
+        console.log('tools');
+        $('.right_board').remove();
+        ToolsShow = new ToolsView;
+        return ToolsShow.render();
+      };
+
+      AppRouter.prototype.calculateTool = function() {
+        var CalculateToolShow;
+        console.log('calculateTool');
+        $('.right_board').remove();
+        CalculateToolShow = new CalculateToolView;
+        return CalculateToolShow.render();
       };
 
       AppRouter.prototype.constraintSetting = function() {

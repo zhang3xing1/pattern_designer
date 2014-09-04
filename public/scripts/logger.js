@@ -8,7 +8,7 @@
 
       instance = null;
 
-      statuses = ['dev', 'info'];
+      statuses = [];
 
       Horn = (function() {
         function Horn() {}

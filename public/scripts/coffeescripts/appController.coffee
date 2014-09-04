@@ -29,6 +29,57 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission','rivets'], (Logger,
       @mission_list = []
 
 
+
+      # pallets template data
+      @pallet_templates = [
+          {
+            id:   0
+            name: 'Industrie-Palette'
+            length: 1200
+            width:  1000
+            max_height: 1500
+            height:   145
+          }
+          {
+            id:   1
+            name: 'Chep 1200 × 1000'
+            length: 1200
+            width:  1000
+            max_height: 1500
+            height:   172
+          }
+          {
+            id:   2
+            name: 'Chep Halbpalette'
+            length: 800
+            width:  600
+            max_height: 1500
+            height:   158
+          }
+          {
+            id:   3
+            name: 'Chep 600 × 400'
+            length: 600
+            width:  400
+            max_height: 1000
+            height:   145
+          }
+          {
+            id:   4
+            name: 'niche definiert'
+            length: 1200
+            width:  800
+            max_height: 1500
+            height:   145
+          }                              
+        ]      
+
+      # flag of timeout for calculation of tool
+      @is_timeout = true
+
+
+      # all tool names from pdl
+      @tool_names = []
     sleep: (d = 100) ->
       t = Date.now()
       while Date.now() - t <= d
@@ -42,7 +93,7 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission','rivets'], (Logger,
         options.value = "'#{ options.value}'"  
 
       get_url = "set?var=#{options.name}&prog=#{@program_name}&value=#{options.value}"
-      console.log "#{@remote_url}#{get_url}"
+      # console.log "#{@remote_url}#{get_url}"
 
       $.ajax
         url: get_url
@@ -67,7 +118,7 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission','rivets'], (Logger,
     
     get_mission_list: =>
       get_url = "get?dirList=UD:/usr/dev/"
-      console.log "#{@remote_url}#{get_url}"
+      # console.log "#{@remote_url}#{get_url}"
 
       $.ajax
         url: get_url
@@ -77,6 +128,14 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission','rivets'], (Logger,
           window.appController.mission_list = JSON.parse(data)
         error: () ->
           window.appController.logger.dev "[get_mission_list]: error" 
+
+    get_tool_names: =>
+      @routine_request(name: 'getToolNames')
+      @get_request(name: 'tool_names', callback: (data) ->
+        tool_names_data = JSON.parse(data)
+        if tool_names_data.tool_names != undefined
+          window.appController.tool_names = tool_names_data.tool_names
+        )
 
     routine_request: (options) =>
       params = options.params
@@ -109,8 +168,17 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission','rivets'], (Logger,
       selected_layer_name = ''
       window.appController.get_request(name:'edting_layer_name', callback: (data) ->
         selected_layer_name = data)
-      # window.appController.mission.getLayerDataByName(selected_layer_name)
       selected_layer_name
+
+    set_stored_layer_name: (stored_layer_name) =>
+      window.appController.set_request(name:'stored_layer_name', value: stored_layer_name, type: 'str')
+
+    get_stored_layer_name:() =>
+      stored_layer_name = ''
+      window.appController.get_request(name:'stored_layer_name', callback: (data) ->
+        stored_layer_name = data)
+      stored_layer_name
+      
     load_whole_mission_data: (mission_data_name) => 
 
       @mission.set('available_layers', {})
@@ -228,9 +296,6 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission','rivets'], (Logger,
             + "#{selected_mission_name}" + '"> </div> <a class="btn btn-default" id="misson_rename">Rename</a> </form>'          
           @flash(message: 'Saving Data......', closable: false)
 
-      # if route == 'frame'
-      #   @load_frame_data()
-
       if route == 'pattern/*action'
         if action == 'new' or action == 'clone'
           unless @mission.validate_layers(attr: 'count')
@@ -240,9 +305,17 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission','rivets'], (Logger,
     after_action: (route, params) =>
       action = params[0]
       rivets.bind $('.mission_'),{mission: @mission}
+      @is_timeout = true
 
       @load_whole_mission_data()
 
+      if route == '' or route == 'program'
+        @load_layers_data()
+        @load_used_layers_data()
+
+      if route == 'frame'
+        $("input").attr "readonly", true
+        $("input[rv-value$='index']").attr "readonly", false
 
       if route == 'placeSetting'
         orient_value = window.appController.mission.get('orient')
@@ -269,37 +342,7 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission','rivets'], (Logger,
           window.appController.mission.set('cross_wise', state)
           $("[name='length']").bootstrapSwitch('state', !state) 
       
-      if route == 'patterns'
-        @load_layers_data()
-        @load_used_layers_data()
-        layers = _.values(@mission.get('available_layers'))
-        for a_layer in layers
-          # SHEET  are layers can not access
-          if a_layer.name != 'SHEET'
-            $('#patterns').append( "<li class=\"list-group-item\" id=\"#{a_layer.id}\">#{a_layer.name}</li>" )
-  
-        $("[id^='layer-item-']").on('click', (el) ->
-          $("[id^='layer-item-']").removeClass('selected-item')
-          $(this).addClass('selected-item')
-          selected_layer_name = $('.list-group-item.selected-item').html()
-          window.appController.set_selected_layer_name(selected_layer_name)
-          return
-        )
-
       if route == 'mission/*action'
-        # if action == 'update'
-          # # window.router.navigate("#mission/index", {trigger: true})
-          # selected_mission_name = $('.list-group-item.selected-item').html()
-          # if selected_mission_name != '' and selected_mission_name != undefined
-          #   # check exist
-          #   selected_mission_name = undefined
-          # else
-          #   window.appController.flash(message: 'select a layer to delete first!')        
-          # window.router.navigate("#mission/index", {trigger: true})
-          # return false
-          # selected_mission_name = 
-          # if one of exist missions has a same name with the to-updated name mission
-          # we could not allow it happen.
         if action == 'delete'
           @get_mission_list()
           selected_mission_name = $('.list-group-item.selected-item').html()
@@ -345,35 +388,8 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission','rivets'], (Logger,
             )
 
         if action == 'save'
-          
-          # mission_pairs = _.pairs(window.appController.mission.toJSON())
-
-          #
-          # in validate, single variable have been saved to pdl programe.
-          # so we need to do save composite variables like layers data in here.
-          #
-
-          # @routine_request(name: 'resetBoxes')
-          # @routine_request(name: 'resetLayers')
-          # @routine_request(name: 'resetUsedLayers')
-
-          # @sendLayersToSave()
-          # @sendUsedLayersToSave()
-
-
-          # _.each(mission_pairs, ((a_pair) ->
-          #   field = a_pair[0]
-          #   value = a_pair[1]
-
-          #   if _.contains(['available_layers', 'used_layers', 'used_layers_created_number'], field)
-          #     # console.log field
-          #     # console.log value
-          #     if field == 'available_layers'
-          #       @sendLayersToSave()
-          #     if field == 'used_layers'
-          #       @sendUsedLayersToSave()
-          #     # to do
-          #   ),this)
+          @load_layers_data()
+          @load_used_layers_data()
 
           @routine_request(name: 'saveVarFile', params:[@mission.get('name')])
           @mission.generateCSVData()
@@ -439,7 +455,6 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission','rivets'], (Logger,
               @refreshSelectableAndSelectedLayers()
               window.appController.mission_saved_flag = false
 
-
               # synchronize data on used_layers
               @routine_request(name: 'resetUsedLayers')
               @sendUsedLayersToSave()
@@ -451,12 +466,12 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission','rivets'], (Logger,
           selected_mission_name = $('.list-group-item.selected-item').html()
           if selected_mission_name != undefined
             @mission.set('name', selected_mission_name)
-            console.log "selected_mission_name: #{selected_mission_name}"
-            console.log "@mission.get('name'): #{@mission.get('name')}"
+            # console.log "selected_mission_name: #{selected_mission_name}"
+            # console.log "@mission.get('name'): #{@mission.get('name')}"
 
-            console.log "----->before: load_whole_mission_data"
+            # console.log "----->before: load_whole_mission_data"
             @load_whole_mission_data(selected_mission_name)
-            console.log "----->after: load_whole_mission_data"
+            # console.log "----->after: load_whole_mission_data"
 
             $.modal.close()
             window.router.navigate("#program", {trigger: true})
@@ -472,39 +487,107 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission','rivets'], (Logger,
           to_reload_mission_name = "#{@mission.get('name')}.var"
           if _.contains(@mission_list, to_reload_mission_name)
             @routine_request(name: 'loadVarFile', params: [to_reload_mission_name])
-            console.log "----->before: reload_whole_mission_data"
+            # console.log "----->before: reload_whole_mission_data"
             @load_whole_mission_data(selected_mission_name)
-            console.log "----->after: reload_whole_mission_data"
+            # console.log "----->after: reload_whole_mission_data"
           else
             @flash(message: "[#{@mission.get('name')}] does not exist in ROBOT!", close: true)
           window.router.navigate("#program", {trigger: true})
           return false 
 
+      if route == 'patterns'
+        @load_layers_data()
+        @load_used_layers_data()
+
+        @set_selected_layer_name('')
+        # @set_stored_layer_name('')
+
+        layers = _.values(@mission.get('available_layers'))
+        for a_layer in layers
+          # SHEET  are layers can not access
+          if a_layer.name != 'SHEET'
+            $('#patterns').append( "<li class=\"list-group-item\" id=\"#{a_layer.id}\">#{a_layer.name}</li>" )
+  
+        $("[id^='layer-item-']").on('click', (el) ->
+          $("[id^='layer-item-']").removeClass('selected-item')
+          $(this).addClass('selected-item')
+          selected_layer_name = $('.list-group-item.selected-item').html()
+          window.appController.set_selected_layer_name(selected_layer_name)
+          return
+        )
+
+      if route == 'calculateTool'
+        $("input").attr "readonly", true
+        # $("input[rv-value^='mission:tool_']").attr "readonly", false
+
+        @is_timeout = false
+        setTimeout (->
+          window.appController.routine_request(name: 'calculate_tool_data')
+          window.appController.load_settingData_data()
+          setTimeout arguments.callee, 500  unless window.appController.is_timeout 
+        ), 500
+
+      if route == 'tools'
+        @get_tool_names()
+        if @tool_names.length > 0
+          _.each(window.appController.tool_names, (a_tool_name, index) ->
+            $('#tool_list').append("<li class=\"list-group-item tool_item\" tool_index='#{index+1}'>#{index+1}: #{a_tool_name}</li>"))
+
+          $(".tool_item").on('click', (el) ->
+            window.appController.set_request(name: 'setting_data.tool_index', value: $(this).attr('tool_index'))
+            window.router.navigate("pickSetting", {trigger: true})
+          ) 
+
+      if route == 'palletTemplate'
+        for a_pattet in @pallet_templates
+          # SHEET  are layers can not access
+          if a_pattet.name != 'SHEET'
+            $('#patterns').append( "<li class=\"list-group-item\" id=\"pallet-template-#{a_pattet.id}\" pallet-index=\"#{a_pattet.id}\"  >#{a_pattet.name}</li>" )
+  
+        $("[id^='pallet-template-']").on('click', (el) ->
+          $("[id^='pallet-template-']").removeClass('selected-item')
+          $(this).addClass('selected-item')
+          pallet_template = window.appController.pallet_templates[Number.parseInt($('.list-group-item.selected-item').attr('pallet-index'))]
+          # window.appController.set_request(name: 'setting_data.pallet_length', value: pallet_template.length)
+          # window.appController.set_request(name: 'setting_data.pallet_width', value: pallet_template.width)
+          # window.appController.set_request(name: 'setting_data.pallet_height', value: pallet_template.height)
+          # window.appController.set_request(name: 'setting_data.max_height', value: pallet_template.max_height)
+          window.appController.mission.set('pallet_width', pallet_template.width)
+          window.appController.mission.set('pallet_height', pallet_template.height)
+          window.appController.mission.set('pallet_length', pallet_template.length)
+          window.appController.mission.set('max_height', pallet_template.max_height)
+
+          window.router.navigate("palletSetting", {trigger: true})
+        )
       if route == 'pattern/*action'
         @load_layers_data()
         if action == 'new'
           window.appController.set_selected_layer_name('')
           $('#layer-name').val("Layer_#{(Math.random()*10e16).toString().substr(0,5)}")
           $('#layer-name').focus().select()
-          $("#layer-name").focusin(->
-            return 
-          ).focusout ->
-            if $('#layer-name').val() == ''
-              window.appController.flash(message: 'layer name can not be empty!')
-              new_layer_name = "Layer_#{(Math.random()*10e16).toString().substr(0,5)}"
-            else
-              new_layer_name = $('#layer-name').val()    
-            new_layer_name = window.appController.mission.generate_valid_layer_name(new_layer_name)
-            $('#layer-name').val(new_layer_name)
-            $('#layer-name').focus()
+
+
+          # $("#layer-name").focusin(->
+          #   return 
+          # ).focusout ->
+          #   if $('#layer-name').val() == ''
+          #     window.appController.flash(message: 'layer name can not be empty!')
+          #     new_layer_name = "Layer_#{(Math.random()*10e16).toString().substr(0,5)}"
+          #   else
+          #     new_layer_name = $('#layer-name').val()    
+          #   new_layer_name = window.appController.mission.generate_valid_layer_name(new_layer_name)
+          #   $('#layer-name').val(new_layer_name)
+          #   $('#layer-name').focus()
+
 
         if action == 'edit'
           selected_layer_name = window.appController.get_selected_layer_name()
           selected_layer = window.appController.mission.getLayerDataByName(selected_layer_name)
-          @load_pattern_data(selected_layer_name)
+          @load_pattern_data(selected_layer)
 
           $('#layer-name').val(selected_layer_name)  
-          $('#layer-name').focus().select()
+          $('#layer-name').focus()
+
 
         if action == 'clone'
           selected_layer_name = window.appController.get_selected_layer_name()
@@ -517,82 +600,35 @@ define ["logger", "tinybox", 'jquery', 'backbone', 'mission','rivets'], (Logger,
           window.router.navigate("patterns", {trigger: true})
           return false 
 
-        # if action == 'save'
-        #   @logger.debug "route-save"
-        #   @logger.debug "previous_action.action #{window.appController.previous_action.action}"
-        #   @logger.debug "current_action.action #{window.appController.current_action.action}"
-
-        #   a_layer_name = $('#layer-name').val()
-
-        #   if window.appController.previous_action.action == 'edit'
-        #     window.appController.saveLayerBy({id: window.appController.selected_layer.id, ulid: window.appController.selected_layer.ulid})
-            
-        #     # if layer name was modified, then update the layers and used_layers of mission
-        #     # referring to the ulid of this layer.
-        #     new_name = $('#layer-name').val()
-        #     window.appController.updateUsedLayersNameByUlid(new_name, window.appController.selected_layer.ulid)
-        #     window.appController.selected_layer = undefined
-        #   else
-        #     window.appController.saveLayerBy()
-
-
-        #   @routine_request(name: 'resetBoxes')
-        #   @routine_request(name: 'resetLayers')
-        #   @sendLayersToSave()
-
-        #   @routine_request(name: 'resetUsedLayers')
-        #   @sendUsedLayersToSave()
-
-
-
-        #   window.router.navigate("patterns", {trigger: true})
-
-      # if route == 'frame'
-      #   $("input[rv-value*='position']").attr "readonly", true
-
       rivets.bind $('.mission_'),{mission: @mission}    
 
       if route == 'pickSetting'
         $("input").attr "readonly", true
         $("input#table-index").attr "readonly", false
         
-        $("[name='teach']").on "switchChange.bootstrapSwitch", (event, state) ->
-          # console.log this # DOM element
-          # console.log event # jQuery event
-          # console.log state # true | false
-
-          # state turn to be off, then button 'set' turn to be button 'PLACE'
-          if state
-            # ...
-            $('a.teach').removeClass('label-primary')
-            $('a.teach').addClass('label-success')
-            $('a.teach').html('')
-            # $("a.teach").attr("href", "#getTool")
-            $("input").attr "readonly", true
-            $("input#table-index").attr "readonly", false
-          else
-            # ...
-            $('a.teach').removeClass('label-success')
-            $('a.teach').addClass('label-success')
-            $('a.teach').html('Place')
-            $("a.teach").attr("href", "#tool/set")
-            $("input").attr "readonly", false
-
         @load_tool_data()     
 
         rivets.bind $('.mission_'),{mission: @mission}     
 
       if route == 'tool/*action' 
         if action == 'set'   
-          @routine_request(name: 'setTool')
+          @mission.set('tool_position_x', @mission.get('tcp_position_x'))
+          @mission.set('tool_position_y', @mission.get('tcp_position_y'))
+          @mission.set('tool_position_z', @mission.get('tcp_position_z'))
+          @mission.set('tool_position_a', @mission.get('tcp_position_a'))
+          @mission.set('tool_position_r', @mission.get('tcp_position_r'))
+          @mission.set('tool_position_e', @mission.get('tcp_position_e'))
+
+          @set_request(name: 'setting_data.tool_position_x', value: @mission.get('tcp_position_x'))
+          @set_request(name: 'setting_data.tool_position_y', value: @mission.get('tcp_position_y'))
+          @set_request(name: 'setting_data.tool_position_z', value: @mission.get('tcp_position_z'))
+          @set_request(name: 'setting_data.tool_position_a', value: @mission.get('tcp_position_a'))
+          @set_request(name: 'setting_data.tool_position_r', value: @mission.get('tcp_position_r'))
+          @set_request(name: 'setting_data.tool_position_e', value: @mission.get('tcp_position_e'))
+          
           window.router.navigate("#pickSetting", {trigger: true})
           rivets.bind $('.mission_'),{mission: @mission} 
-          return false 
 
-      @logger.debug("[after_action]: window.appController.mission_saved_flag #{window.appController.mission_saved_flag}")
-    
-
-      # @load_whole_mission_data()
     # functions for mission edit page
 
     refreshSelectableAndSelectedLayers: ->

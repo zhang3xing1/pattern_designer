@@ -4,17 +4,44 @@
 
 2.1 edit frame info in frame page and tool info in box picking page -- ok
 
-2.1 calculate the tool data by moving tcp to the center of box -- todo after discussion
-
-3. temp mission data save, especially layer data; -- almost ok.
-
-4. load pallet size infomation after getting detail info from multipack
-
-5. animation when transitting
-
 6. csv review -- ok
 
-7. implement tcp
+7. implement tcp -- ok
+
+3. temp mission data save, especially layer data; -- ok.
+
+4. load pallet size infomation after getting detail info from multipack -- doing
+
+8. redesign tool setting page as Alessio and Leonardo disscussed.
+
+2.1 calculate the tool data by moving tcp to the center of box -- todo after discussion
+
+5. animation when transitting -- transit is ok on mission index page, but not all pages. -- half
+
+
+
+
+
+$(document).ready(function() {interval1 = setInterval(function(){get_popup()}, 1000)});
+//$(document).ready(function() {interval2 = setInterval(function(){close_all()}, 1000)});
+
+
+//function to get the value of the popup to open
+function get_popup()
+{
+  $.ajax(
+  {
+    url: 'get?var=vi_popup_open&prog=pl_dd', 
+    cache : true,
+    async : false,
+    success: function(data)
+    {
+      vi_open = data;
+      popup_show()
+    // console.log('get_popup')
+    }
+  });
+
 
 
 

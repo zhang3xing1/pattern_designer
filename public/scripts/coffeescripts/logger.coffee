@@ -3,7 +3,7 @@ define ->
     instance = null
     # statuses = ['info', 'debug', "dev"]
     # statuses = ['info']
-    statuses = ['dev', 'info']
+    statuses = []
     class Horn
       info: (message) -> 
         'INFO:\t' + message

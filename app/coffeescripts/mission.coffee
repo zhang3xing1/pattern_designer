@@ -639,7 +639,7 @@ define [
       @pprint "\"pallet\";_description;#{@get('pallet_length')};#{@get('pallet_width')};#{@get('pallet_height')};#{@get('tare')}"
       @pprint "\"sheet\";#{@get('sleepsheet_height')};#{@get_count_of_sheets()}"
       @pprint "\"pall_info\";#{@get_total_box()};#{@get_count_of_layers()};#{@get_total_weight()};#{@get('pallet_length')};#{@get('pallet_width')};#{@get('pallet_height')}"
-      @pprint "\"tool\";_toolName;0;0;0;#{@get('tool_position_x')};#{@get('tool_position_y')};#{@get('tool_position_z')};0;0;0;0"
+      @pprint "\"tool\";#{@get('tool_name')};0;0;0;#{@get('tool_position_x')};#{@get('tool_position_y')};#{@get('tool_position_z')};0;0;0;0"
       @pprint "\"linein\";Conveyor;#{@get('frame_line_in_index')};0;"
       @pprint "\"lineout\";Pallet place definition;#{@get('frame_line_out_index')};0;"
       @pprint "\"pack\";#{@get('product')};#{@get('box_length')};#{@get('box_width')};#{@get('box_height')};#{@get('box_weight')};0;0;0"

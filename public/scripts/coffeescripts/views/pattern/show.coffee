@@ -728,7 +728,7 @@ define [
           ## update the new box params with to_be_added_box_data
           if to_be_added_box_data.x != undefined
             #keys: x,y,rotate,arrow
-            console.log to_be_added_box_data
+            # console.log to_be_added_box_data
             newBox.rotateWithAngle(to_be_added_box_data.rotate)
             newBox.rotateArrow(to_be_added_box_data.arrow) if to_be_added_box_data.arrowEnabled
             newBox.setXPosition(to_be_added_box_data.x)
@@ -782,27 +782,30 @@ define [
             @hideAlignLines()
             @draw()
 
-            # synchronize current layer data to PDL
-
-            # 1. load this page before settting ulid and id value and the previous name to current page
-            # 2. just update boxes and  delete the layer with previous name  and add the new layer name when settleCurrentBox
-
 
             a_layer_name = $('#layer-name').val()
-
             selected_layer_name = window.appController.get_selected_layer_name()
-            if selected_layer_name != ''
-              selected_layer = window.appController.mission.getLayerDataByName(selected_layer_name)
-              window.appController.saveLayerBy(id: selected_layer.id, ulid: selected_layer.ulid)
-              
-              # if layer name was modified, then update the layers and used_layers of mission
-              # referring to the ulid of this layer.
-              new_name = $('#layer-name').val()
-              window.appController.updateUsedLayersNameByUlid(new_name, selected_layer.ulid)
-              window.appController.set_selected_layer_name('')
-            else
-              window.appController.saveLayerBy(name: a_layer_name = $('#layer-name').val())
 
+
+            boxes =_.map(@models,((a_box) ->
+              {
+                x: a_box.getXPosition(),
+                y: a_box.getYPosition(),
+                rotate: a_box.get('rotate'),
+                arrow: a_box.get('vectorDegree')
+                arrowEnabled: a_box.get('vectorEnabled')
+                layer_name: a_layer_name     # always current layer name
+              }), this) 
+
+
+            if selected_layer_name == ''
+              window.appController.saveLayerBy(name: a_layer_name, boxes: boxes)
+              window.appController.set_selected_layer_name(a_layer_name)
+            else
+              to_update_layer = window.appController.mission.getLayerDataByName(selected_layer_name)
+              window.appController.saveLayerBy(name: a_layer_name, id: to_update_layer.id, ulid: to_update_layer.ulid, boxes: boxes )
+              window.appController.updateUsedLayersNameByUlid(a_layer_name, to_update_layer.ulid)
+       
 
             window.appController.routine_request(name: 'resetBoxes')
             window.appController.routine_request(name: 'resetLayers')
@@ -811,9 +814,6 @@ define [
             window.appController.routine_request(name: 'resetUsedLayers')
             window.appController.sendUsedLayersToSave()
 
-
-
-            #
         updateDragStatus: (draggableBox) ->
           _.each(@models,((aBox) ->
               if aBox.getBoxId() == draggableBox.getBoxId()

@@ -15,7 +15,7 @@
               name: 'Box Place Location',
               router: "#placeSetting"
             }, {
-              name: 'Box Pick Location',
+              name: 'TCP Setting',
               router: "#pickSetting"
             }, {
               name: 'Additional Info',

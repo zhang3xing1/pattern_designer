@@ -832,7 +832,6 @@
               newBox.setYPosition(this.last().getYPosition());
             }
             if (to_be_added_box_data.x !== void 0) {
-              console.log(to_be_added_box_data);
               newBox.rotateWithAngle(to_be_added_box_data.rotate);
               if (to_be_added_box_data.arrowEnabled) {
                 newBox.rotateArrow(to_be_added_box_data.arrow);
@@ -866,7 +865,7 @@
           };
 
           Boxes.prototype.settleCurrentBox = function() {
-            var a_layer_name, new_name, selected_layer, selected_layer_name;
+            var a_layer_name, boxes, selected_layer_name, to_update_layer;
             if (this.currentBox.get('collisionStatus')) {
               return this.flash = "Box" + (this.currentBox.getTitleName()) + " cannot be placed in collision status!";
             } else {
@@ -876,19 +875,31 @@
               this.draw();
               a_layer_name = $('#layer-name').val();
               selected_layer_name = window.appController.get_selected_layer_name();
-              if (selected_layer_name !== '') {
-                selected_layer = window.appController.mission.getLayerDataByName(selected_layer_name);
+              boxes = _.map(this.models, (function(a_box) {
+                return {
+                  x: a_box.getXPosition(),
+                  y: a_box.getYPosition(),
+                  rotate: a_box.get('rotate'),
+                  arrow: a_box.get('vectorDegree'),
+                  arrowEnabled: a_box.get('vectorEnabled'),
+                  layer_name: a_layer_name
+                };
+              }), this);
+              if (selected_layer_name === '') {
                 window.appController.saveLayerBy({
-                  id: selected_layer.id,
-                  ulid: selected_layer.ulid
+                  name: a_layer_name,
+                  boxes: boxes
                 });
-                new_name = $('#layer-name').val();
-                window.appController.updateUsedLayersNameByUlid(new_name, selected_layer.ulid);
-                window.appController.set_selected_layer_name('');
+                window.appController.set_selected_layer_name(a_layer_name);
               } else {
+                to_update_layer = window.appController.mission.getLayerDataByName(selected_layer_name);
                 window.appController.saveLayerBy({
-                  name: a_layer_name = $('#layer-name').val()
+                  name: a_layer_name,
+                  id: to_update_layer.id,
+                  ulid: to_update_layer.ulid,
+                  boxes: boxes
                 });
+                window.appController.updateUsedLayersNameByUlid(a_layer_name, to_update_layer.ulid);
               }
               window.appController.routine_request({
                 name: 'resetBoxes'

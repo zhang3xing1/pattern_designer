@@ -46,6 +46,8 @@ define [
       tool_position_e: 0,
       tool_position_r: 1,
 
+
+      tool_name: '',
       tcp_position_x: 1,
       tcp_position_y: 1,
       tcp_position_z: 1,
@@ -161,7 +163,7 @@ define [
           return  
         when 'used_layers', 'used_layers_created_number'
           return
-        when 'name'
+        when 'name', 'tool_name'
           if @is_blank(attr)
             @set(attr,  @previous(attr))
             window.appController.flash(message: "[#{attr}] could not be blank!")
@@ -193,26 +195,26 @@ define [
           else
             window.appController.set_request(name: "setting_data.#{attr}", value: @get(attr))
           return 
-        when 'frame_line_in_position_x', 'frame_line_in_position_y', 'frame_line_in_position_z', 'frame_line_in_position_r'
-          if !@is_real(attr) or parseFloat(@get(attr)) > 720
-            @set(attr,  @previous(attr))
-          else 
-            window.appController.set_request(
-              name: "setting_data.#{attr}" 
-              value: @get(attr)
-            )             
-            window.appController.routine_request(name: 'setFrameIn')
-          return
-        when 'frame_line_out_position_x', 'frame_line_out_position_y', 'frame_line_out_position_z', 'frame_line_out_position_r'
-          if !@is_real(attr) or parseFloat(@get(attr)) > 720
-            @set(attr,  @previous(attr))
-          else 
-            window.appController.set_request(
-              name: "setting_data.#{attr}" 
-              value: @get(attr)
-            ) 
-            window.appController.routine_request(name: 'setFrameOut')
-          return 
+        # when 'frame_line_in_position_x', 'frame_line_in_position_y', 'frame_line_in_position_z', 'frame_line_in_position_r'
+        #   if !@is_real(attr) or parseFloat(@get(attr)) > 720
+        #     @set(attr,  @previous(attr))
+        #   else 
+        #     window.appController.set_request(
+        #       name: "setting_data.#{attr}" 
+        #       value: @get(attr)
+        #     )             
+        #     window.appController.routine_request(name: 'setFrameIn')
+        #   return
+        # when 'frame_line_out_position_x', 'frame_line_out_position_y', 'frame_line_out_position_z', 'frame_line_out_position_r'
+        #   if !@is_real(attr) or parseFloat(@get(attr)) > 720
+        #     @set(attr,  @previous(attr))
+        #   else 
+        #     window.appController.set_request(
+        #       name: "setting_data.#{attr}" 
+        #       value: @get(attr)
+        #     ) 
+        #     window.appController.routine_request(name: 'setFrameOut')
+        #   return 
         when 'length_wise', 'cross_wise', 'orient'       
           window.appController.set_request(
             name: "setting_data.#{attr}"
@@ -287,7 +289,7 @@ define [
             window.appController.load_frame_out_data()
           return  
         when 'tool_index'
-          if !@is_int(attr) or @get(attr) < 0
+          if !@is_int(attr) or @get(attr) < 0 or  @get(attr) > 30
             @set(attr,  @previous(attr))
           else
             @logger.dev "[mission.coffee]: tool_index"
@@ -447,12 +449,19 @@ define [
       @set('box_z_off',setting_data_from_pdl.box_z_off)
       @set('orient',setting_data_from_pdl.orient)
       @set('tool_index',setting_data_from_pdl.tool_index)
+      @set('tool_name',setting_data_from_pdl.tool_name)
       @set('tool_position_x',setting_data_from_pdl.tool_position_x)
       @set('tool_position_y',setting_data_from_pdl.tool_position_y)
       @set('tool_position_z',setting_data_from_pdl.tool_position_z)
       @set('tool_position_a',setting_data_from_pdl.tool_position_a)
       @set('tool_position_e',setting_data_from_pdl.tool_position_e)
       @set('tool_position_r',setting_data_from_pdl.tool_position_r)
+      @set('tcp_position_x',setting_data_from_pdl.tcp_position_x)
+      @set('tcp_position_y',setting_data_from_pdl.tcp_position_y)
+      @set('tcp_position_z',setting_data_from_pdl.tcp_position_z)
+      @set('tcp_position_a',setting_data_from_pdl.tcp_position_a)
+      @set('tcp_position_e',setting_data_from_pdl.tcp_position_e)
+      @set('tcp_position_r',setting_data_from_pdl.tcp_position_r)
       @set('length_wise',setting_data_from_pdl.length_wise)
       @set('cross_wise',setting_data_from_pdl.cross_wise)
       @set('pallet_length',setting_data_from_pdl.pallet_length)
@@ -525,7 +534,8 @@ define [
           name: 'request_box'
           callback: (data) ->
             box= JSON.parse(data)
-            boxes[box.layer_name].push(box) if box.is_available )
+            boxes[box.layer_name].push(box) if box.is_available && boxes[box.layer_name] != undefined)
+
 
       for a_layer_name in available_layers_names
         available_layers = @get('available_layers') 
@@ -534,10 +544,7 @@ define [
         @set('available_layers', available_layers)
 
         used_layers = @get('used_layers')
-        console.log "used_layers before"
-        console.log used_layers
-        console.log "@get('used_layers') before"
-        console.log @get('used_layers')
+
 
 
 
@@ -632,7 +639,7 @@ define [
       @pprint "\"pallet\";_description;#{@get('pallet_length')};#{@get('pallet_width')};#{@get('pallet_height')};#{@get('tare')}"
       @pprint "\"sheet\";#{@get('sleepsheet_height')};#{@get_count_of_sheets()}"
       @pprint "\"pall_info\";#{@get_total_box()};#{@get_count_of_layers()};#{@get_total_weight()};#{@get('pallet_length')};#{@get('pallet_width')};#{@get('pallet_height')}"
-      @pprint "\"tool\";_toolName;0;0;0;#{@get('tool_position_x')};#{@get('tool_position_y')};#{@get('tool_position_z')};0;0;0;0"
+      @pprint "\"tool\";#{@get('tool_name')};0;0;0;#{@get('tool_position_x')};#{@get('tool_position_y')};#{@get('tool_position_z')};0;0;0;0"
       @pprint "\"linein\";Conveyor;#{@get('frame_line_in_index')};0;"
       @pprint "\"lineout\";Pallet place definition;#{@get('frame_line_out_index')};0;"
       @pprint "\"pack\";#{@get('product')};#{@get('box_length')};#{@get('box_width')};#{@get('box_height')};#{@get('box_weight')};0;0;0"

@@ -23,10 +23,13 @@ define [
   "views/lineout/palletSetting"
   "views/lineout/constraintSetting"
   "views/pattern/show"
+  "views/lineout/palletTemplate"
+  "views/linein/tools"
+  "views/linein/calculateTool"
 ], ($, _, Backbone, AppController, BackboneRoutefilter, Tinybox, Logger, JqueryTransit, MissionShowView, PatternIndexView, FrameShowView, 
   LineinShowView, LineoutShowView, MissionEditView, MissionIndexView, MissionNewView,
   BoxSettingView, PlaceSettingView, PickSettingView, ToolSettingView, AdditionalInfoView,
-  PalletSettingView, ConstraintSettingView, PatternShowView) ->
+  PalletSettingView, ConstraintSettingView, PatternShowView, PalletTemplateView, ToolsView, CalculateToolView) ->
   class AppRouter extends Backbone.Router
     routes:
       "program": "missionShow"
@@ -42,9 +45,12 @@ define [
       'toolSetting': 'toolSetting'
       'additionalInfo': 'additionalInfo'
       'palletSetting' : 'palletSetting'
+      'palletTemplate' : 'palletTemplate'
       'constraintSetting': 'constraintSetting'
       "patterns": "patternIndex"
       'tool/*action': 'tool'
+      'tools': 'tools'
+      'calculateTool':'calculateTool'
 
       # default root router
       "": "missionShow"
@@ -108,7 +114,8 @@ define [
           # patternShowView.render()
         else
           @navigate("patterns", {trigger: true})
-          return false                 
+          return false  
+
     frameShow: ->
       
       $('.right_board').remove()
@@ -144,9 +151,9 @@ define [
         missionIndexView = new MissionIndexView
         missionIndexView.render() 
         $('.sub-page-view').transition({ left: '0px' });
-        # window.setTimeout((->
-        #   $('.previous-page').remove()
-        #   ), 1000);
+        window.setTimeout((->
+          $('.previous-page').remove()
+          ), 1000);
         
 
       if action == 'save'
@@ -194,6 +201,24 @@ define [
       $('.right_board').remove()
       palletSettingView = new PalletSettingView
       palletSettingView.render()           
+
+    palletTemplate: ->
+      console.log 'palletTemplate'
+      $('.right_board').remove()
+      PalletTemplateShow = new PalletTemplateView
+      PalletTemplateShow.render() 
+
+    tools: ->
+      console.log 'tools'
+      $('.right_board').remove()
+      ToolsShow = new ToolsView
+      ToolsShow.render() 
+
+    calculateTool: ->
+      console.log 'calculateTool'
+      $('.right_board').remove()
+      CalculateToolShow = new CalculateToolView
+      CalculateToolShow.render()     
 
     constraintSetting: ->
       console.log 'constraintSetting'

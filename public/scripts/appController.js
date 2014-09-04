@@ -16,9 +16,12 @@
         this.load_frame_in_data = __bind(this.load_frame_in_data, this);
         this.load_tool_data = __bind(this.load_tool_data, this);
         this.load_whole_mission_data = __bind(this.load_whole_mission_data, this);
+        this.get_stored_layer_name = __bind(this.get_stored_layer_name, this);
+        this.set_stored_layer_name = __bind(this.set_stored_layer_name, this);
         this.get_selected_layer_name = __bind(this.get_selected_layer_name, this);
         this.set_selected_layer_name = __bind(this.set_selected_layer_name, this);
         this.routine_request = __bind(this.routine_request, this);
+        this.get_tool_names = __bind(this.get_tool_names, this);
         this.get_mission_list = __bind(this.get_mission_list, this);
         this.get_request = __bind(this.get_request, this);
         this.set_request = __bind(this.set_request, this);
@@ -34,6 +37,46 @@
         this.mission_saved_flag = true;
         this.pattern_saved_flag = true;
         this.mission_list = [];
+        this.pallet_templates = [
+          {
+            id: 0,
+            name: 'Industrie-Palette',
+            length: 1200,
+            width: 1000,
+            max_height: 1500,
+            height: 145
+          }, {
+            id: 1,
+            name: 'Chep 1200 × 1000',
+            length: 1200,
+            width: 1000,
+            max_height: 1500,
+            height: 172
+          }, {
+            id: 2,
+            name: 'Chep Halbpalette',
+            length: 800,
+            width: 600,
+            max_height: 1500,
+            height: 158
+          }, {
+            id: 3,
+            name: 'Chep 600 × 400',
+            length: 600,
+            width: 400,
+            max_height: 1000,
+            height: 145
+          }, {
+            id: 4,
+            name: 'niche definiert',
+            length: 1200,
+            width: 800,
+            max_height: 1500,
+            height: 145
+          }
+        ];
+        this.is_timeout = true;
+        this.tool_names = [];
       }
 
       AppController.prototype.sleep = function(d) {
@@ -55,7 +98,6 @@
           options.value = "'" + options.value + "'";
         }
         get_url = "set?var=" + options.name + "&prog=" + this.program_name + "&value=" + options.value;
-        console.log("" + this.remote_url + get_url);
         return $.ajax({
           url: get_url,
           cache: false,
@@ -93,7 +135,6 @@
       AppController.prototype.get_mission_list = function() {
         var get_url;
         get_url = "get?dirList=UD:/usr/dev/";
-        console.log("" + this.remote_url + get_url);
         return $.ajax({
           url: get_url,
           cache: false,
@@ -103,6 +144,22 @@
           },
           error: function() {
             return window.appController.logger.dev("[get_mission_list]: error");
+          }
+        });
+      };
+
+      AppController.prototype.get_tool_names = function() {
+        this.routine_request({
+          name: 'getToolNames'
+        });
+        return this.get_request({
+          name: 'tool_names',
+          callback: function(data) {
+            var tool_names_data;
+            tool_names_data = JSON.parse(data);
+            if (tool_names_data.tool_names !== void 0) {
+              return window.appController.tool_names = tool_names_data.tool_names;
+            }
           }
         });
       };
@@ -157,6 +214,26 @@
           }
         });
         return selected_layer_name;
+      };
+
+      AppController.prototype.set_stored_layer_name = function(stored_layer_name) {
+        return window.appController.set_request({
+          name: 'stored_layer_name',
+          value: stored_layer_name,
+          type: 'str'
+        });
+      };
+
+      AppController.prototype.get_stored_layer_name = function() {
+        var stored_layer_name;
+        stored_layer_name = '';
+        window.appController.get_request({
+          name: 'stored_layer_name',
+          callback: function(data) {
+            return stored_layer_name = data;
+          }
+        });
+        return stored_layer_name;
       };
 
       AppController.prototype.load_whole_mission_data = function(mission_data_name) {
@@ -335,12 +412,21 @@
       };
 
       AppController.prototype.after_action = function(route, params) {
-        var a_layer, action, clone_layer_name, cross_wise_value, layers, length_wise_value, new_message, orient_value, selected_layer, selected_layer_name, selected_mission_name, to_reload_mission_name, _i, _len;
+        var a_layer, a_pattet, action, clone_layer_name, cross_wise_value, layers, length_wise_value, new_message, orient_value, selected_layer, selected_layer_name, selected_mission_name, to_reload_mission_name, _i, _j, _len, _len1, _ref;
         action = params[0];
         rivets.bind($('.mission_'), {
           mission: this.mission
         });
+        this.is_timeout = true;
         this.load_whole_mission_data();
+        if (route === '' || route === 'program') {
+          this.load_layers_data();
+          this.load_used_layers_data();
+        }
+        if (route === 'frame') {
+          $("input").attr("readonly", true);
+          $("input[rv-value$='index']").attr("readonly", false);
+        }
         if (route === 'placeSetting') {
           orient_value = window.appController.mission.get('orient');
           $("[name='orient']").bootstrapSwitch('state', orient_value);
@@ -360,24 +446,6 @@
           $("[name='cross']").on("switchChange.bootstrapSwitch", function(event, state) {
             window.appController.mission.set('cross_wise', state);
             return $("[name='length']").bootstrapSwitch('state', !state);
-          });
-        }
-        if (route === 'patterns') {
-          this.load_layers_data();
-          this.load_used_layers_data();
-          layers = _.values(this.mission.get('available_layers'));
-          for (_i = 0, _len = layers.length; _i < _len; _i++) {
-            a_layer = layers[_i];
-            if (a_layer.name !== 'SHEET') {
-              $('#patterns').append("<li class=\"list-group-item\" id=\"" + a_layer.id + "\">" + a_layer.name + "</li>");
-            }
-          }
-          $("[id^='layer-item-']").on('click', function(el) {
-            var selected_layer_name;
-            $("[id^='layer-item-']").removeClass('selected-item');
-            $(this).addClass('selected-item');
-            selected_layer_name = $('.list-group-item.selected-item').html();
-            window.appController.set_selected_layer_name(selected_layer_name);
           });
         }
         if (route === 'mission/*action') {
@@ -446,6 +514,8 @@
             }
           }
           if (action === 'save') {
+            this.load_layers_data();
+            this.load_used_layers_data();
             this.routine_request({
               name: 'saveVarFile',
               params: [this.mission.get('name')]
@@ -524,11 +594,7 @@
             selected_mission_name = $('.list-group-item.selected-item').html();
             if (selected_mission_name !== void 0) {
               this.mission.set('name', selected_mission_name);
-              console.log("selected_mission_name: " + selected_mission_name);
-              console.log("@mission.get('name'): " + (this.mission.get('name')));
-              console.log("----->before: load_whole_mission_data");
               this.load_whole_mission_data(selected_mission_name);
-              console.log("----->after: load_whole_mission_data");
               $.modal.close();
               window.router.navigate("#program", {
                 trigger: true
@@ -552,9 +618,7 @@
                 name: 'loadVarFile',
                 params: [to_reload_mission_name]
               });
-              console.log("----->before: reload_whole_mission_data");
               this.load_whole_mission_data(selected_mission_name);
-              console.log("----->after: reload_whole_mission_data");
             } else {
               this.flash({
                 message: "[" + (this.mission.get('name')) + "] does not exist in ROBOT!",
@@ -567,33 +631,90 @@
             return false;
           }
         }
+        if (route === 'patterns') {
+          this.load_layers_data();
+          this.load_used_layers_data();
+          this.set_selected_layer_name('');
+          layers = _.values(this.mission.get('available_layers'));
+          for (_i = 0, _len = layers.length; _i < _len; _i++) {
+            a_layer = layers[_i];
+            if (a_layer.name !== 'SHEET') {
+              $('#patterns').append("<li class=\"list-group-item\" id=\"" + a_layer.id + "\">" + a_layer.name + "</li>");
+            }
+          }
+          $("[id^='layer-item-']").on('click', function(el) {
+            var selected_layer_name;
+            $("[id^='layer-item-']").removeClass('selected-item');
+            $(this).addClass('selected-item');
+            selected_layer_name = $('.list-group-item.selected-item').html();
+            window.appController.set_selected_layer_name(selected_layer_name);
+          });
+        }
+        if (route === 'calculateTool') {
+          $("input").attr("readonly", true);
+          this.is_timeout = false;
+          setTimeout((function() {
+            window.appController.routine_request({
+              name: 'calculate_tool_data'
+            });
+            window.appController.load_settingData_data();
+            if (!window.appController.is_timeout) {
+              return setTimeout(arguments.callee, 500);
+            }
+          }), 500);
+        }
+        if (route === 'tools') {
+          this.get_tool_names();
+          if (this.tool_names.length > 0) {
+            _.each(window.appController.tool_names, function(a_tool_name, index) {
+              return $('#tool_list').append("<li class=\"list-group-item tool_item\" tool_index='" + (index + 1) + "'>" + (index + 1) + ": " + a_tool_name + "</li>");
+            });
+            $(".tool_item").on('click', function(el) {
+              window.appController.set_request({
+                name: 'setting_data.tool_index',
+                value: $(this).attr('tool_index')
+              });
+              return window.router.navigate("pickSetting", {
+                trigger: true
+              });
+            });
+          }
+        }
+        if (route === 'palletTemplate') {
+          _ref = this.pallet_templates;
+          for (_j = 0, _len1 = _ref.length; _j < _len1; _j++) {
+            a_pattet = _ref[_j];
+            if (a_pattet.name !== 'SHEET') {
+              $('#patterns').append("<li class=\"list-group-item\" id=\"pallet-template-" + a_pattet.id + "\" pallet-index=\"" + a_pattet.id + "\"  >" + a_pattet.name + "</li>");
+            }
+          }
+          $("[id^='pallet-template-']").on('click', function(el) {
+            var pallet_template;
+            $("[id^='pallet-template-']").removeClass('selected-item');
+            $(this).addClass('selected-item');
+            pallet_template = window.appController.pallet_templates[Number.parseInt($('.list-group-item.selected-item').attr('pallet-index'))];
+            window.appController.mission.set('pallet_width', pallet_template.width);
+            window.appController.mission.set('pallet_height', pallet_template.height);
+            window.appController.mission.set('pallet_length', pallet_template.length);
+            window.appController.mission.set('max_height', pallet_template.max_height);
+            return window.router.navigate("palletSetting", {
+              trigger: true
+            });
+          });
+        }
         if (route === 'pattern/*action') {
           this.load_layers_data();
           if (action === 'new') {
             window.appController.set_selected_layer_name('');
             $('#layer-name').val("Layer_" + ((Math.random() * 10e16).toString().substr(0, 5)));
             $('#layer-name').focus().select();
-            $("#layer-name").focusin(function() {}).focusout(function() {
-              var new_layer_name;
-              if ($('#layer-name').val() === '') {
-                window.appController.flash({
-                  message: 'layer name can not be empty!'
-                });
-                new_layer_name = "Layer_" + ((Math.random() * 10e16).toString().substr(0, 5));
-              } else {
-                new_layer_name = $('#layer-name').val();
-              }
-              new_layer_name = window.appController.mission.generate_valid_layer_name(new_layer_name);
-              $('#layer-name').val(new_layer_name);
-              return $('#layer-name').focus();
-            });
           }
           if (action === 'edit') {
             selected_layer_name = window.appController.get_selected_layer_name();
             selected_layer = window.appController.mission.getLayerDataByName(selected_layer_name);
-            this.load_pattern_data(selected_layer_name);
+            this.load_pattern_data(selected_layer);
             $('#layer-name').val(selected_layer_name);
-            $('#layer-name').focus().select();
+            $('#layer-name').focus();
           }
           if (action === 'clone') {
             selected_layer_name = window.appController.get_selected_layer_name();
@@ -617,21 +738,6 @@
         if (route === 'pickSetting') {
           $("input").attr("readonly", true);
           $("input#table-index").attr("readonly", false);
-          $("[name='teach']").on("switchChange.bootstrapSwitch", function(event, state) {
-            if (state) {
-              $('a.teach').removeClass('label-primary');
-              $('a.teach').addClass('label-success');
-              $('a.teach').html('');
-              $("input").attr("readonly", true);
-              return $("input#table-index").attr("readonly", false);
-            } else {
-              $('a.teach').removeClass('label-success');
-              $('a.teach').addClass('label-success');
-              $('a.teach').html('Place');
-              $("a.teach").attr("href", "#tool/set");
-              return $("input").attr("readonly", false);
-            }
-          });
           this.load_tool_data();
           rivets.bind($('.mission_'), {
             mission: this.mission
@@ -639,19 +745,44 @@
         }
         if (route === 'tool/*action') {
           if (action === 'set') {
-            this.routine_request({
-              name: 'setTool'
+            this.mission.set('tool_position_x', this.mission.get('tcp_position_x'));
+            this.mission.set('tool_position_y', this.mission.get('tcp_position_y'));
+            this.mission.set('tool_position_z', this.mission.get('tcp_position_z'));
+            this.mission.set('tool_position_a', this.mission.get('tcp_position_a'));
+            this.mission.set('tool_position_r', this.mission.get('tcp_position_r'));
+            this.mission.set('tool_position_e', this.mission.get('tcp_position_e'));
+            this.set_request({
+              name: 'setting_data.tool_position_x',
+              value: this.mission.get('tcp_position_x')
+            });
+            this.set_request({
+              name: 'setting_data.tool_position_y',
+              value: this.mission.get('tcp_position_y')
+            });
+            this.set_request({
+              name: 'setting_data.tool_position_z',
+              value: this.mission.get('tcp_position_z')
+            });
+            this.set_request({
+              name: 'setting_data.tool_position_a',
+              value: this.mission.get('tcp_position_a')
+            });
+            this.set_request({
+              name: 'setting_data.tool_position_r',
+              value: this.mission.get('tcp_position_r')
+            });
+            this.set_request({
+              name: 'setting_data.tool_position_e',
+              value: this.mission.get('tcp_position_e')
             });
             window.router.navigate("#pickSetting", {
               trigger: true
             });
-            rivets.bind($('.mission_'), {
+            return rivets.bind($('.mission_'), {
               mission: this.mission
             });
-            return false;
           }
         }
-        return this.logger.debug("[after_action]: window.appController.mission_saved_flag " + window.appController.mission_saved_flag);
       };
 
       AppController.prototype.refreshSelectableAndSelectedLayers = function() {
